@@ -1,0 +1,26 @@
+
+#about {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* padding: 80px 0; */
+}
+#about h1 {
+    font-size: 55px;
+    font-weight: 600;
+
+
+}
+#about p {
+    text-align: left;
+}
+#about .info {
+    font-size: 30px;
+    padding-top: 40px;
+    
+}
+#about .container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}

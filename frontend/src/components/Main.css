@@ -1,0 +1,89 @@
+.first {
+    color: #ffffff
+}
+.second {
+    color: #9b00ff;
+}
+#home {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 100px;
+    max-height: 100vh;
+  }
+  
+  #home p {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  #home h1 {
+    font-size: 61px;
+    font-weight: 900;
+    text-align: center;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+  
+  #home .blur-effect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 500px;
+    height: 500px;
+    background: linear-gradient(135deg, rgba(155, 0, 255, 0.8), rgba(255, 255, 255, 0.2));
+    filter: blur(128px);
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    pointer-events: none;
+  }
+  
+  #home .container {
+    display: flex;
+    justify-content: space-between; /* Вирівнює елементи по боках */
+    align-items: center;
+    width: 60%;
+    padding-top: 90px;
+    margin: 0 auto;
+  }
+  
+  #home .button {
+    background-color: #9b00ff;
+    color: white;
+    font-weight: 400;
+    letter-spacing: 1px;
+    padding: 10px 20px;
+    border-radius: 9999px;
+    box-shadow: 0px 4px 10px rgba(155, 0, 255, 0.4);
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+  
+  #home .button:hover {
+    background-color: #7f00d4;
+  }
+  
+  #home .button a {
+    color: white;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  #home .button-icon {
+    margin-left: 10px;
+  }
+  
+  #home .link-text {
+    color: white;
+    text-decoration: none;
+    margin-left: auto; /* Це відштовхує елемент до правого краю */
+  }
+  
+  #home .link-text:hover {
+    color: #7f00d4;
+    transition: color 0.3s ease;
+  }
+  
