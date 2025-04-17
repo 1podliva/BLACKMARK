@@ -1,57 +1,101 @@
-.navbar {
+/* Стиль для зображення */
+#banner {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Стиль для навігаційного бару */
+  .navbar {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* Між елементами на початку і в кінці */
     align-items: center;
-    /* padding: 20px 40px; */
-    padding-top: 20px;
-    margin: 0 120px;
-}
-
-.logo {
+    height: 99px;
+    padding: 0 160px;
+    margin: 0;
+    background-color: var(--navy-gray);
+  }
+  
+  /* Логотип */
+  .logo {
     font-family: "Inter-Bold", Helvetica;
     font-weight: 700;
     font-size: 40px;
-    line-height: 28px;
     white-space: nowrap;
     color: white;
-}
-
-.nav-links {
+  }
+  
+  /* Стиль для контейнера навігаційних лінків */
+  .nav-links-container {
     display: flex;
-    gap: 20px;
+    justify-content: center; /* Це вирівнює лінки по центру */
+    flex-grow: 1; /* Займає всю доступну ширину між логотипом і профілем */
+  }
+  
+  /* Стиль для навігаційних лінків */
+  .nav-links {
+    display: flex;
+    gap: 30px;
     margin: 0;
     padding: 0;
-    align-content: center;
-}
-.navbar li {
+    align-items: center;
+  }
+  
+  /* Стиль для кожного елемента списку */
+  .navbar li {
     display: flex;
-    align-items: center; /* Це вирівняє <a> по центру вертикально */
-}
-.nav-links li a {
+    align-items: center; /* Вирівнює <a> по центру вертикально */
+  }
+  
+  /* Стиль для лінків */
+  .nav-links li a {
     display: block;
-    color: #d1d5db;
+    color: var(--light-gray);
     font-weight: 500;
     padding: 8px 12px;
-    transition: background 0.2s ease;
-    text-decoration: none;
-}   
-
-.nav-links li a:hover {
-    color: #7f00d4;
     transition: all 0.3s ease;
-    border-radius: 5px;
-}
-.profile {
-    background-color: #9b00ff;
+    text-decoration: none;
+    border-radius: 10px; /* Додаємо радіус для круглого вигляду */
+  }
+  
+  /* Ховер ефект для лінків */
+  .nav-links li a:hover {
+    background-color: var(--purple-hover);
+    color: var(--soft-white);
+    border-radius: 10px;
+  }
+  
+  /* Стиль для активного лінка */
+  .nav-links li a.active {
+    background-color: var(--dark-bg);
+    color: var(--soft-white);
+    border-radius: 10px;
+  }
+  
+  /* Стиль для профілю */
+  .profile a {
+    background-color: var(--purple-accent);
     color: white;
     font-weight: 400;
     letter-spacing: 1px;
-    padding: 5px 10px;
-    border-radius: 9999px;
-    box-shadow: 0px 4px 10px rgba(155, 0, 255, 0.4);
+    padding: 10px 16px; /* Збільшено padding для профілю */
+    border-radius: 10px; /* Кругліші кути */
+    box-shadow: 0px 4px 12px rgba(155, 0, 255, 0.5);
     transition: all 0.3s ease;
-}
-.profile:hover {
-    background-color: #7f00d4;
-    transition: background-color 0.3s ease;
-}
+  }
+  
+  /* Стиль при ховері для профілю */
+  .profile a:hover {
+    background-color: #7f00d4; /* Можна використовувати інший колір */
+    box-shadow: 0px 8px 16px rgba(155, 0, 255, 0.7); /* Збільшуємо тінь при ховері */
+    transform: scale(1.05); /* Легке збільшення кнопки при ховері */
+  }
+  
+  .nav-links-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+  }
+  

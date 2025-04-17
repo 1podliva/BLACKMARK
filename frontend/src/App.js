@@ -1,6 +1,7 @@
 
 import Header from './components/Header';
 import Main from './components/Main';
+import WhyUs from './components/WhyUs';
 import About from './components/About';
 import HomeGalleryPreview from './components/HomeGalleryPreview';
 import Footer from './components/Footer';
@@ -10,6 +11,7 @@ function App() {
     <>
     <Header />
     <Main />
+    <WhyUs />
     <About />
     <HomeGalleryPreview />
     <Footer />
