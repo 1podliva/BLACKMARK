@@ -7,7 +7,7 @@ export default function Footer() {
       <div className='footer'>
         <div className='firstcolumn'>
           <h3>BLACKMARK</h3>
-          <p>Where art meets skin.</p>
+          <p>Залиш слід. Залиш враження.</p>
         </div>
         <div className='secondcolumn'>
           <h3>Швидкі посилання</h3>
@@ -34,7 +34,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <p>© 2025 BLACKMARK. All rights reserved.</p>
+        <p>© 2025 BLACKMARK. Всі права захищені.</p>
       </div>
     </footer>
   );

@@ -1,0 +1,87 @@
+.home-gallery-preview {
+  height: 100vh;
+  text-align: center;
+}
+
+.home-gallery-preview h2 {
+  font-size: 55px;
+  margin-bottom: 0.2rem;
+}
+
+.home-gallery-preview p {
+  color: #9B00FF;
+  margin-bottom: 1.5rem;
+}
+
+.gallery-preview-grid {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.preview-item {
+  position: relative;
+  width: 300px; /* Збільшено ширину */
+  height: 350px; /* Збільшено висоту */
+  flex-shrink: 0;
+  overflow: hidden; /* Приховує все, що виходить за межі */
+  border-radius: 1rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease; /* Перехід для всього блоку */
+}
+
+.preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease; /* Перехід для зображення */
+}
+
+.preview-item:hover img {
+  transform: scale(1.05); /* Фото збільшується при наведенні */
+}
+
+.preview-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  color: white;
+  /* font-size: 1rem; */
+  background: rgba(0, 0, 0, 0.7); /* Темний фон */
+  padding: 10px;
+  text-align:start;
+  border-radius: 0 0 1rem 1rem; /* Зробити лише нижні кути округлими */
+  transition: opacity 0.3s ease; /* Додати плавність до opacity */
+  opacity: 0; /* Сховати інформацію за замовчуванням */
+}
+
+.preview-item:hover .preview-info {
+  opacity: 1; /* Показує блок при наведенні */
+}
+
+.view-more-btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: black;
+  color: white;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.view-more-btn:hover {
+  background-color: #333;
+}
+.preview-info h3 {
+  margin: 0; /* Зменшуємо відстань для заголовка */
+  font-size: 1.2rem; /* Можна змінити розмір заголовка */
+}
+
+.preview-info p {
+  margin: 0; /* Зменшуємо відстань для опису */
+  font-size: 1rem; /* Можна змінити розмір тексту */
+}

@@ -1,6 +1,7 @@
 .footer {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     flex-wrap: wrap;
     padding: 40px 90px;
     background-color: #000;
@@ -26,7 +27,7 @@
     color: #ccc;
     font-size: 15px;
     text-decoration: none;
-    margin-bottom: 8px;
+    /* margin-bottom: 8px; */
     display: block;
   }
   
