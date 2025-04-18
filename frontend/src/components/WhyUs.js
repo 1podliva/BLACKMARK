@@ -3,10 +3,26 @@ import './WhyUs.css'
 
 export default function WhyUs() {
   const items = [
-    { id: 1, title: 'Ми найкращі', text: 'Наші майстри мають величезний досвід і власний стиль.' },
-    { id: 2, title: 'Безпечність', text: 'Ми використовуємо стерильні інструменти та сертифіковані фарби.' },
-    { id: 3, title: 'Індивідуальний підхід', text: 'Кожен ескіз створюється під тебе, з урахуванням твоїх ідей.' },
-    { id: 4, title: 'Сучасна студія', text: 'Комфортне середовище, новітнє обладнання та приємна атмосфера.' },
+    {
+      title: 'Ми найкращі',
+      text: 'Наші майстри мають величезний досвід і власний стиль.',
+      image: '/images/1.svg',
+    },
+    {
+      title: 'Безпечність',
+      text: 'Ми використовуємо стерильні інструменти та сертифіковані фарби.',
+      image: '/images/2.svg',
+    },
+    {
+      title: 'Індивідуальний підхід',
+      text: 'Кожен ескіз створюється під тебе, з урахуванням твоїх ідей.',
+      image: '/images/3.svg',
+    },
+    {
+      title: 'Сучасна студія',
+      text: 'Комфортне середовище, новітнє обладнання та приємна атмосфера.',
+      image: '/images/4.svg',
+    },
   ];
 
   return (
@@ -14,7 +30,7 @@ export default function WhyUs() {
       <div className="whyus-row">
         {items.map(item => (
           <div className="whyus-card" key={item.id}>
-            <h2 className="whyus-number">{item.id}</h2>
+            <img src={item.image} alt={item.title} className="whyus-image" />
             <h3 className="whyus-title">{item.title}</h3>
             <p className="whyus-text">{item.text}</p>
           </div>

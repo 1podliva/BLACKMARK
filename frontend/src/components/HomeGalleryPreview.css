@@ -1,71 +1,131 @@
-.home-gallery-preview {
-  height: 100vh;
-  text-align: center;
-}
-
-.home-gallery-preview h2 {
-  font-size: 55px;
-  margin-bottom: 0.2rem;
-}
-
-.home-gallery-preview p {
-  color: #9B00FF;
-  margin-bottom: 1.5rem;
-}
-
 .gallery-preview-grid {
-  display: flex;
-  gap: 2rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 2rem;
+  column-count: 3;
+  column-gap: 1rem;
+  padding: 2rem 0;
+}
+
+/* Приклади "хаотичних" розмірів */
+.item-1 {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+.item-2 {
+  grid-column: span 2;
+  grid-row: span 1;
+}
+.item-3 {
+  grid-column: span 2;
+  grid-row: span 3;
+}
+.item-4 {
+  grid-column: span 3;
+  grid-row: span 2;
+}
+.item-5 {
+  grid-column: span 3;
+  grid-row: span 1;
+}
+.item-6 {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+.item-7 {
+  grid-column: span 4;
+  grid-row: span 2;
 }
 
 .preview-item {
-  position: relative;
-  width: 300px; /* Збільшено ширину */
-  height: 350px; /* Збільшено висоту */
-  flex-shrink: 0;
-  overflow: hidden; /* Приховує все, що виходить за межі */
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 1rem;
   border-radius: 1rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease; /* Перехід для всього блоку */
+  overflow: hidden;
+  break-inside: avoid;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  position: relative;
+  transition: transform 0.3s ease-in-out;
 }
 
 .preview-item img {
   width: 100%;
-  height: 100%;
+  height: auto;
+  display: block;
   object-fit: cover;
-  transition: transform 0.3s ease; /* Перехід для зображення */
+  filter: blur(6px); /* Фото розмито за замовчуванням */
+  transition: filter 0.3s ease-in-out;
 }
 
 .preview-item:hover img {
-  transform: scale(1.05); /* Фото збільшується при наведенні */
+  /* transform: scale(1.03); */
+  filter: blur(0); /* розмивання при наведенні */
 }
 
+.preview-item:hover::before {
+  content: " ";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5); /* затемнення */
+  transition: background 0.3s ease;
+}
+.preview-item:hover .preview-info {
+  opacity: 1;
+  transform: translateY(0); /* Блок з'являється знизу */
+}
 .preview-info {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
+  max-height: 120px; /* Встановлюємо максимальну висоту для блоку */
   color: white;
-  /* font-size: 1rem; */
-  background: rgba(0, 0, 0, 0.7); /* Темний фон */
-  padding: 10px;
-  text-align:start;
-  border-radius: 0 0 1rem 1rem; /* Зробити лише нижні кути округлими */
-  transition: opacity 0.3s ease; /* Додати плавність до opacity */
-  opacity: 0; /* Сховати інформацію за замовчуванням */
+  background: rgba(0, 0, 0, 0.6);
+  padding: 15px;
+  text-align: start;
+  border-radius: 0 0 1rem 1rem;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0;
+  transform: translateY(100%); /* Спочатку блок знаходиться за межами фото знизу */
+}
+.preview-info h3 {
+  margin: 0;
+  font-size: 1.2rem;
 }
 
-.preview-item:hover .preview-info {
-  opacity: 1; /* Показує блок при наведенні */
+.preview-info p {
+  margin: 0;
+  font-size: 1rem;
+  white-space: nowrap; /* Заборонити розриви рядків */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Три крапки, якщо текст не вміщується */
+}
+/* Інші стилі */
+.home-gallery-preview {
+  padding: 100px 160px;
+  background-color: var(--dark-bg);
+  color: var(--soft-white);
+  text-align: center;
+}
+
+.home-gallery-preview h2 {
+  font-size: 48px;
+  color: var(--soft-white);
+  margin-bottom: 0.3rem;
+}
+
+.home-gallery-preview p {
+  font-size: 18px;
+  color: var(--muted-pink);
+  margin-bottom: 2rem;
 }
 
 .view-more-btn {
+  margin-top: 1rem;
   display: inline-block;
   padding: 0.75rem 1.5rem;
-  background-color: black;
+  background-color: var(--purple-accent);
   color: white;
   border-radius: 30px;
   text-decoration: none;
@@ -74,14 +134,5 @@
 }
 
 .view-more-btn:hover {
-  background-color: #333;
-}
-.preview-info h3 {
-  margin: 0; /* Зменшуємо відстань для заголовка */
-  font-size: 1.2rem; /* Можна змінити розмір заголовка */
-}
-
-.preview-info p {
-  margin: 0; /* Зменшуємо відстань для опису */
-  font-size: 1rem; /* Можна змінити розмір тексту */
+  background-color: var(--purple-hover);
 }

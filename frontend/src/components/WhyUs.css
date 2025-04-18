@@ -39,12 +39,12 @@
     transform: translateY(-4px);
   }
   
-  .whyus-number {
+  /* .whyus-number {
     font-size: 90px;
     text-align: center;
     color: var(--purple-accent);
     margin: 0 0 8px 0;
-  }
+  } */
   
   .whyus-title {
     font-size: 24px;
@@ -55,5 +55,12 @@
   .whyus-text {
     font-size: 20px;
     color: var(--light-gray);
+  }
+  .whyus-image {
+    width: 82px;
+    height: 82px;
+    object-fit: cover;
+    margin: 0 auto 16px; /* авто по боках — для центрування */
+    display: block;      /* щоб margin працював */
   }
   
