@@ -78,17 +78,20 @@
   position: absolute;
   bottom: 0;
   left: 0;
+  right: 0; /* додаємо right, щоб блок точно займав всю ширину */
   width: 100%;
-  max-height: 120px; /* Встановлюємо максимальну висоту для блоку */
+  padding: 15px;
+  box-sizing: border-box; /* враховує padding у ширині */
+  max-height: 120px;
   color: white;
   background: rgba(0, 0, 0, 0.6);
-  padding: 15px;
   text-align: start;
   border-radius: 0 0 1rem 1rem;
   transition: opacity 0.3s ease, transform 0.3s ease;
   opacity: 0;
-  transform: translateY(100%); /* Спочатку блок знаходиться за межами фото знизу */
+  transform: translateY(100%);
 }
+
 .preview-info h3 {
   margin: 0;
   font-size: 1.2rem;
@@ -97,13 +100,22 @@
 .preview-info p {
   margin: 0;
   font-size: 1rem;
-  white-space: nowrap; /* Заборонити розриви рядків */
+  line-height: 1.4;
+  white-space: normal;           /* Дозволяє переносити рядки */
+  overflow-wrap: break-word;     /* Дозволяє переносити слова */
+  word-break: break-word;        /* Розриває надто довгі слова */
   overflow: hidden;
-  text-overflow: ellipsis; /* Три крапки, якщо текст не вміщується */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;         /* Максимум 2 рядки */
+  -webkit-box-orient: vertical;
 }
+
+
+
 /* Інші стилі */
 .home-gallery-preview {
-  padding: 100px 160px;
+  padding: 0px 160px;
+  padding-bottom: 100px;
   background-color: var(--dark-bg);
   color: var(--soft-white);
   text-align: center;
