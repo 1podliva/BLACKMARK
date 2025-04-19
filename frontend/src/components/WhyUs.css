@@ -1,66 +1,90 @@
 :root {
-    --dark-bg: #0F0F10;
-    --navy-gray: #1A1A1D;
-    --purple-accent: #9B00FF;
-    --purple-hover: #7F00D4;
-    --soft-white: #F8F9FA;
-    --light-gray: #D1D5DB;
-    --muted-pink: #CBA6DD;
-  }
-  
-  .whyus-section {
-    background-color: var(--dark-bg);
-    padding: 20px 20px;
-  }
-  
+  --dark-bg: #0F0F10;
+  --navy-gray: #1A1A1D;
+  --purple-accent: #9B00FF;
+  --purple-hover: #7F00D4;
+  --soft-white: #F8F9FA;
+  --light-gray: #D1D5DB;
+  --muted-pink: #CBA6DD;
+}
+
+.whyus-section {
+  background-color: var(--dark-bg);
+  padding: 20px;
+}
+
+.whyus-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 30px;
+  flex-wrap: wrap; /* Додаємо можливість для елементів змінювати розташування на малих екранах */
+}
+
+.whyus-card {
+  flex: 1;
+  background-color: #1A1A1A;
+  color: var(--soft-white);
+  padding: 20px;
+  border-radius: 12px;
+  height: 200px;
+  outline: 1px solid #262626;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.whyus-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.whyus-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.whyus-text {
+  font-size: 20px;
+  color: var(--light-gray);
+}
+
+.whyus-image {
+  width: 82px;
+  height: 82px;
+  object-fit: cover;
+  margin: 0 auto 16px;
+  display: block;
+}
+
+.whyus-action {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.button-link {
+  padding: 12px 24px;
+  background-color: var(--purple-accent);
+  color: var(--soft-white);
+  text-decoration: none;
+  border-radius: 30px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  display: inline-block;
+}
+
+.button-link:hover {
+  background-color: var(--purple-hover);
+}
+
+@media (max-width: 768px) {
   .whyus-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: stretch;
-    width: 100%;
-    gap: 30px;
+    flex-direction: column; /* На менших екранах карти будуть в колонку */
   }
-  
+
   .whyus-card {
-    flex: 1;
-    background-color: #1A1A1A;
-    color: var(--soft-white);
-    padding: 20px;
-    border-radius: 12px;
-    height: 200px;
-    outline: 1px solid #262626;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    transition: transform 0.3s ease;
+    height: auto; /* Змінюємо висоту картки, щоб адаптувалась під контент */
   }
-  
-  .whyus-card:hover {
-    transform: translateY(-4px);
-  }
-  
-  /* .whyus-number {
-    font-size: 90px;
-    text-align: center;
-    color: var(--purple-accent);
-    margin: 0 0 8px 0;
-  } */
-  
-  .whyus-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 8px;
-  }
-  
-  .whyus-text {
-    font-size: 20px;
-    color: var(--light-gray);
-  }
-  .whyus-image {
-    width: 82px;
-    height: 82px;
-    object-fit: cover;
-    margin: 0 auto 16px; /* авто по боках — для центрування */
-    display: block;      /* щоб margin працював */
-  }
-  
+}

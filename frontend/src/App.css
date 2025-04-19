@@ -34,7 +34,7 @@ a {
 section {
   /* margin: 0 120px; */
   /* height: 100vh; */
-  display: flex;
+  /* display: flex; */
   justify-content: center;
   align-items: center;
   scroll-snap-align: start;

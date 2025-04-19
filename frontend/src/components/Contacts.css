@@ -1,0 +1,176 @@
+:root {
+  --dark-bg: #0F0F10;
+  --navy-gray: #1A1A1D;
+  --purple-accent: #9B00FF;
+  --purple-hover: #7F00D4;
+  --soft-white: #F8F9FA;
+  --light-gray: #D1D5DB;
+  --muted-pink: #CBA6DD;
+}
+
+.contacts-section {
+  padding: 60px 20px;
+  background-color: var(--dark-bg);
+  color: var(--soft-white);
+}
+
+.contacts-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.contacts-header h2 {
+  font-size: 32px;
+  color: var(--purple-accent);
+  margin-bottom: 10px;
+}
+
+.contacts-header p {
+  /* font-size: 16px; */
+  color: var(--light-gray);
+}
+
+.contacts-main-container {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.custom-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 50px;
+  justify-content: space-between;
+}
+
+.contact-form-container {
+  flex: 1;
+  min-width: 320px;
+  max-width: 400px;
+  background-color: var(--navy-gray);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.contact-form h3 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: var(--soft-white);
+}
+
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background-color: #2C2C2C;
+  color: var(--soft-white);
+  border: 1px solid #262626;
+  font-size: 14px;
+  box-sizing: border-box; /* Це важливо для правильного обчислення розмірів */
+}
+
+.contact-form textarea {
+  flex-grow: 1; /* Займає весь доступний простір */
+  resize: none; /* Відключаємо зміну розміру */
+  min-height: 200px; /* Мінімальна висота */
+  line-height: 1.5; /* Задає відстань між рядками */
+}
+
+.contact-form button {
+  padding: 12px;
+  background-color: var(--purple-accent);
+  border: none;
+  border-radius: 8px;
+  color: var(--soft-white);
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+}
+
+.contact-form button:hover {
+  background-color: var(--purple-hover);
+}
+
+.form-success {
+  margin-top: 10px;
+  color: var(--muted-pink);
+  font-size: 14px;
+}
+
+.contact-info-container.compact {
+  flex: 1;
+  min-width: 320px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.contact-info {
+  background-color: var(--navy-gray);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+  flex-grow: 1;
+}
+
+.contact-info:hover {
+  transform: translateY(-4px);
+}
+
+.contact-icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+  filter: brightness(1.2);
+}
+
+.contact-info h3 {
+  font-size: 16px;
+  margin-bottom: 6px;
+  color: var(--soft-white);
+}
+
+.contact-info p,
+.contact-info a {
+  font-size: 14px;
+  color: var(--light-gray);
+  text-decoration: none;
+}
+
+.contact-info a:hover {
+  color: var(--purple-accent);
+}
+
+.contacts-map {
+  width: 30%; /* Задаємо ширину для карти, щоб вона була в ряду з іншими елементами */
+  height: 500px; /* Задайте бажану висоту */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 768px) {
+  .custom-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .contacts-map {
+    height: 300px;
+  }
+}

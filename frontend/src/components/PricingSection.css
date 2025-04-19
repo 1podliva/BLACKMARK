@@ -1,0 +1,74 @@
+/* Основні стилі для розділу розцінок */
+.pricing-section {
+    padding: 4rem 0;
+    background-color: var(--dark-bg); /* темний фон */
+    text-align: center;
+  }
+  
+  .pricing-section h2 {
+    font-size: 3rem;
+    color: var(--soft-white); /* білий колір для заголовка */
+    margin-bottom: 1.5rem;
+  }
+  
+  .pricing-section p {
+    font-size: 1.2rem;
+    color: var(--muted-pink); /* м'який рожевий */
+    margin-bottom: 3rem;
+  }
+  
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+  }
+  
+  .pricing-item {
+    background-color: var(--light-bg); /* світлий фон для кожної картки */
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+  }
+  
+  .pricing-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+  }
+  
+  .pricing-content h3 {
+    font-size: 1.8rem;
+    color: var(--purple-accent); /* фіолетовий колір для заголовків */
+    margin-bottom: 1rem;
+  }
+  
+  .pricing-content .price {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: var(--purple-accent); /* фіолетова ціна */
+    margin-bottom: 1.5rem;
+  }
+  
+  .pricing-content .description {
+    font-size: 1rem;
+    color: var(--dark-text); /* темний текст для опису */
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+  
+  .btn-book {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--purple-accent);
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 30px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  .btn-book:hover {
+    background-color: var(--purple-hover);
+    transform: scale(1.05); /* ефект збільшення кнопки */
+  }
+  

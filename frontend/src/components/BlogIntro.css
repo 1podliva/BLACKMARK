@@ -1,0 +1,32 @@
+.blog-intro-section {
+    background-color: var(--navy-gray);
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--soft-white);
+  }
+  
+  .blog-intro-section h2 {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .blog-intro-section p {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .button-link {
+    padding: 12px 24px;
+    background-color: var(--purple-accent);
+    color: var(--soft-white);
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .button-link:hover {
+    background-color: var(--purple-hover);
+  }
+  

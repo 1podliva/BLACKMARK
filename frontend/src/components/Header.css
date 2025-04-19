@@ -69,7 +69,7 @@
   
   /* Стиль для активного лінка */
   .nav-links li a.active {
-    background-color: var(--dark-bg);
+    background-color: #0f0f1070;
     color: var(--soft-white);
     border-radius: 10px;
   }
