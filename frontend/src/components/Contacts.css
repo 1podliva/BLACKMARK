@@ -9,123 +9,154 @@
 }
 
 .contacts-section {
-  padding: 60px 20px;
+  display: flex;
+  justify-content: center;
+  padding: 120px 10%;
   background-color: var(--dark-bg);
+  color: var(--soft-white);
+  position: relative;
+  overflow: hidden;
+}
+
+.contacts-content {
+  max-width: 800px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.intro-block {
+  margin-bottom: 60px;
+}
+
+.section-subtitle {
+  font-size: 18px;
+  color: var(--purple-accent);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+}
+
+.main-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.first-line {
+  display: block;
   color: var(--soft-white);
 }
 
-.contacts-header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.contacts-header h2 {
-  font-size: 32px;
+.second-line {
+  display: block;
   color: var(--purple-accent);
-  margin-bottom: 10px;
 }
 
-.contacts-header p {
-  /* font-size: 16px; */
+.divider {
+  width: 80px;
+  height: 4px;
+  background: var(--purple-accent);
+  margin: 30px 0;
+}
+
+.intro-text {
+  font-size: 1.2rem;
+  line-height: 1.8;
   color: var(--light-gray);
+  max-width: 600px;
+  margin-bottom: 60px;
 }
 
-.contacts-main-container {
+.contacts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 80px;
+}
+
+.form-info-block {
   display: flex;
   flex-direction: column;
   gap: 40px;
 }
 
-.custom-layout {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 50px;
-  justify-content: space-between;
-}
-
 .contact-form-container {
-  flex: 1;
-  min-width: 320px;
-  max-width: 400px;
   background-color: var(--navy-gray);
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-.contact-form h3 {
-  font-size: 20px;
+.contact-form-container h3 {
+  font-size: 1.5rem;
+  color: var(--purple-accent);
   margin-bottom: 20px;
-  color: var(--soft-white);
 }
-
 
 .contact-form {
   display: flex;
   flex-direction: column;
 }
 
-
-
 .contact-form input,
 .contact-form textarea {
   width: 100%;
-  padding: 10px 14px;
-  margin-bottom: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
   border-radius: 8px;
   background-color: #2C2C2C;
   color: var(--soft-white);
   border: 1px solid #262626;
-  font-size: 14px;
-  box-sizing: border-box; /* Це важливо для правильного обчислення розмірів */
+  font-size: 1rem;
+  box-sizing: border-box;
 }
 
 .contact-form textarea {
-  flex-grow: 1; /* Займає весь доступний простір */
-  resize: none; /* Відключаємо зміну розміру */
-  min-height: 200px; /* Мінімальна висота */
-  line-height: 1.5; /* Задає відстань між рядками */
+  resize: none;
+  min-height: 120px;
+  line-height: 1.5;
 }
 
 .contact-form button {
-  padding: 12px;
+  padding: 15px 30px;
   background-color: var(--purple-accent);
   border: none;
   border-radius: 8px;
   color: var(--soft-white);
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  width: 100%;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(155, 0, 255, 0.3);
 }
 
 .contact-form button:hover {
   background-color: var(--purple-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(155, 0, 255, 0.4);
 }
 
 .form-success {
   margin-top: 10px;
   color: var(--muted-pink);
-  font-size: 14px;
+  font-size: 0.9rem;
 }
 
-.contact-info-container.compact {
-  flex: 1;
-  min-width: 320px;
-  max-width: 350px;
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
+.contact-info-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
 }
 
 .contact-info {
   background-color: var(--navy-gray);
   padding: 20px;
   border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   text-align: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease;
-  flex-grow: 1;
 }
 
 .contact-info:hover {
@@ -133,21 +164,21 @@
 }
 
 .contact-icon {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   margin-bottom: 10px;
   filter: brightness(1.2);
 }
 
 .contact-info h3 {
-  font-size: 16px;
-  margin-bottom: 6px;
-  color: var(--soft-white);
+  font-size: 1.2rem;
+  color: var(--purple-accent);
+  margin-bottom: 8px;
 }
 
 .contact-info p,
 .contact-info a {
-  font-size: 14px;
+  font-size: 1rem;
   color: var(--light-gray);
   text-decoration: none;
 }
@@ -157,20 +188,57 @@
 }
 
 .contacts-map {
-  width: 30%; /* Задаємо ширину для карти, щоб вона була в ряду з іншими елементами */
-  height: 500px; /* Задайте бажану висоту */
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  height: 100%;
+  min-height: 300px;
 }
 
 @media (max-width: 768px) {
-  .custom-layout {
-    flex-direction: column;
-    align-items: center;
+  .contacts-section {
+    padding: 80px 5%;
+  }
+
+  .contacts-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    margin-bottom: 60px;
+  }
+
+  .contact-form-container,
+  .contact-info-container,
+  .contacts-map {
+    max-width: 100%;
   }
 
   .contacts-map {
     height: 300px;
+  }
+
+  .intro-text {
+    font-size: 1rem;
+    margin-bottom: 40px;
+  }
+
+  .section-subtitle {
+    font-size: 16px;
+  }
+
+  .main-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+  }
+
+  .contact-form-container h3 {
+    font-size: 1.3rem;
+  }
+
+  .contact-info h3 {
+    font-size: 1.1rem;
+  }
+
+  .contact-info p,
+  .contact-info a {
+    font-size: 0.9rem;
   }
 }
