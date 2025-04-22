@@ -26,46 +26,36 @@ const images = [
     title: 'Мистецтво на твоїй шкірі',
     description: 'Майстер творить з ескізу справжнє мистецтво прямо на тілі.'
   },
-  {
-    src: '/images/gallery/tattoo5.jpg',
-    alt: 'Татуювання 5',
-    title: 'Татуювання, яке привертає увагу',
-    description: 'Ефектний малюнок на ключиці. Стильно й жіночно.'
-  },
-  {
-    src: '/images/gallery/tattoo6.jpg',
-    alt: 'Татуювання 6',
-    title: 'Деталі, що мають значення',
-    description: 'Мінімалістичне татуювання на пальці для витонченого стилю.'
-  },
-  {
-    src: '/images/gallery/tattoo7.jpg',
-    alt: 'Татуювання 7',
-    title: 'Художня робота на руці',
-    description: 'Повний рукав — простір для творчості. Яскраво й сміливо.'
-  },
 ];
-
 
 export default function HomeGalleryPreview() {
   return (
-    <div className="home-gallery-preview">
-      <h2>Галерея робіт</h2>
-      <p>Ознайомтеся з нашою різноманітною колекцією мистецтва татуювань.</p>
+    <section className="home-gallery-preview">
+      <div className="gallery-content">
+        <h2 className="section-subtitle">Наші роботи</h2>
+        <h1 className="main-title">
+          <span className="first-line">Мистецтво</span>
+          <span className="second-line">На твоїй шкірі</span>
+        </h1>
+        <div className="divider"></div>
+        <p className="intro-text">
+          Ознайомтеся з нашою колекцією унікальних татуювань, створених з душею.
+        </p>
 
-      <div className="gallery-preview-grid">
-        {images.map((img, index) => (
-          <div className={`preview-item item-${index + 1}`} key={index}>
-            <img src={img.src} alt={img.alt} />
-            <div className="preview-info">
-              <h3>{img.title}</h3>
-              <p>{img.description}</p>
+        <div className="gallery-preview-grid">
+          {images.map((img, index) => (
+            <div className={`preview-item item-${index + 1}`} key={index}>
+              <img src={img.src} alt={img.alt} />
+              <div className="preview-info">
+                <h3>{img.title}</h3>
+                <p>{img.description}</p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      <a href="/gallery" className="view-more-btn">Переглянути більше</a>
-    </div>
+        <a href="/gallery" className="gallery-btn">Переглянути більше</a>
+      </div>
+    </section>
   );
 }
