@@ -75,8 +75,8 @@
     color: var(--soft-white);
     font-weight: 400;
     letter-spacing: 1px;
-    padding: 12px 24px;
-    border-radius: 9999px;
+    padding: 10px 16px;
+    border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(155, 0, 255, 0.4);
     display: flex;
     align-items: center;

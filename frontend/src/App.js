@@ -16,7 +16,7 @@ function App() {
     <Main />
     <WhyUs />
     
-    {/* <About /> */}
+    <About />
     {/* <PricingSection /> */}
     <HomeGalleryPreview />
     {/* <BlogIntro /> */}

@@ -4,12 +4,12 @@ import './Footer.css';
 export default function Footer() {
   return (
     <footer className="footer-wrapper">
-      <div className='footer'>
-        <div className='firstcolumn'>
+      <div className="footer">
+        <div className="footer-column">
           <h3>BLACKMARK</h3>
           <p>Залиш слід. Залиш враження.</p>
         </div>
-        <div className='secondcolumn'>
+        <div className="footer-column">
           <h3>Швидкі посилання</h3>
           <a href="#home">Головна</a>
           <a href="#about">Про нас</a>
@@ -17,12 +17,12 @@ export default function Footer() {
           <a href="#masters">Майстри</a>
           <a href="#contacts">Контакти</a>
         </div>
-        <div className='thirdcolumn'>
+        <div className="footer-column">
           <h3>Графік роботи</h3>
           <p>Понеділок – Субота</p>
           <p>10:00 - 20:00</p>
         </div>
-        <div className='fourthcolumn'>
+        <div className="footer-column">
           <h3>Ми в соцмережах</h3>
           <a href="https://instagram.com" target="_blank" rel="noreferrer">
             <i className="fab fa-instagram"></i> Instagram

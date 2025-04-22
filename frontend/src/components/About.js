@@ -1,6 +1,14 @@
 import React from 'react';
 import './About.css';
+import { useNavigate } from 'react-router-dom'; // імпортуємо хук
+
 export default function About() {
+  const navigate = useNavigate(); // ініціалізуємо навігацію
+
+  const goToAboutPage = () => {
+    navigate('/about-us'); // або інша твоя сторінка "Про нас"
+  };
+
   return (
     <section id="about">
       <div className="text-content">
@@ -11,6 +19,11 @@ export default function About() {
           Наші художники прагнуть перетворити ваші ідеї на приголомшливі <br />
           витвори мистецтва, які ви будете носити з гордістю все життя.
         </p>
+
+        <a href="/about" className="about-btn" onClick={goToAboutPage}>
+          Дізнатися більше
+        </a>
+
         <div className="container">
           <div className="info">
             <h2 className="second">15+</h2>

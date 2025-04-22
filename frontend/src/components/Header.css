@@ -79,6 +79,7 @@
     background-color: var(--purple-accent);
     color: white;
     font-weight: 400;
+    text-decoration: none;
     letter-spacing: 1px;
     padding: 10px 16px; /* Збільшено padding для профілю */
     border-radius: 10px; /* Кругліші кути */
