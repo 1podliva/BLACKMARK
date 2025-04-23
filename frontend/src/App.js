@@ -5,6 +5,7 @@ import About from './components/About';
 import PricingSection from './components/PricingSection';
 import BlogIntro from './components/BlogIntro';
 import Contacts from './components/Contacts';
+import Consultation from './components/Consultation';
 import HomeGalleryPreview from './components/HomeGalleryPreview';
 import Footer from './components/Footer';
 import './App.css';
@@ -16,7 +17,8 @@ function App() {
     <About />
     {/* <PricingSection /> */}
     <HomeGalleryPreview />
-    {/* <BlogIntro /> */}
+    <Consultation />
+    <BlogIntro />
     <Contacts />
     <Footer />
     </>

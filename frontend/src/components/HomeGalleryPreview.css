@@ -180,7 +180,7 @@
 .gallery-fullwidth {
   width: 100%;
   background-color: var(--dark-bg);
-  padding: 60px 0; /* відступи зверху і знизу */
+  /* padding: 60px 0; відступи зверху і знизу */
 }
 
 
