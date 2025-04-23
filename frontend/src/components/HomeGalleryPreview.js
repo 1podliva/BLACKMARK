@@ -30,32 +30,40 @@ const images = [
 
 export default function HomeGalleryPreview() {
   return (
-    <section className="home-gallery-preview">
-      <div className="gallery-content">
-        <h2 className="section-subtitle">Наші роботи</h2>
-        <h1 className="main-title">
-          <span className="first-line">Мистецтво</span>
-          <span className="second-line">На твоїй шкірі</span>
-        </h1>
-        <div className="divider"></div>
-        <p className="intro-text">
-          Ознайомтеся з нашою колекцією унікальних татуювань, створених з душею.
-        </p>
+<>
+<section className="home-gallery-preview">
+  <div className="gallery-content">
+    <h2 className="section-subtitle">Наші роботи</h2>
+    <h1 className="main-title">
+      <span className="first-line">Мистецтво</span>
+      <span className="second-line">На твоїй шкірі</span>
+    </h1>
+    <div className="divider"></div>
+    <p className="intro-text">
+      Ознайомтеся з нашою колекцією унікальних татуювань, створених з душею.
+    </p>
+  </div>
+</section>
 
-        <div className="gallery-preview-grid">
-          {images.map((img, index) => (
-            <div className={`preview-item item-${index + 1}`} key={index}>
-              <img src={img.src} alt={img.alt} />
-              <div className="preview-info">
-                <h3>{img.title}</h3>
-                <p>{img.description}</p>
-              </div>
-            </div>
-          ))}
+<div className="gallery-fullwidth">
+  <div className="gallery-preview-grid">
+    {images.map((img, index) => (
+      <div className={`preview-item item-${index + 1}`} key={index}>
+        <img src={img.src} alt={img.alt} />
+        <div className="preview-info">
+          <h3>{img.title}</h3>
+          <p>{img.description}</p>
         </div>
-
-        <a href="/gallery" className="gallery-btn">Переглянути більше</a>
       </div>
-    </section>
+    ))}
+  </div>
+
+  <div className="gallery-btn-wrapper">
+    <a href="/gallery" className="gallery-btn">Переглянути більше</a>
+  </div>
+</div>
+
+</>
+
   );
-}
+}  
