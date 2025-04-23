@@ -1,0 +1,132 @@
+:root {
+    --dark-bg: #0F0F10;
+    --navy-gray: #1A1A1D;
+    --purple-accent: #9B00FF;
+    --purple-hover: #7F00D4;
+    --soft-white: #F8F9FA;
+    --light-gray: #D1D5DB;
+    --muted-pink: #CBA6DD;
+  }
+  
+  .blog-post-section {
+    display: flex;
+    justify-content: center;
+    padding: 120px 10%;
+    background-color: var(--dark-bg);
+    color: var(--soft-white);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .blog-post-content {
+    max-width: 800px;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .intro-block {
+    margin-bottom: 60px;
+  }
+  
+  .section-subtitle {
+    font-size: 18px;
+    color: var(--purple-accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+  }
+  
+  .main-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+    color: var(--soft-white);
+  }
+  
+  .divider {
+    width: 80px;
+    height: 4px;
+    background: var(--purple-accent);
+    margin: 30px 0;
+  }
+  
+  .intro-text {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: var(--light-gray);
+    margin-bottom: 40px;
+  }
+  
+  .post-image-container {
+    margin-bottom: 40px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .post-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .post-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--light-gray);
+  }
+  
+  .post-content p {
+    margin-bottom: 20px;
+  }
+  
+  .post-content h2,
+  .post-content h3 {
+    color: var(--soft-white);
+    margin: 30px 0 20px;
+  }
+  
+  .post-content ul,
+  .post-content ol {
+    margin: 20px 0;
+    padding-left: 40px;
+  }
+  
+  .post-content li {
+    margin-bottom: 10px;
+  }
+  
+  .error-message {
+    color: #ff4d4d;
+    text-align: center;
+    font-size: 1.2rem;
+  }
+  
+  @media (max-width: 768px) {
+    .blog-post-section {
+      padding: 80px 5%;
+    }
+  
+    .intro-text {
+      font-size: 1rem;
+      margin-bottom: 30px;
+    }
+  
+    .section-subtitle {
+      font-size: 16px;
+    }
+  
+    .main-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+    }
+  
+    .post-content {
+      font-size: 1rem;
+    }
+  
+    .post-image-container {
+      margin-bottom: 30px;
+    }
+  }

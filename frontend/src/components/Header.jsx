@@ -1,11 +1,31 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './Header.css';
 
 const Header = () => {
-  const [activeLink, setActiveLink] = useState('home');
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const handleClick = (link) => {
-    setActiveLink(link);
+  const handleContactsClick = (e) => {
+    e.preventDefault();
+    if (location.pathname !== '/') {
+      navigate('/#contacts');
+      setTimeout(() => {
+        const contactsSection = document.getElementById('contacts');
+        if (contactsSection) {
+          contactsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      const contactsSection = document.getElementById('contacts');
+      if (contactsSection) {
+        contactsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
+  const getActiveClass = (path) => {
+    return location.pathname === path ? 'active' : '';
   };
 
   return (
@@ -18,62 +38,67 @@ const Header = () => {
         <div className="nav-links-container">
           <ul className="nav-links">
             <li>
-              <a
-                href="#home"
-                className={activeLink === 'home' ? 'active' : ''}
-                onClick={() => handleClick('home')}
+              <Link
+                to="/"
+                className={getActiveClass('/')}
               >
                 Головна
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="#about"
-                className={activeLink === 'about' ? 'active' : ''}
-                onClick={() => handleClick('about')}
+              <Link
+                to="/about"
+                className={getActiveClass('/about')}
               >
                 Про нас
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="#gallery"
-                className={activeLink === 'gallery' ? 'active' : ''}
-                onClick={() => handleClick('gallery')}
+              <Link
+                to="/gallery"
+                className={getActiveClass('/gallery')}
               >
                 Галерея
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="#masters"
-                className={activeLink === 'masters' ? 'active' : ''}
-                onClick={() => handleClick('masters')}
+              <Link
+                to="/blog"
+                className={getActiveClass('/blog')}
               >
-                Майстри
-              </a>
+                Блог
+              </Link>
             </li>
             <li>
               <a
                 href="#contacts"
-                className={activeLink === 'contacts' ? 'active' : ''}
-                onClick={() => handleClick('contacts')}
+                className={location.hash === '#contacts' ? 'active' : ''}
+                onClick={handleContactsClick}
               >
                 Контакти
               </a>
             </li>
+            {localStorage.getItem('token') && (
+              <li>
+                <Link
+                  to="/admin"
+                  className={getActiveClass('/admin')}
+                >
+                  Адмін
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
 
         {/* Профіль */}
         <div className="profile">
-          <a
-            href="#profile"
-            className={activeLink === 'profile' ? 'active' : ''}
-            onClick={() => handleClick('profile')}
+          <Link
+            to="/profile"
+            className={getActiveClass('/profile')}
           >
             Профіль
-          </a>
+          </Link>
         </div>
       </nav>
     </>

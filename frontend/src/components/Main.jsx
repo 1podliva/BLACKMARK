@@ -1,7 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './Main.css';
 
 const Main = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.scrollTo === 'contacts') {
+      setTimeout(() => {
+        const contactsSection = document.getElementById('contacts');
+        if (contactsSection) {
+          contactsSection.scrollIntoView({ behavior: 'smooth' });
+          navigate(location.pathname, { replace: true, state: {} }); // очищаємо state
+        }
+      }, 200); // Можна збільшити затримку, якщо треба більше часу на рендер DOM
+    }
+  }, [location, navigate]);
+
   return (
     <section id="home">
       <div className="home-content">

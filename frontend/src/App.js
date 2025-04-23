@@ -1,4 +1,4 @@
-
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Main from './components/Main';
 import About from './components/About';
@@ -8,20 +8,109 @@ import Contacts from './components/Contacts';
 import Consultation from './components/Consultation';
 import HomeGalleryPreview from './components/HomeGalleryPreview';
 import Footer from './components/Footer';
+import Blog from './pages/Blog';
+import BlogPost from './components/BlogPost';
+import Gallery from './pages/Gallery';
+import Profile from './pages/Profile';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/AdminLogin';
 import './App.css';
+
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  return token ? children : <Navigate to="/admin/login" />;
+};
+
 function App() {
   return (
-    <>
-    <Header />
-    <Main />
-    <About />
-    {/* <PricingSection /> */}
-    <HomeGalleryPreview />
-    <Consultation />
-    <BlogIntro />
-    <Contacts />
-    <Footer />
-    </>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <>
+            <Header />
+            <Main />
+            <About />
+            {/* <PricingSection /> */}
+            <HomeGalleryPreview />
+            <Consultation />
+            <BlogIntro />
+            <Contacts />
+            <Footer />
+          </>
+        }
+      />
+      <Route
+        path="/about"
+        element={
+          <>
+            <Header />
+            <About />
+            <Footer />
+          </>
+        }
+      />
+      <Route
+        path="/gallery"
+        element={
+          <>
+            <Header />
+            <Gallery />
+            <Footer />
+          </>
+        }
+      />
+      <Route
+        path="/blog"
+        element={
+          <>
+            <Header />
+            <Blog />
+            <Footer />
+          </>
+        }
+      />
+      <Route
+        path="/blog/:id"
+        element={
+          <>
+            <Header />
+            <BlogPost />
+            <Footer />
+          </>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <>
+            <Header />
+            <Profile />
+            <Footer />
+          </>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <Header />
+            <AdminDashboard />
+            <Footer />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/login"
+        element={
+          <>
+            <Header />
+            <AdminLogin />
+            <Footer />
+          </>
+        }
+      />
+    </Routes>
   );
 }
 
