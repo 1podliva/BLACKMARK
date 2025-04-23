@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { convert } from 'html-to-text'; // Added for HTML stripping
 import './Blog.css';
 
 const Blog = () => {
@@ -92,12 +93,20 @@ const Blog = () => {
         {featuredPost && (
           <div className="featured-post">
             <div className="featured-image-container">
-              <img src={featuredPost.image} alt={featuredPost.title} className="featured-image" />
+              {featuredPost.image && (
+                <img
+                  src={`http://localhost:5000${featuredPost.image}`}
+                  alt={featuredPost.title}
+                  className="featured-image"
+                />
+              )}
             </div>
             <div className="featured-content">
               <span className="post-category">{featuredPost.category}</span>
               <h3 className="featured-title">{featuredPost.title}</h3>
-              <p className="featured-excerpt">{featuredPost.content.substring(0, 100)}...</p>
+              <p className="featured-excerpt">
+                {convert(featuredPost.content, { wordwrap: false }).substring(0, 100)}...
+              </p>
               <button
                 className="read-more-btn"
                 onClick={() => handlePostClick(featuredPost._id)}
@@ -116,12 +125,20 @@ const Blog = () => {
               onClick={() => handlePostClick(post._id)}
             >
               <div className="post-image-container">
-                <img src={post.image} alt={post.title} className="post-image" />
+                {post.image && (
+                  <img
+                    src={`http://localhost:5000${post.image}`}
+                    alt={post.title}
+                    className="post-image"
+                  />
+                )}
               </div>
               <div className="post-content">
                 <span className="post-category">{post.category}</span>
                 <h3 className="post-title">{post.title}</h3>
-                <p className="post-excerpt">{post.content.substring(0, 100)}...</p>
+                <p className="post-excerpt">
+                  {convert(post.content, { wordwrap: false }).substring(0, 100)}...
+                </p>
               </div>
             </div>
           ))}

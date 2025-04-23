@@ -21,45 +21,25 @@ const BlogPost = () => {
     fetchPost();
   }, [id]);
 
-  if (error) {
-    return (
-      <section className="blog-post-section">
-        <div className="blog-post-content">
-          <p className="error-message">{error}</p>
-        </div>
-      </section>
-    );
-  }
-
-  if (!post) {
-    return (
-      <section className="blog-post-section">
-        <div className="blog-post-content">
-          <p>Завантаження...</p>
-        </div>
-      </section>
-    );
-  }
+  if (error) return <p className="error-message">{error}</p>;
+  if (!post) return <p>Loading...</p>;
 
   return (
     <section className="blog-post-section">
       <div className="blog-post-content">
-        <div className="intro-block">
-          <h2 className="section-subtitle">{post.category}</h2>
-          <h1 className="main-title">{post.title}</h1>
-          <div className="divider"></div>
-          <p className="intro-text">
-            Опубліковано: {new Date(post.createdAt).toLocaleDateString('uk-UA')}
-          </p>
-        </div>
-
+        <h1 className="post-title">{post.title}</h1>
+        <span className="post-category">{post.category}</span>
         {post.image && (
-          <div className="post-image-container">
-            <img src={post.image} alt={post.title} className="post-image" />
-          </div>
+          <img
+            src={`http://localhost:5000${post.image}`}
+            alt={post.title}
+            className="post-image"
+          />
         )}
-
-        <div className="post-content" dangerouslySetInnerHTML={{ __html: post.content }} />
+        <div
+          className="post-content"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
       </div>
     </section>
   );

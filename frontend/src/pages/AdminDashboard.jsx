@@ -19,6 +19,7 @@ const AdminDashboard = () => {
     id: '',
     name: '',
   });
+  const [imagePreview, setImagePreview] = useState(''); // New state for image preview
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
@@ -61,7 +62,7 @@ const AdminDashboard = () => {
     formData.append('category', postForm.category);
     formData.append('featured', postForm.featured);
     if (postForm.image) formData.append('image', postForm.image);
-    if (postForm.id && postForm.imageUrl) formData.append('image', postForm.imageUrl);
+    if (postForm.id && postForm.imageUrl && !postForm.image) formData.append('image', postForm.imageUrl);
 
     try {
       const token = localStorage.getItem('token');
@@ -78,6 +79,7 @@ const AdminDashboard = () => {
       await res.json();
       setSuccess(postForm.id ? 'Post updated!' : 'Post created!');
       setPostForm({ id: '', title: '', content: '', image: null, category: '', featured: false, imageUrl: '' });
+      setImagePreview(''); // Clear preview after submission
       fetchPosts();
     } catch (err) {
       setError(err.message);
@@ -123,6 +125,7 @@ const AdminDashboard = () => {
       category: post.category,
       featured: post.featured,
     });
+    setImagePreview(post.image ? `http://localhost:5000${post.image}` : ''); // Set preview for existing image
   };
 
   const handleCategoryEdit = (category) => {
@@ -169,7 +172,18 @@ const AdminDashboard = () => {
   };
 
   const handleImageChange = (e) => {
-    setPostForm({ ...postForm, image: e.target.files[0] });
+    const file = e.target.files[0];
+    setPostForm({ ...postForm, image: file });
+    if (file) {
+      setImagePreview(URL.createObjectURL(file)); // Show preview for new image
+    } else {
+      setImagePreview(postForm.imageUrl ? `http://localhost:5000${postForm.imageUrl}` : '');
+    }
+  };
+
+  const handleImageClear = () => {
+    setPostForm({ ...postForm, image: null, imageUrl: '' }); // Clear image and URL
+    setImagePreview(''); // Clear preview
   };
 
   return (
@@ -238,7 +252,7 @@ const AdminDashboard = () => {
             <div className="form-group">
               <label>Контент</label>
               <Editor
-                apiKey="no-api-key"
+                apiKey="r8dzuc4d4dm81ovnn3e6c2dromlmzfzi4tu6h10k5lpqt00h" // Replace with your TinyMCE API key
                 value={postForm.content}
                 onEditorChange={(content) => setPostForm({ ...postForm, content })}
                 init={{
@@ -266,8 +280,13 @@ const AdminDashboard = () => {
             <div className="form-group">
               <label>Зображення</label>
               <input type="file" accept="image/*" onChange={handleImageChange} />
-              {postForm.imageUrl && !postForm.image && (
-                <img src={postForm.imageUrl} alt="Current" className="image-preview" />
+              {imagePreview && (
+                <div className="image-preview-container">
+                  <img src={imagePreview} alt="Preview" className="image-preview" />
+                  <button type="button" className="image-clear-btn" onClick={handleImageClear}>
+                    ✕
+                  </button>
+                </div>
               )}
             </div>
             <div className="form-group">

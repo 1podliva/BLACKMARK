@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
+const path = require('path'); // Added import
 const Post = require('../models/Post');
 const Category = require('../models/Category');
 const router = express.Router();

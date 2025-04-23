@@ -132,11 +132,33 @@
     border-radius: 8px;
     background-color: #2C2C2C;
   }
-  
-  .image-preview {
-    max-width: 200px;
+  .image-preview-container {
+    position: relative;
     margin-top: 10px;
-    border-radius: 8px;
+  }
+
+.image-preview {
+  max-width: 200px;
+  border-radius: 8px;
+}
+.image-clear-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #CF6679;
+    color: #F8F9FA;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .image-clear-btn:hover {
+    background: #B55265;
   }
   
   .submit-btn {
