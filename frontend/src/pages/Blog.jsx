@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { convert } from 'html-to-text'; // Added for HTML stripping
+import { convert } from 'html-to-text';
 import './Blog.css';
 
 const Blog = () => {
@@ -17,8 +17,10 @@ const Blog = () => {
         const res = await fetch('http://localhost:5000/api/posts');
         if (!res.ok) throw new Error('Failed to fetch posts');
         const data = await res.json();
+        console.log('Fetched posts:', data);
         setPosts(data);
       } catch (err) {
+        console.error('Fetch posts error:', err);
         setError(err.message);
       }
     };
@@ -28,8 +30,10 @@ const Blog = () => {
         const res = await fetch('http://localhost:5000/api/categories');
         if (!res.ok) throw new Error('Failed to fetch categories');
         const data = await res.json();
+        console.log('Fetched categories:', data);
         setCategories([{ name: 'Усі' }, ...data]);
       } catch (err) {
+        console.error('Fetch categories error:', err);
         setError(err.message);
       }
     };
@@ -70,15 +74,19 @@ const Blog = () => {
 
         <div className="blog-controls">
           <div className="category-filter">
-            {categories.map((category) => (
-              <button
-                key={category._id || 'all'}
-                className={`category-btn ${selectedCategory === category.name ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(category.name)}
-              >
-                {category.name}
-              </button>
-            ))}
+            {categories.length > 0 ? (
+              categories.map((category) => (
+                <button
+                  key={category._id || 'all'}
+                  className={`category-btn ${selectedCategory === category.name ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory(category.name)}
+                >
+                  {category.name}
+                </button>
+              ))
+            ) : (
+              <p>Категорії не завантажено</p>
+            )}
           </div>
           <div className="search-bar">
             <input
@@ -93,12 +101,18 @@ const Blog = () => {
         {featuredPost && (
           <div className="featured-post">
             <div className="featured-image-container">
-              {featuredPost.image && (
-                <img
-                  src={`http://localhost:5000${featuredPost.image}`}
-                  alt={featuredPost.title}
-                  className="featured-image"
-                />
+              {featuredPost.image ? (
+                <>
+                  {console.log('Featured post image URL:', `http://localhost:5000${featuredPost.image}`)}
+                  <img
+                    src={`http://localhost:5000${featuredPost.image}`}
+                    alt={featuredPost.title}
+                    className="featured-image"
+                    onError={(e) => console.error('Image load error:', e, 'URL:', `http://localhost:5000${featuredPost.image}`)}
+                  />
+                </>
+              ) : (
+                <div className="image-placeholder">Немає зображення</div>
               )}
             </div>
             <div className="featured-content">
@@ -125,12 +139,18 @@ const Blog = () => {
               onClick={() => handlePostClick(post._id)}
             >
               <div className="post-image-container">
-                {post.image && (
-                  <img
-                    src={`http://localhost:5000${post.image}`}
-                    alt={post.title}
-                    className="post-image"
-                  />
+                {post.image ? (
+                  <>
+                    {console.log('Post image URL:', `http://localhost:5000${post.image}`)}
+                    <img
+                      src={`http://localhost:5000${post.image}`}
+                      alt={post.title}
+                      className="post-image"
+                      onError={(e) => console.error('Image load error:', e, 'URL:', `http://localhost:5000${post.image}`)}
+                    />
+                  </>
+                ) : (
+                  <div className="image-placeholder">Немає зображення</div>
                 )}
               </div>
               <div className="post-content">

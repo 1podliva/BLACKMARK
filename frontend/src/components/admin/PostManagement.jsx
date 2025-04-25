@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
-// import './AdminDashboard.css';
+
 
 const PostManagement = ({ posts, categories, setPosts, handleSubmit, setError, setSuccess, fetchPosts }) => {
   const [postForm, setPostForm] = useState({
@@ -14,10 +14,17 @@ const PostManagement = ({ posts, categories, setPosts, handleSubmit, setError, s
   });
   const [imagePreview, setImagePreview] = useState('');
 
+  console.log('PostManagement categories:', categories);
+
   const handlePostSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    if (!postForm.category) {
+      setError('Please select a category');
+      return;
+    }
 
     const formData = new FormData();
     formData.append('title', postForm.title);
@@ -26,6 +33,8 @@ const PostManagement = ({ posts, categories, setPosts, handleSubmit, setError, s
     formData.append('featured', postForm.featured);
     if (postForm.image) formData.append('image', postForm.image);
     if (postForm.id && postForm.imageUrl && !postForm.image) formData.append('image', postForm.imageUrl);
+
+    console.log('FormData entries:', Array.from(formData.entries()));
 
     try {
       const url = postForm.id ? `http://localhost:5000/api/posts/${postForm.id}` : 'http://localhost:5000/api/posts';
@@ -134,16 +143,20 @@ const PostManagement = ({ posts, categories, setPosts, handleSubmit, setError, s
         </div>
         <div className="form-group">
           <label>Категорія</label>
-          <select
-            value={postForm.category}
-            onChange={(e) => setPostForm({ ...postForm, category: e.target.value })}
-            required
-          >
-            <option value="">Оберіть категорію</option>
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat.name}>{cat.name}</option>
-            ))}
-          </select>
+          {categories && categories.length > 0 ? (
+            <select
+              value={postForm.category}
+              onChange={(e) => setPostForm({ ...postForm, category: e.target.value })}
+              required
+            >
+              <option value="">Оберіть категорію</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat.name}>{cat.name}</option>
+              ))}
+            </select>
+          ) : (
+            <p>Категорії не завантажено</p>
+          )}
         </div>
         <div className="form-group">
           <label>

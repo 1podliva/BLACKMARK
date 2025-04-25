@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const Gallery = require('../models/Gallery');
+const auth = require('../middleware/auth');
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
@@ -19,6 +20,7 @@ const upload = multer({ storage });
 router.get('/', async (req, res) => {
   try {
     const images = await Gallery.find();
+    console.log('Fetched gallery images:', images);
     res.json(images);
   } catch (err) {
     console.error('GET /api/gallery Error:', err);
@@ -27,11 +29,10 @@ router.get('/', async (req, res) => {
 });
 
 // Add new gallery image
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', auth, upload.single('image'), async (req, res) => {
   try {
     console.log('Request body:', req.body);
     const { alt, title, description } = req.body;
-    // Handle styles as an array from FormData
     const styles = Array.isArray(req.body.styles) ? req.body.styles : (req.body.styles ? [req.body.styles] : []);
     console.log('Parsed styles:', styles);
     if (!req.file) return res.status(400).json({ message: 'Image is required' });
@@ -53,13 +54,12 @@ router.post('/', upload.single('image'), async (req, res) => {
 });
 
 // Update gallery image
-router.put('/:id', upload.single('image'), async (req, res) => {
+router.put('/:id', auth, upload.single('image'), async (req, res) => {
   try {
     console.log('Request body:', req.body);
     const gallery = await Gallery.findById(req.params.id);
     if (!gallery) return res.status(404).json({ message: 'Image not found' });
     const { alt, title, description } = req.body;
-    // Handle styles as an array from FormData
     const styles = Array.isArray(req.body.styles) ? req.body.styles : (req.body.styles ? [req.body.styles] : gallery.styles);
     console.log('Parsed styles for update:', styles);
     gallery.alt = alt || gallery.alt;
@@ -68,6 +68,8 @@ router.put('/:id', upload.single('image'), async (req, res) => {
     gallery.styles = styles;
     if (req.file) {
       gallery.src = `/images/gallery/${req.file.filename}`;
+    } else if (req.body.image) {
+      gallery.src = req.body.image;
     }
     const updatedGallery = await gallery.save();
     console.log('Updated gallery item:', updatedGallery);
@@ -79,7 +81,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
 });
 
 // Delete gallery image
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
     const gallery = await Gallery.findById(req.params.id);
     if (!gallery) return res.status(404).json({ message: 'Image not found' });

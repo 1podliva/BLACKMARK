@@ -1,36 +1,25 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const Category = require('../models/Category');
 const Post = require('../models/Post');
 const router = express.Router();
-
-// Middleware to verify JWT
-const authMiddleware = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  if (!token) return res.status(401).json({ message: 'No token provided' });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    res.status(401).json({ message: 'Invalid token' });
-  }
-};
+const auth = require('../middleware/auth');
 
 // Get all categories
 router.get('/', async (req, res) => {
   try {
     const categories = await Category.find().sort({ createdAt: 1 });
+    console.log('Fetched categories:', categories);
     res.json(categories);
   } catch (err) {
+    console.error('GET /api/categories Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Create category (protected)
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', auth, async (req, res) => {
   const { name } = req.body;
+  console.log('POST /api/categories body:', req.body);
   if (!name) return res.status(400).json({ message: 'Category name is required' });
 
   try {
@@ -38,16 +27,19 @@ router.post('/', authMiddleware, async (req, res) => {
     if (existingCategory) return res.status(400).json({ message: 'Category already exists' });
 
     const category = new Category({ name });
-    await category.save();
+    const savedCategory = await category.save();
+    console.log('Saved category:', savedCategory);
     res.status(201).json(category);
   } catch (err) {
+    console.error('POST /api/categories Error:', err);
     res.status(400).json({ message: 'Error creating category' });
   }
 });
 
 // Update category (protected)
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
   const { name } = req.body;
+  console.log('PUT /api/categories/:id body:', req.body);
   if (!name) return res.status(400).json({ message: 'Category name is required' });
 
   try {
@@ -58,15 +50,17 @@ router.put('/:id', authMiddleware, async (req, res) => {
     if (existingCategory) return res.status(400).json({ message: 'Category name already exists' });
 
     category.name = name;
-    await category.save();
+    const updatedCategory = await category.save();
+    console.log('Updated category:', updatedCategory);
     res.json(category);
   } catch (err) {
+    console.error('PUT /api/categories Error:', err);
     res.status(400).json({ message: 'Error updating category' });
   }
 });
 
 // Delete category (protected)
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) return res.status(404).json({ message: 'Category not found' });
@@ -77,8 +71,10 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     }
 
     await Category.findByIdAndDelete(req.params.id);
+    console.log('Deleted category ID:', req.params.id);
     res.json({ message: 'Category deleted' });
   } catch (err) {
+    console.error('DELETE /api/categories Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });

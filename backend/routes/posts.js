@@ -1,15 +1,14 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const multer = require('multer');
-const path = require('path'); // Added import
-const Post = require('../models/Post');
-const Category = require('../models/Category');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const Post = require('../models/Post');
+const auth = require('../middleware/auth');
 
-// Multer setup
+// Multer setup for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, 'public/images/posts');
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -17,87 +16,92 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Middleware to verify JWT
-const authMiddleware = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  if (!token) return res.status(401).json({ message: 'No token provided' });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    res.status(401).json({ message: 'Invalid token' });
-  }
-};
-
 // Get all posts
 router.get('/', async (req, res) => {
   try {
-    const posts = await Post.find().sort({ createdAt: -1 });
+    const posts = await Post.find();
+    console.log('Fetched posts:', posts);
     res.json(posts);
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('GET /api/posts Error:', err);
+    res.status(500).json({ message: err.message });
   }
 });
 
-// Get single post
+// Get single post by ID
 router.get('/:id', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: 'Post not found' });
     res.json(post);
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('GET /api/posts/:id Error:', err);
+    res.status(500).json({ message: err.message });
   }
 });
 
-// Create post (protected)
-router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
-  const { title, content, category, featured } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : '';
-
+// Add new post (admin only)
+router.post('/', auth, upload.single('image'), async (req, res) => {
   try {
-    const categoryExists = await Category.findOne({ name: category });
-    if (!categoryExists) return res.status(400).json({ message: 'Category does not exist' });
-
-    const post = new Post({ title, content, image, category, featured });
-    await post.save();
-    res.status(201).json(post);
+    console.log('Request body:', req.body);
+    console.log('Uploaded file:', req.file);
+    const { title, content, category, featured } = req.body;
+    if (!title || !content || !category) {
+      return res.status(400).json({ message: 'Title, content, and category are required' });
+    }
+    const post = new Post({
+      title,
+      content,
+      category,
+      featured: featured === 'true' || featured === true,
+      image: req.file ? `/images/posts/${req.file.filename}` : null,
+    });
+    const newPost = await post.save();
+    console.log('Saved post:', newPost);
+    res.status(201).json(newPost);
   } catch (err) {
-    res.status(400).json({ message: err.message || 'Error creating post' });
+    console.error('POST /api/posts Error:', err);
+    res.status(400).json({ message: err.message });
   }
 });
 
-// Update post (protected)
-router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
-  const { title, content, category, featured } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : req.body.image;
-
+// Update post (admin only)
+router.put('/:id', auth, upload.single('image'), async (req, res) => {
   try {
-    const categoryExists = await Category.findOne({ name: category });
-    if (!categoryExists) return res.status(400).json({ message: 'Category does not exist' });
-
-    const post = await Post.findByIdAndUpdate(
-      req.params.id,
-      { title, content, image, category, featured },
-      { new: true, runValidators: true }
-    );
+    console.log('Request body:', req.body);
+    console.log('Uploaded file:', req.file);
+    const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: 'Post not found' });
-    res.json(post);
+    const { title, content, category, featured } = req.body;
+    post.title = title || post.title;
+    post.content = content || post.content;
+    post.category = category || post.category;
+    post.featured = featured !== undefined ? (featured === 'true' || featured === true) : post.featured;
+    if (req.file) {
+      post.image = `/images/posts/${req.file.filename}`;
+    } else if (req.body.image) {
+      post.image = req.body.image;
+    }
+    const updatedPost = await post.save();
+    console.log('Updated post:', updatedPost);
+    res.json(updatedPost);
   } catch (err) {
-    res.status(400).json({ message: err.message || 'Error updating post' });
+    console.error('PUT /api/posts Error:', err);
+    res.status(400).json({ message: err.message });
   }
 });
 
-// Delete post (protected)
-router.delete('/:id', authMiddleware, async (req, res) => {
+// Delete post (admin only)
+router.delete('/:id', auth, async (req, res) => {
   try {
-    const post = await Post.findByIdAndDelete(req.params.id);
+    const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: 'Post not found' });
+    await post.deleteOne();
+    console.log('Deleted post ID:', req.params.id);
     res.json({ message: 'Post deleted' });
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('DELETE /api/posts Error:', err);
+    res.status(500).json({ message: err.message });
   }
 });
 

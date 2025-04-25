@@ -18,27 +18,64 @@ const AdminDashboard = () => {
   const [galleryCategories, setGalleryCategories] = useState([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchGalleryImages();
-    fetchPosts();
-    fetchCategories();
-    fetchGalleryCategories();
-  }, []);
+  const token = localStorage.getItem('token');
 
-  const handleSubmit = async (url, method, data, isFormData = false) => {
+  useEffect(() => {
+    if (!token) {
+      navigate('/admin/login');
+      return;
+    }
+
+    const verifyToken = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/auth/verify', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) {
+          throw new Error('Invalid token');
+        }
+        console.log('Token verified successfully');
+        // Завантажуємо дані лише після успішної верифікації
+        fetchGalleryImages();
+        fetchPosts();
+        fetchCategories();
+        fetchGalleryCategories();
+      } catch (err) {
+        console.error('Token verification error:', err);
+        localStorage.removeItem('token');
+        navigate('/admin/login');
+      }
+    };
+
+    verifyToken();
+  }, [token, navigate]);
+
+  const handleSubmit = async (url, method, payload, isFormData = false) => {
+    setError('');
+    
+
     try {
-      const token = localStorage.getItem('token');
-      console.log('Request:', { url, method, token });
-      const headers = isFormData ? { Authorization: `Bearer ${token}` } : {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      };
-      const body = isFormData ? data : JSON.stringify(data);
+      console.log('Request:', { url, method, token, payload });
+      const headers = { Authorization: `Bearer ${token}` };
+      if (!isFormData) headers['Content-Type'] = 'application/json';
+      const body = isFormData ? payload : JSON.stringify(payload);
       const res = await fetch(url, { method, headers, body });
-      console.log('Response status:', res.status);
-      if (!res.ok) throw new Error((await res.json()).message || 'Failed to process request');
-      return await res.json();
+      console.log('Response status:', res.status, 'URL:', url);
+      if (!res.ok) {
+        const errorData = await res.json();
+        if (res.status === 401) {
+          localStorage.removeItem('token');
+          navigate('/admin/login');
+          throw new Error('Invalid token. Please log in again.');
+        }
+        throw new Error(errorData.message || 'Failed to process request');
+      }
+      const responseData = await res.json();
+      setSuccess('Operation successful!');
+      console.log('Response data:', responseData);
+      return responseData;
     } catch (err) {
+      console.error('Request error:', err);
       setError(err.message);
       throw err;
     }
@@ -46,23 +83,30 @@ const AdminDashboard = () => {
 
   const fetchGalleryImages = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/gallery');
+      const res = await fetch('http://localhost:5000/api/gallery', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) throw new Error('Failed to fetch gallery images');
       const data = await res.json();
-      console.log('Gallery images:', data);
+      console.log('Fetched gallery images:', data);
       setGalleryImages(data);
     } catch (err) {
+      console.error('Fetch gallery images error:', err);
       setError(err.message);
     }
   };
 
   const fetchPosts = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/posts');
+      const res = await fetch('http://localhost:5000/api/posts', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) throw new Error('Failed to fetch posts');
       const data = await res.json();
+      console.log('Fetched posts:', data);
       setPosts(data);
     } catch (err) {
+      console.error('Fetch posts error:', err);
       setError(err.message);
     }
   };
@@ -72,20 +116,25 @@ const AdminDashboard = () => {
       const res = await fetch('http://localhost:5000/api/categories');
       if (!res.ok) throw new Error('Failed to fetch categories');
       const data = await res.json();
+      console.log('Fetched post categories:', data);
       setCategories(data);
     } catch (err) {
+      console.error('Fetch categories error:', err);
       setError(err.message);
     }
   };
 
   const fetchGalleryCategories = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/gallery-categories');
+      const res = await fetch('http://localhost:5000/api/gallery-categories', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) throw new Error('Failed to fetch gallery categories');
       const data = await res.json();
-      console.log('Gallery categories:', data);
+      console.log('Fetched gallery categories:', data);
       setGalleryCategories(data);
     } catch (err) {
+      console.error('Fetch gallery categories error:', err);
       setError(err.message);
     }
   };

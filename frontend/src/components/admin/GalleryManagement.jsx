@@ -31,7 +31,7 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
     formData.append('title', imageForm.title);
     formData.append('description', imageForm.description);
     imageForm.styles.forEach(style => {
-      formData.append('styles', style); // Змінено з 'styles[]' на 'styles'
+      formData.append('styles', style);
       console.log('Appending style:', style);
     });
     if (imageForm.image) formData.append('image', imageForm.image);
@@ -135,11 +135,15 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
         </div>
         <div className="form-group">
           <label>Категорії (утримуйте Ctrl для вибору кількох)</label>
-          <select multiple value={imageForm.styles} onChange={handleStylesChange} required>
-            {galleryCategories.map(category => (
-              <option key={category._id} value={category.name}>{category.name}</option>
-            ))}
-          </select>
+          {galleryCategories && galleryCategories.length > 0 ? (
+            <select multiple value={imageForm.styles} onChange={handleStylesChange} required>
+              {galleryCategories.map(category => (
+                <option key={category._id} value={category.name}>{category.name}</option>
+              ))}
+            </select>
+          ) : (
+            <p>Категорії не завантажено</p>
+          )}
         </div>
         <div className="form-group">
           <label>Alt текст</label>
@@ -156,7 +160,7 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
       </form>
 
       <div className="gallery-tabs">
-        {['All', ...galleryCategories.map(cat => cat.name)].map(style => (
+        {['All', ...(galleryCategories || []).map(cat => cat.name)].map(style => (
           <button
             key={style}
             className={`gallery-tab-btn ${activeStyle === style ? 'active' : ''}`}

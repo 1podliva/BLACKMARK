@@ -2,7 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
-
+const auth = require('../middleware/auth');
 // Login
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
@@ -20,5 +20,17 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// Verify token
+router.get('/verify', auth, async (req, res) => {
+  try {
+    // Якщо middleware auth пройшов, токен валідний
+    res.json({ message: 'Token is valid' });
+  } catch (err) {
+    console.error('GET /api/auth/verify Error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 module.exports = router;
