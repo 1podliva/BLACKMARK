@@ -39,7 +39,7 @@ const AdminLogin = () => {
           </h1>
           <div className="divider"></div>
           <p className="intro-text">
-            Увійдіть, щоб керувати блогом.
+            Увійдіть, щоб мати доступ.
           </p>
         </div>
 

@@ -1,74 +1,92 @@
 const express = require('express');
 const router = express.Router();
-const Gallery = require('../models/Gallery');
 const multer = require('multer');
 const path = require('path');
+const Gallery = require('../models/Gallery');
 
-// Multer setup for image uploads
+// Multer setup for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'public/images/gallery');
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
-  }
+  },
 });
 const upload = multer({ storage });
 
 // Get all gallery images
 router.get('/', async (req, res) => {
   try {
-    const images = await Gallery.find().sort({ createdAt: -1 });
+    const images = await Gallery.find();
     res.json(images);
   } catch (err) {
+    console.error('GET /api/gallery Error:', err);
     res.status(500).json({ message: err.message });
   }
 });
 
-// Add new image
+// Add new gallery image
 router.post('/', upload.single('image'), async (req, res) => {
   try {
-    const image = new Gallery({
+    console.log('Request body:', req.body);
+    const { alt, title, description } = req.body;
+    // Handle styles as an array from FormData
+    const styles = Array.isArray(req.body.styles) ? req.body.styles : (req.body.styles ? [req.body.styles] : []);
+    console.log('Parsed styles:', styles);
+    if (!req.file) return res.status(400).json({ message: 'Image is required' });
+    if (!styles.length) return res.status(400).json({ message: 'At least one category is required' });
+    const gallery = new Gallery({
       src: `/images/gallery/${req.file.filename}`,
-      alt: req.body.alt,
-      title: req.body.title,
-      description: req.body.description,
-      style: req.body.style
+      alt,
+      title,
+      description,
+      styles,
     });
-    const newImage = await image.save();
-    res.status(201).json(newImage);
+    const newGallery = await gallery.save();
+    console.log('Saved gallery item:', newGallery);
+    res.status(201).json(newGallery);
   } catch (err) {
+    console.error('POST /api/gallery Error:', err);
     res.status(400).json({ message: err.message });
   }
 });
 
-// Update image
+// Update gallery image
 router.put('/:id', upload.single('image'), async (req, res) => {
   try {
-    const image = await Gallery.findById(req.params.id);
-    if (!image) return res.status(404).json({ message: 'Image not found' });
-
-    image.alt = req.body.alt || image.alt;
-    image.title = req.body.title || image.title;
-    image.description = req.body.description || image.description;
-    image.style = req.body.style || image.style;
-    if (req.file) image.src = `/images/gallery/${req.file.filename}`;
-
-    const updatedImage = await image.save();
-    res.json(updatedImage);
+    console.log('Request body:', req.body);
+    const gallery = await Gallery.findById(req.params.id);
+    if (!gallery) return res.status(404).json({ message: 'Image not found' });
+    const { alt, title, description } = req.body;
+    // Handle styles as an array from FormData
+    const styles = Array.isArray(req.body.styles) ? req.body.styles : (req.body.styles ? [req.body.styles] : gallery.styles);
+    console.log('Parsed styles for update:', styles);
+    gallery.alt = alt || gallery.alt;
+    gallery.title = title || gallery.title;
+    gallery.description = description || gallery.description;
+    gallery.styles = styles;
+    if (req.file) {
+      gallery.src = `/images/gallery/${req.file.filename}`;
+    }
+    const updatedGallery = await gallery.save();
+    console.log('Updated gallery item:', updatedGallery);
+    res.json(updatedGallery);
   } catch (err) {
+    console.error('PUT /api/gallery Error:', err);
     res.status(400).json({ message: err.message });
   }
 });
 
-// Delete image
+// Delete gallery image
 router.delete('/:id', async (req, res) => {
   try {
-    const image = await Gallery.findById(req.params.id);
-    if (!image) return res.status(404).json({ message: 'Image not found' });
-    await image.remove();
+    const gallery = await Gallery.findById(req.params.id);
+    if (!gallery) return res.status(404).json({ message: 'Image not found' });
+    await gallery.deleteOne();
     res.json({ message: 'Image deleted' });
   } catch (err) {
+    console.error('DELETE /api/gallery Error:', err);
     res.status(500).json({ message: err.message });
   }
 });

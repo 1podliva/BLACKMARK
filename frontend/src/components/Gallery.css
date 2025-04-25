@@ -4,12 +4,23 @@
     --purple-hover: #7F00D4;
     --soft-white: #F8F9FA;
     --light-gray: #D1D5DB;
+    --navy-gray: #2C2C2C;
+    --shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   }
   
-  .gallery-page {
-    padding: 120px 10%;
+  .gallery {
     background-color: var(--dark-bg);
     color: var(--soft-white);
+    padding-bottom: 60px;
+    overflow-x: hidden; /* Запобігає горизонтальному скролу */
+  }
+  
+  .gallery-header {
+    display: flex;
+    justify-content: center;
+    padding: 120px 10%;
+    padding-bottom: 0;
+    background-color: var(--dark-bg);
     position: relative;
     overflow: hidden;
   }
@@ -17,7 +28,8 @@
   .gallery-content {
     max-width: 800px;
     width: 100%;
-    margin-bottom: 60px;
+    position: relative;
+    z-index: 2;
   }
   
   .section-subtitle {
@@ -60,39 +72,63 @@
     margin-bottom: 60px;
   }
   
-  .gallery-filter {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 40px;
+  .error-message {
+    color: #ff4d4d;
+    text-align: center;
+    margin: 20px 0;
   }
   
-  .filter-btn {
+  .no-images {
+    color: var(--light-gray);
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .gallery-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 30px auto;
+    justify-content: center;
+    max-width: 1200px;
+  }
+  
+  .gallery-tab-btn {
     padding: 10px 20px;
-    background-color: transparent;
-    border: 2px solid var(--purple-accent);
-    border-radius: 8px;
+    background-color: var(--navy-gray);
+    border: 1px solid var(--light-gray);
+    border-radius: 20px;
     color: var(--soft-white);
-    font-size: 1rem;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.3s ease;
   }
   
-  .filter-btn:hover {
+  .gallery-tab-btn:hover {
+    background-color: var(--purple-hover);
+    border-color: var(--purple-accent);
+  }
+  
+  .gallery-tab-btn.active {
     background-color: var(--purple-accent);
+    border-color: var(--purple-accent);
     color: var(--soft-white);
   }
   
-  .filter-btn.active {
-    background-color: var(--purple-accent);
-    color: var(--soft-white);
+  .gallery-fullwidth {
+    max-width: 1200px; /* Обмежує ширину для відповідності .gallery-content */
+    margin: 0 auto; /* Центрує блок */
+    background-color: var(--dark-bg);
   }
   
   .gallery-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 60px;
+    gap: 3px; /* Зменшено відступи між зображеннями до 3px */
     justify-content: center;
+    padding: 60px 0;
+    max-width: 100%; /* Запобігає виходу за межі контейнера */
+    box-sizing: border-box;
   }
   
   .gallery-item {
@@ -101,12 +137,17 @@
     flex-direction: column;
     border-radius: 1rem;
     overflow: hidden;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow);
     position: relative;
     transition: transform 0.3s ease-in-out;
+    box-sizing: border-box;
   }
   
-  .gallery-item img {
+  .gallery-item:hover {
+    transform: translateY(-5px);
+  }
+  
+  .gallery-image {
     width: 100%;
     height: 250px;
     object-fit: cover;
@@ -114,12 +155,12 @@
     transition: filter 0.3s ease-in-out;
   }
   
-  .gallery-item:hover img {
+  .gallery-item:hover .gallery-image {
     filter: blur(0);
   }
   
   .gallery-item:hover::before {
-    content: " ";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
@@ -172,33 +213,22 @@
     -webkit-box-orient: vertical;
   }
   
-  .no-results {
-    font-size: 1.2rem;
-    color: var(--light-gray);
-    text-align: center;
-    margin: 40px 0;
-  }
-  
   @media (max-width: 768px) {
-    .gallery-page {
+    .gallery-header {
       padding: 80px 5%;
     }
   
-    .gallery-content {
-      margin-bottom: 40px;
-    }
-  
     .gallery-grid {
-      gap: 20px;
+      gap: 3px; /* Зменшено відступи між зображеннями до 3px для мобільних */
+      padding: 40px 0;
     }
   
     .gallery-item {
       flex: 0 0 250px;
     }
   
-    .intro-text {
-      font-size: 1rem;
-      margin-bottom: 40px;
+    .gallery-image {
+      height: 200px;
     }
   
     .section-subtitle {
@@ -209,16 +239,16 @@
       font-size: clamp(2rem, 4vw, 3rem);
     }
   
+    .intro-text {
+      font-size: 1rem;
+      margin-bottom: 40px;
+    }
+  
     .gallery-info h3 {
       font-size: 0.9rem;
     }
   
     .gallery-info p {
       font-size: 0.8rem;
-    }
-  
-    .filter-btn {
-      font-size: 0.9rem;
-      padding: 8px 16px;
     }
   }

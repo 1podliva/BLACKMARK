@@ -94,9 +94,9 @@ function App() {
         path="/admin"
         element={
           <ProtectedRoute>
-            <Header />
+            {/* <Header /> */}
             <AdminDashboard />
-            <Footer />
+            {/* <Footer /> */}
           </ProtectedRoute>
         }
       />

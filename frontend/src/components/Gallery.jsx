@@ -3,75 +3,91 @@ import './Gallery.css';
 
 const Gallery = () => {
   const [images, setImages] = useState([]);
-  const [filteredImages, setFilteredImages] = useState([]);
-  const [styles, setStyles] = useState([]);
-  const [selectedStyle, setSelectedStyle] = useState('All');
+  const [categories, setCategories] = useState(['All']);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [error, setError] = useState('');
 
-  // Fetch images from backend
   useEffect(() => {
-    fetch('http://localhost:5000/api/gallery')
-      .then(res => res.json())
-      .then(data => {
+    const fetchImages = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/gallery');
+        if (!res.ok) throw new Error('Failed to fetch gallery images');
+        const data = await res.json();
+        console.log('Gallery images:', data);
         setImages(data);
-        setFilteredImages(data);
-        // Extract unique styles
-        const uniqueStyles = ['All', ...new Set(data.map(img => img.style))];
-        setStyles(uniqueStyles);
-      })
-      .catch(err => console.error(err));
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/gallery-categories');
+        if (!res.ok) throw new Error('Failed to fetch gallery categories');
+        const data = await res.json();
+        console.log('Gallery categories:', data);
+        setCategories(['All', ...data.map(cat => cat.name)]);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    fetchImages();
+    fetchCategories();
   }, []);
 
-  // Filter images by style
-  useEffect(() => {
-    if (selectedStyle === 'All') {
-      setFilteredImages(images);
-    } else {
-      setFilteredImages(images.filter(img => img.style === selectedStyle));
-    }
-  }, [selectedStyle, images]);
+  const filteredImages = images.filter(img => {
+    const styles = Array.isArray(img.styles) ? img.styles.map(s => s.trim()) : (img.style ? [img.style.trim()] : []);
+    console.log(`Filtering image: ${img.title}, styles: ${styles}, activeCategory: ${activeCategory}`);
+    return activeCategory === 'All' || styles.includes(activeCategory.trim());
+  });
 
   return (
-    <section className="gallery-page">
-      <div className="gallery-content">
-        <h2 className="section-subtitle">Галерея</h2>
-        <h1 className="main-title">
-          <span className="first-line">Наші</span>
-          <span className="second-line">Татуювання</span>
-        </h1>
-        <div className="divider"></div>
-        <p className="intro-text">
-          Перегляньте нашу колекцію унікальних татуювань, створених з душею та майстерністю.
-        </p>
-      </div>
+    <div className="gallery">
+      <section className="gallery-header">
+        <div className="gallery-content">
+          <h2 className="section-subtitle">Наші роботи</h2>
+          <h1 className="main-title">
+            <span className="first-line">Мистецтво</span>
+            <span className="second-line">На твоїй шкірі</span>
+          </h1>
+          <div className="divider"></div>
+          <p className="intro-text">
+            Ознайомтеся з нашою колекцією унікальних татуювань, створених з душею.
+          </p>
+        </div>
+      </section>
 
-      <div className="gallery-filter">
-        {styles.map(style => (
+      <div className="gallery-tabs">
+        {categories.map(category => (
           <button
-            key={style}
-            className={`filter-btn ${selectedStyle === style ? 'active' : ''}`}
-            onClick={() => setSelectedStyle(style)}
+            key={category}
+            className={`gallery-tab-btn ${activeCategory === category ? 'active' : ''}`}
+            onClick={() => setActiveCategory(category)}
           >
-            {style}
+            {category}
           </button>
         ))}
       </div>
 
-      <div className="gallery-grid">
-        {filteredImages.length > 0 ? (
-          filteredImages.map((img, index) => (
-            <div className={`gallery-item item-${index + 1}`} key={img._id}>
-              <img src={img.src} alt={img.alt} />
+      {error && <p className="error-message">{error}</p>}
+      {filteredImages.length === 0 && activeCategory !== 'All' && (
+        <p className="no-images">Немає зображень у категорії "{activeCategory}"</p>
+      )}
+
+      <div className="gallery-fullwidth">
+        <div className="gallery-grid">
+          {filteredImages.map(img => (
+            <div key={img._id} className="gallery-item">
+              <img src={`http://localhost:5000${img.src}`} alt={img.alt} className="gallery-image" />
               <div className="gallery-info">
                 <h3>{img.title}</h3>
                 <p>{img.description}</p>
+                <p><strong>Категорії:</strong> {(img.styles?.length ? img.styles : [img.style]).filter(Boolean).join(', ')}</p>
               </div>
             </div>
-          ))
-        ) : (
-          <p className="no-results">Немає татуювань у цій категорії.</p>
-        )}
+          ))}
+        </div>
       </div>
-    </section>
+    </div>
   );
 };
 

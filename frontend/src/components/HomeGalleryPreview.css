@@ -59,7 +59,7 @@
 .gallery-preview-grid {
   display: flex;
   flex-wrap: wrap; /* Ensures items stay in a single row */
-  gap: 60px; /* Matches About's features gap */
+  gap: 30px; /* Matches About's features gap */
 
   padding-bottom: 60px;
   /* padding: 60px 0; Matches About's section spacing */
