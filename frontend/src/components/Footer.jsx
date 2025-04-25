@@ -1,7 +1,28 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Footer.css';
 
 export default function Footer() {
+  const navigate = useNavigate();
+
+  const handleContactsClick = (e) => {
+    e.preventDefault();
+    if (window.location.pathname !== '/') {
+      navigate('/#contacts');
+      setTimeout(() => {
+        const contactsSection = document.getElementById('contacts');
+        if (contactsSection) {
+          contactsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      const contactsSection = document.getElementById('contacts');
+      if (contactsSection) {
+        contactsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
   return (
     <footer className="footer-wrapper">
       <div className="footer">
@@ -11,11 +32,13 @@ export default function Footer() {
         </div>
         <div className="footer-column">
           <h3>Швидкі посилання</h3>
-          <a href="#home">Головна</a>
-          <a href="#about">Про нас</a>
-          <a href="#gallery">Галерея</a>
-          <a href="#masters">Майстри</a>
-          <a href="#contacts">Контакти</a>
+          <Link to="/">Головна</Link>
+          <Link to="/about">Про нас</Link>
+          <Link to="/gallery">Галерея</Link>
+          <Link to="/blog">Блог</Link>
+          <a href="#contacts" onClick={handleContactsClick}>
+            Контакти
+          </a>
         </div>
         <div className="footer-column">
           <h3>Графік роботи</h3>
@@ -34,7 +57,17 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <p>© 2025 BLACKMARK. Всі права захищені.</p>
+        <p>
+          © 2025{' '}
+          {localStorage.getItem('token') ? (
+            <Link to="/admin" className="footer-admin-link">
+              BLACKMARK
+            </Link>
+          ) : (
+            'BLACKMARK'
+          )}
+          . Всі права захищені.
+        </p>
       </div>
     </footer>
   );

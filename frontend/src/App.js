@@ -10,7 +10,7 @@ import HomeGalleryPreview from './components/HomeGalleryPreview';
 import Footer from './components/Footer';
 import Blog from './pages/Blog';
 import BlogPost from './components/BlogPost';
-import Gallery from './pages/Gallery';
+import Gallery from './components/Gallery';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';

@@ -51,3 +51,7 @@
   /* font-size: 14px; */
   color: #aaa;
 }
+.footer-admin-link {
+  color: var(--purple-accent, #BB86FC);
+  text-decoration: none;
+}

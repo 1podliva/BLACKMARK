@@ -24,19 +24,22 @@ const BlogIntro = () => {
           </p>
         </div>
 
-        <div className="blog-intro-grid">
-          <div className="blog-text-block">
-            <p className="blog-description">
-              Від порад щодо догляду за татуюваннями до розповідей про створення унікальних дизайнів — наш блог надихає та інформує.
-            </p>
-            <button className="blog-btn" onClick={goToBlogPage}>
-              Перейти до блогу
-            </button>
-          </div>
-          <div className="blog-image-container">
-            <img src="/images/laptop-mockup.png" alt="Laptop with blog mockup" className="blog-image" />
-          </div>
+        <div className="blog-text-block">
+          <p className="blog-description">
+            Від порад щодо догляду за татуюваннями до розповідей про створення унікальних дизайнів — наш блог надихає та інформує.
+          </p>
+          <button className="blog-btn" onClick={goToBlogPage}>
+            Перейти до блогу
+          </button>
         </div>
+      </div>
+
+      <div className="background-macbook-container">
+        <img
+          src="/images/macbook-blog.png"
+          alt="MacBook with blog"
+          className="macbook-image"
+        />
       </div>
     </section>
   );

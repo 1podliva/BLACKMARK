@@ -7,7 +7,7 @@ const path = require('path');
 const postRoutes = require('./routes/posts');
 const authRoutes = require('./routes/auth');
 const categoryRoutes = require('./routes/categories');
-
+const galleryRoutes = require('./routes/gallery');
 dotenv.config();
 
 const app = express();
@@ -16,6 +16,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/gallery', galleryRoutes);
 
 // Multer setup
 const storage = multer.diskStorage({

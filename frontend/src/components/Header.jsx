@@ -38,34 +38,22 @@ const Header = () => {
         <div className="nav-links-container">
           <ul className="nav-links">
             <li>
-              <Link
-                to="/"
-                className={getActiveClass('/')}
-              >
+              <Link to="/" className={getActiveClass('/')}>
                 Головна
               </Link>
             </li>
             <li>
-              <Link
-                to="/about"
-                className={getActiveClass('/about')}
-              >
+              <Link to="/about" className={getActiveClass('/about')}>
                 Про нас
               </Link>
             </li>
             <li>
-              <Link
-                to="/gallery"
-                className={getActiveClass('/gallery')}
-              >
+              <Link to="/gallery" className={getActiveClass('/gallery')}>
                 Галерея
               </Link>
             </li>
             <li>
-              <Link
-                to="/blog"
-                className={getActiveClass('/blog')}
-              >
+              <Link to="/blog" className={getActiveClass('/blog')}>
                 Блог
               </Link>
             </li>
@@ -78,25 +66,12 @@ const Header = () => {
                 Контакти
               </a>
             </li>
-            {localStorage.getItem('token') && (
-              <li>
-                <Link
-                  to="/admin"
-                  className={getActiveClass('/admin')}
-                >
-                  Адмін
-                </Link>
-              </li>
-            )}
           </ul>
         </div>
 
         {/* Профіль */}
         <div className="profile">
-          <Link
-            to="/profile"
-            className={getActiveClass('/profile')}
-          >
+          <Link to="/profile" className={getActiveClass('/profile')}>
             Профіль
           </Link>
         </div>
