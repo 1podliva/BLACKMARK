@@ -1,24 +1,17 @@
-import React, { useState } from 'react';
-
+import React from 'react';
 
 const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setSuccess, fetchBookings }) => {
-  const [statusForm, setStatusForm] = useState({ id: '', status: '', comment: '' });
-
-  const handleStatusSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+  const handleStatusChange = async (bookingId, status) => {
     try {
-      await handleSubmit(
-        `http://localhost:5000/api/bookings/${statusForm.id}`,
+      const data = await handleSubmit(
+        `http://localhost:5000/api/bookings/${bookingId}/status`,
         'PUT',
-        { status: statusForm.status, comment: statusForm.comment }
+        { status }
       );
+      setBookings(bookings.map((b) => (b._id === bookingId ? data : b)));
       setSuccess('Статус оновлено!');
-      setStatusForm({ id: '', status: '', comment: '' });
-      fetchBookings();
     } catch (err) {
-      // Помилка встановлюється в handleSubmit
+      // Помилка вже оброблена в handleSubmit
     }
   };
 
@@ -29,7 +22,7 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
         <table className="bookings-table">
           <thead>
             <tr>
-              <th>Клієнт</th>
+              <th>Користувач</th>
               <th>Майстер</th>
               <th>Дата</th>
               <th>Час</th>
@@ -41,20 +34,21 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
           <tbody>
             {bookings.map((booking) => (
               <tr key={booking._id}>
-                <td>{`${booking.userId.firstName} ${booking.userId.lastName}`}</td>
+                <td>{booking.user ? `${booking.user.firstName} ${booking.user.lastName}` : 'Невідомо'}</td>
                 <td>{booking.artist}</td>
                 <td>{new Date(booking.date).toLocaleDateString()}</td>
                 <td>{booking.time}</td>
                 <td>{booking.description || 'Немає'}</td>
                 <td>{booking.status}</td>
                 <td>
-                  <button
-                    onClick={() =>
-                      setStatusForm({ id: booking._id, status: booking.status, comment: '' })
-                    }
+                  <select
+                    value={booking.status}
+                    onChange={(e) => handleStatusChange(booking._id, e.target.value)}
                   >
-                    Оновити
-                  </button>
+                    <option value="pending">Очікує</option>
+                    <option value="confirmed">Підтверджено</option>
+                    <option value="cancelled">Скасовано</option>
+                  </select>
                 </td>
               </tr>
             ))}
@@ -62,41 +56,6 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
         </table>
       ) : (
         <p>Бронювань немає</p>
-      )}
-
-      {statusForm.id && (
-        <form onSubmit={handleStatusSubmit} className="admin-form">
-          <h4>Оновити статус бронювання</h4>
-          <div className="form-group">
-            <label>Статус</label>
-            <select
-              value={statusForm.status}
-              onChange={(e) => setStatusForm({ ...statusForm, status: e.target.value })}
-              required
-            >
-              <option value="pending">Очікує</option>
-              <option value="confirmed">Підтверджено</option>
-              <option value="cancelled">Скасовано</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Коментар</label>
-            <textarea
-              value={statusForm.comment}
-              onChange={(e) => setStatusForm({ ...statusForm, comment: e.target.value })}
-            />
-          </div>
-          <button type="submit" className="submit-btn">
-            Зберегти
-          </button>
-          <button
-            type="button"
-            className="cancel-btn"
-            onClick={() => setStatusForm({ id: '', status: '', comment: '' })}
-          >
-            Скасувати
-          </button>
-        </form>
       )}
     </div>
   );

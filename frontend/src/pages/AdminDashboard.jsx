@@ -1,55 +1,63 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaTimes, FaSignOutAlt, FaImage, FaFolder, FaCalendar } from 'react-icons/fa';
+import { FaBars, FaTimes, FaSignOutAlt, FaImage, FaFolder, FaCalendar, FaBell, FaUser } from 'react-icons/fa';
 import GalleryManagement from '../components/admin/GalleryManagement';
 import PostManagement from '../components/admin/PostManagement';
 import CategoryManagement from '../components/admin/CategoryManagement';
 import GalleryCategoryManagement from '../components/admin/GalleryCategoryManagement';
 import BookingManagement from '../components/admin/BookingManagement';
+import NotificationManagement from '../components/admin/NotificationManagement';
+import ArtistManagement from '../components/admin/ArtistManagement';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-  const [activeSection, setActiveSection] = useState('gallery');
+  const [activeSection, setActiveSection] = useState('notifications');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(true);
   const [galleryImages, setGalleryImages] = useState([]);
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [galleryCategories, setGalleryCategories] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [artists, setArtists] = useState([]);
   const navigate = useNavigate();
-
   const token = localStorage.getItem('token');
 
   useEffect(() => {
     if (!token) {
-      navigate('/admin/login');
+      navigate('/');
       return;
     }
 
-    const verifyToken = async () => {
+    const verifyAdminAccess = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/auth/verify', {
+        setLoading(true);
+        const res = await fetch('http://localhost:5000/api/auth/check-admin', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!res.ok) {
-          throw new Error('Invalid token');
-        }
-        console.log('Token verified successfully');
-        fetchGalleryImages();
-        fetchPosts();
-        fetchCategories();
-        fetchGalleryCategories();
-        fetchBookings();
+        if (!res.ok) throw new Error('Доступ заборонено: тільки для адміністраторів');
+        console.log('Адмін-доступ підтверджено');
+        await Promise.all([
+          fetchGalleryImages(),
+          fetchPosts(),
+          fetchCategories(),
+          fetchGalleryCategories(),
+          fetchBookings(),
+          fetchArtists(),
+        ]);
       } catch (err) {
-        console.error('Token verification error:', err);
+        console.error('Помилка перевірки адмін-доступу:', err);
+        setError(err.message);
         localStorage.removeItem('token');
-        navigate('/admin/login');
+        setTimeout(() => navigate('/'), 3000);
+      } finally {
+        setLoading(false);
       }
     };
 
-    verifyToken();
+    verifyAdminAccess();
   }, [token, navigate]);
 
   const handleSubmit = async (url, method, payload, isFormData = false) => {
@@ -64,20 +72,22 @@ const AdminDashboard = () => {
       console.log('Response status:', res.status, 'URL:', url);
       if (!res.ok) {
         const errorData = await res.json();
-        if (res.status === 401) {
+        if (res.status === 401 || res.status === 403) {
           localStorage.removeItem('token');
-          navigate('/admin/login');
-          throw new Error('Invalid token. Please log in again.');
+          navigate('/');
+          throw new Error('Доступ заборонено. Увійдіть як адміністратор.');
         }
-        throw new Error(errorData.message || 'Failed to process request');
+        throw new Error(errorData.message || 'Не вдалося обробити запит');
       }
       const responseData = await res.json();
-      setSuccess('Operation successful!');
+      setSuccess('Операція успішна!');
+      setTimeout(() => setSuccess(''), 3000);
       console.log('Response data:', responseData);
       return responseData;
     } catch (err) {
       console.error('Request error:', err);
       setError(err.message);
+      setTimeout(() => setError(''), 3000);
       throw err;
     }
   };
@@ -87,12 +97,10 @@ const AdminDashboard = () => {
       const res = await fetch('http://localhost:5000/api/gallery', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Failed to fetch gallery images');
+      if (!res.ok) throw new Error('Не вдалося отримати зображення галереї');
       const data = await res.json();
-      console.log('Fetched gallery images:', data);
       setGalleryImages(data);
     } catch (err) {
-      console.error('Fetch gallery images error:', err);
       setError(err.message);
     }
   };
@@ -102,12 +110,10 @@ const AdminDashboard = () => {
       const res = await fetch('http://localhost:5000/api/posts', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Failed to fetch posts');
+      if (!res.ok) throw new Error('Не вдалося отримати пости');
       const data = await res.json();
-      console.log('Fetched posts:', data);
       setPosts(data);
     } catch (err) {
-      console.error('Fetch posts error:', err);
       setError(err.message);
     }
   };
@@ -115,12 +121,10 @@ const AdminDashboard = () => {
   const fetchCategories = async () => {
     try {
       const res = await fetch('http://localhost:5000/api/categories');
-      if (!res.ok) throw new Error('Failed to fetch categories');
+      if (!res.ok) throw new Error('Не вдалося отримати категорії');
       const data = await res.json();
-      console.log('Fetched post categories:', data);
       setCategories(data);
     } catch (err) {
-      console.error('Fetch categories error:', err);
       setError(err.message);
     }
   };
@@ -130,12 +134,10 @@ const AdminDashboard = () => {
       const res = await fetch('http://localhost:5000/api/gallery-categories', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Failed to fetch gallery categories');
+      if (!res.ok) throw new Error('Не вдалося отримати категорії галереї');
       const data = await res.json();
-      console.log('Fetched gallery categories:', data);
       setGalleryCategories(data);
     } catch (err) {
-      console.error('Fetch gallery categories error:', err);
       setError(err.message);
     }
   };
@@ -145,35 +147,53 @@ const AdminDashboard = () => {
       const res = await fetch('http://localhost:5000/api/bookings/all', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Failed to fetch bookings');
+      if (!res.ok) throw new Error('Не вдалося отримати бронювання');
       const data = await res.json();
-      console.log('Fetched bookings:', data);
       setBookings(data);
     } catch (err) {
-      console.error('Fetch bookings error:', err);
+      setError(err.message);
+    }
+  };
+
+  const fetchArtists = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/artists', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Не вдалося отримати майстрів');
+      const data = await res.json();
+      setArtists(data);
+    } catch (err) {
       setError(err.message);
     }
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    navigate('/admin/login');
+    setSuccess('Вихід виконано! Перенаправлення...');
+    setTimeout(() => navigate('/'), 3000);
   };
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  if (loading) {
+    return <div className="loading">Завантаження...</div>;
+  }
 
   return (
     <div className="admin-dashboard">
       <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <h2>Адмін Панель</h2>
-          <button className="sidebar-toggle" onClick={toggleSidebar}>
+          <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? <FaTimes /> : <FaBars />}
           </button>
         </div>
         <nav className="sidebar-nav">
+          <button
+            className={`sidebar-item ${activeSection === 'notifications' ? 'active' : ''}`}
+            onClick={() => { setActiveSection('notifications'); setSidebarOpen(false); }}
+          >
+            <FaBell className="sidebar-icon" /> Сповіщення
+          </button>
           <button
             className={`sidebar-item ${activeSection === 'gallery' ? 'active' : ''}`}
             onClick={() => { setActiveSection('gallery'); setSidebarOpen(false); }}
@@ -204,28 +224,26 @@ const AdminDashboard = () => {
           >
             <FaCalendar className="sidebar-icon" /> Бронювання
           </button>
+          <button
+            className={`sidebar-item ${activeSection === 'artists' ? 'active' : ''}`}
+            onClick={() => { setActiveSection('artists'); setSidebarOpen(false); }}
+          >
+            <FaUser className="sidebar-icon" /> Майстри
+          </button>
           <button className="sidebar-item logout" onClick={handleLogout}>
             <FaSignOutAlt className="sidebar-icon" /> Вийти
           </button>
         </nav>
       </div>
       <div className={`admin-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
-        <button className="sidebar-toggle" onClick={toggleSidebar}>
+        <button className="sidebar-toggle mobile" onClick={() => setSidebarOpen(!sidebarOpen)}>
           <FaBars />
         </button>
-        <div className="intro-block">
-          <p className="section-subtitle">Адмін Панель</p>
-          <h1 className="main-title">
-            <span className="first-line">Керування</span>
-            <span className="second-line">BLACKMARK</span>
-          </h1>
-          <div className="divider"></div>
-          <p className="intro-text">
-            Ласкаво просимо до адмін-панелі BLACKMARK. Тут ви можете керувати галереєю, постами, категоріями та бронюваннями.
-          </p>
-        </div>
         {error && <p className="error-message">{error}</p>}
         {success && <p className="success-message">{success}</p>}
+        {activeSection === 'notifications' && (
+          <NotificationManagement token={token} setError={setError} setSuccess={setSuccess} />
+        )}
         {activeSection === 'gallery' && (
           <GalleryManagement
             galleryImages={galleryImages}
@@ -276,6 +294,16 @@ const AdminDashboard = () => {
             setError={setError}
             setSuccess={setSuccess}
             fetchBookings={fetchBookings}
+          />
+        )}
+        {activeSection === 'artists' && (
+          <ArtistManagement
+            artists={artists}
+            setArtists={setArtists}
+            handleSubmit={handleSubmit}
+            setError={setError}
+            setSuccess={setSuccess}
+            fetchArtists={fetchArtists}
           />
         )}
       </div>

@@ -5,7 +5,8 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  avatar: { type: String, default: null }, // Наприклад, "/images/avatars/123.jpg"
+  avatar: { type: String, default: null },
+  role: { type: String, enum: ['user', 'admin'], default: 'user' }, // Додаємо роль
   createdAt: { type: Date, default: Date.now },
 });
 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './CategoryManagement.css';
 
 const CategoryManagement = ({ categories, setCategories, handleSubmit, setError, setSuccess, fetchCategories }) => {
   const [categoryForm, setCategoryForm] = useState({
@@ -76,8 +77,8 @@ const CategoryManagement = ({ categories, setCategories, handleSubmit, setError,
             <div key={category._id} className="category-item">
               <span>{category.name}</span>
               <div className="category-actions">
-                <button onClick={() => handleCategoryEdit(category)}>Редагувати</button>
-                <button onClick={() => handleCategoryDelete(category._id)}>Видалити</button>
+                <button className="edit-btn" onClick={() => handleCategoryEdit(category)}>Редагувати</button>
+                <button className="delete-btn" onClick={() => handleCategoryDelete(category._id)}>Видалити</button>
               </div>
             </div>
           ))

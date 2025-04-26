@@ -13,106 +13,93 @@ import BlogPost from './components/BlogPost';
 import Gallery from './components/Gallery';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
-import AdminLogin from './pages/AdminLogin';
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
-  return token ? children : <Navigate to="/admin/login" />;
+  return token ? children : <Navigate to="/" />;
 };
 
 function App() {
   return (
     <AuthProvider>
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <>
-            <Header />
-            <Main />
-            <About />
-            {/* <PricingSection /> */}
-            <HomeGalleryPreview />
-            <Consultation />
-            <BlogIntro />
-            <Contacts />
-            <Footer />
-          </>
-        }
-      />
-      <Route
-        path="/about"
-        element={
-          <>
-            <Header />
-            <About />
-            <Footer />
-          </>
-        }
-      />
-      <Route
-        path="/gallery"
-        element={
-          <>
-            <Header />
-            <Gallery />
-            <Footer />
-          </>
-        }
-      />
-      <Route
-        path="/blog"
-        element={
-          <>
-            <Header />
-            <Blog />
-            <Footer />
-          </>
-        }
-      />
-      <Route
-        path="/blog/:id"
-        element={
-          <>
-            <Header />
-            <BlogPost />
-            <Footer />
-          </>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <>
-            <Header />
-            <Profile />
-            <Footer />
-          </>
-        }
-      />
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute>
-            {/* <Header /> */}
-            <AdminDashboard />
-            {/* <Footer /> */}
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/login"
-        element={
-          <>
-            <Header />
-            <AdminLogin />
-            <Footer />
-          </>
-        }
-      />
-    </Routes>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <Header />
+              <Main />
+              <About />
+              {/* <PricingSection /> */}
+              <HomeGalleryPreview />
+              <Consultation />
+              <BlogIntro />
+              <Contacts />
+              <Footer />
+            </>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <>
+              <Header />
+              <About />
+              <Footer />
+            </>
+          }
+        />
+        <Route
+          path="/gallery"
+          element={
+            <>
+              <Header />
+              <Gallery />
+              <Footer />
+            </>
+          }
+        />
+        <Route
+          path="/blog"
+          element={
+            <>
+              <Header />
+              <Blog />
+              <Footer />
+            </>
+          }
+        />
+        <Route
+          path="/blog/:id"
+          element={
+            <>
+              <Header />
+              <BlogPost />
+              <Footer />
+            </>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <>
+              <Header />
+              <Profile />
+              <Footer />
+            </>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
     </AuthProvider>
   );
 }

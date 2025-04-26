@@ -60,7 +60,7 @@ export default function Footer() {
         <p>
           © 2025{' '}
           {localStorage.getItem('token') ? (
-            <Link to="/admin" className="footer-admin-link">
+            <Link to="/admin/" className="footer-admin-link">
               BLACKMARK
             </Link>
           ) : (

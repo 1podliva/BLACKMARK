@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './GalleryManagement.css';
 
 const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setError, setSuccess, fetchGalleryImages, galleryCategories }) => {
   const [imageForm, setImageForm] = useState({
@@ -23,7 +24,7 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
     setError('');
     setSuccess('');
     if (!imageForm.styles.length) {
-      setError('Please select at least one category');
+      setError('Будь ласка, виберіть принаймні одну категорію');
       return;
     }
     const formData = new FormData();
@@ -41,7 +42,7 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
       const url = imageForm.id ? `http://localhost:5000/api/gallery/${imageForm.id}` : 'http://localhost:5000/api/gallery';
       const method = imageForm.id ? 'PUT' : 'POST';
       const data = await handleSubmit(url, method, formData, true);
-      setSuccess(imageForm.id ? 'Image updated!' : 'Image added!');
+      setSuccess(imageForm.id ? 'Зображення оновлено!' : 'Зображення додано!');
       setImageForm({ id: '', alt: '', title: '', description: '', styles: [], image: null, imageUrl: '' });
       setImagePreview('');
       fetchGalleryImages();
@@ -65,16 +66,16 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
   };
 
   const handleImageDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this image?')) return;
+    if (!window.confirm('Ви впевнені, що хочете видалити це зображення?')) return;
     console.log('Deleting image ID:', id);
     try {
       const res = await handleSubmit(`http://localhost:5000/api/gallery/${id}`, 'DELETE');
       console.log('Delete response:', res);
-      setSuccess('Image deleted!');
+      setSuccess('Зображення видалено!');
       fetchGalleryImages();
     } catch (err) {
       console.error('Delete error:', err);
-      setError('Failed to delete image: ' + err.message);
+      setError('Не вдалося видалити зображення: ' + err.message);
     }
   };
 
@@ -121,6 +122,7 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
             type="text"
             value={imageForm.title}
             onChange={(e) => setImageForm({ ...imageForm, title: e.target.value })}
+            placeholder="Введіть заголовок"
             required
           />
         </div>
@@ -130,6 +132,7 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
             type="text"
             value={imageForm.description}
             onChange={(e) => setImageForm({ ...imageForm, description: e.target.value })}
+            placeholder="Введіть опис"
             required
           />
         </div>
@@ -151,6 +154,7 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
             type="text"
             value={imageForm.alt}
             onChange={(e) => setImageForm({ ...imageForm, alt: e.target.value })}
+            placeholder="Введіть alt текст"
             required
           />
         </div>
@@ -184,8 +188,8 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
                   <p>{img.description}</p>
                   <p><strong>Категорії:</strong> {(img.styles?.length ? img.styles : [img.style]).filter(Boolean).join(', ')}</p>
                   <div className="gallery-item-actions">
-                    <button onClick={() => handleImageEdit(img)}>Редагувати</button>
-                    <button onClick={() => handleImageDelete(img._id)}>Видалити</button>
+                    <button className="edit-btn" onClick={() => handleImageEdit(img)}>Редагувати</button>
+                    <button className="delete-btn" onClick={() => handleImageDelete(img._id)}>Видалити</button>
                   </div>
                 </div>
               </div>

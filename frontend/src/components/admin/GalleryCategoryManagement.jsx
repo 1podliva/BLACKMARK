@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-// import './AdminDashboard.css';
+import './GalleryCategoryManagement.css';
 
 const GalleryCategoryManagement = ({ galleryCategories, setGalleryCategories, handleSubmit, setError, setSuccess, fetchGalleryCategories }) => {
   const [categoryForm, setCategoryForm] = useState({ id: '', name: '' });
@@ -13,7 +13,7 @@ const GalleryCategoryManagement = ({ galleryCategories, setGalleryCategories, ha
       const url = categoryForm.id ? `http://localhost:5000/api/gallery-categories/${categoryForm.id}` : 'http://localhost:5000/api/gallery-categories';
       const method = categoryForm.id ? 'PUT' : 'POST';
       const data = await handleSubmit(url, method, { name: categoryForm.name });
-      setSuccess(categoryForm.id ? 'Category updated!' : 'Category added!');
+      setSuccess(categoryForm.id ? 'Категорію оновлено!' : 'Категорію додано!');
       setCategoryForm({ id: '', name: '' });
       fetchGalleryCategories();
     } catch (err) {
@@ -26,16 +26,16 @@ const GalleryCategoryManagement = ({ galleryCategories, setGalleryCategories, ha
   };
 
   const handleCategoryDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this category?')) return;
+    if (!window.confirm('Ви впевнені, що хочете видалити цю категорію?')) return;
     console.log('Deleting gallery category ID:', id);
     try {
       const res = await handleSubmit(`http://localhost:5000/api/gallery-categories/${id}`, 'DELETE');
       console.log('Delete response:', res);
-      setSuccess('Category deleted!');
+      setSuccess('Категорію видалено!');
       fetchGalleryCategories();
     } catch (err) {
       console.error('Delete error:', err);
-      setError('Failed to delete category: ' + err.message);
+      setError('Не вдалося видалити категорію: ' + err.message);
     }
   };
 
@@ -49,6 +49,7 @@ const GalleryCategoryManagement = ({ galleryCategories, setGalleryCategories, ha
             type="text"
             value={categoryForm.name}
             onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
+            placeholder="Введіть назву категорії"
             required
           />
         </div>
@@ -59,15 +60,19 @@ const GalleryCategoryManagement = ({ galleryCategories, setGalleryCategories, ha
 
       <div className="category-list">
         <h4>Усі категорії</h4>
-        {galleryCategories.map(category => (
-          <div key={category._id} className="category-item">
-            <span>{category.name}</span>
-            <div className="category-actions">
-              <button onClick={() => handleCategoryEdit(category)}>Редагувати</button>
-              <button onClick={() => handleCategoryDelete(category._id)}>Видалити</button>
+        {galleryCategories.length ? (
+          galleryCategories.map(category => (
+            <div key={category._id} className="category-item">
+              <span>{category.name}</span>
+              <div className="category-actions">
+                <button className="edit-btn" onClick={() => handleCategoryEdit(category)}>Редагувати</button>
+                <button className="delete-btn" onClick={() => handleCategoryDelete(category._id)}>Видалити</button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p>Категорій немає</p>
+        )}
       </div>
     </div>
   );

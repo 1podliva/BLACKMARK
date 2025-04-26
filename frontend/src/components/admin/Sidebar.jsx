@@ -1,12 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-// import './AdminDashboard.css';
+import './AdminDashboard.css';
 
 const Sidebar = ({ activeSection, setActiveSection, isSidebarOpen, toggleSidebar }) => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
+  const handleExitAdmin = () => {
     navigate('/');
   };
 
@@ -40,9 +39,9 @@ const Sidebar = ({ activeSection, setActiveSection, isSidebarOpen, toggleSidebar
           <span className="sidebar-icon">🖼️</span>
           Галерея
         </button>
-        <button className="sidebar-item logout" onClick={handleLogout}>
+        <button className="sidebar-item logout" onClick={handleExitAdmin}>
           <span className="sidebar-icon">🚪</span>
-          Вийти
+          Вийти з адмін-панелі
         </button>
       </nav>
     </aside>

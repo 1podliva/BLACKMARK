@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
-
+import './PostManagement.css';
 
 const PostManagement = ({ posts, categories, setPosts, handleSubmit, setError, setSuccess, fetchPosts }) => {
   const [postForm, setPostForm] = useState({
@@ -22,7 +22,7 @@ const PostManagement = ({ posts, categories, setPosts, handleSubmit, setError, s
     setSuccess('');
 
     if (!postForm.category) {
-      setError('Please select a category');
+      setError('Будь ласка, виберіть категорію');
       return;
     }
 
@@ -40,7 +40,7 @@ const PostManagement = ({ posts, categories, setPosts, handleSubmit, setError, s
       const url = postForm.id ? `http://localhost:5000/api/posts/${postForm.id}` : 'http://localhost:5000/api/posts';
       const method = postForm.id ? 'PUT' : 'POST';
       const data = await handleSubmit(url, method, formData, true);
-      setSuccess(postForm.id ? 'Post updated!' : 'Post created!');
+      setSuccess(postForm.id ? 'Пост оновлено!' : 'Пост створено!');
       setPostForm({ id: '', title: '', content: '', image: null, category: '', featured: false, imageUrl: '' });
       setImagePreview('');
       fetchPosts();
@@ -63,10 +63,10 @@ const PostManagement = ({ posts, categories, setPosts, handleSubmit, setError, s
   };
 
   const handlePostDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this post?')) return;
+    if (!window.confirm('Ви впевнені, що хочете видалити цей пост?')) return;
     try {
       await handleSubmit(`http://localhost:5000/api/posts/${id}`, 'DELETE');
-      setSuccess('Post deleted!');
+      setSuccess('Пост видалено!');
       fetchPosts();
     } catch (err) {
       // Error set by handleSubmit
@@ -98,6 +98,7 @@ const PostManagement = ({ posts, categories, setPosts, handleSubmit, setError, s
             type="text"
             value={postForm.title}
             onChange={(e) => setPostForm({ ...postForm, title: e.target.value })}
+            placeholder="Введіть заголовок"
             required
           />
         </div>
@@ -175,15 +176,19 @@ const PostManagement = ({ posts, categories, setPosts, handleSubmit, setError, s
 
       <div className="posts-list">
         <h4>Усі пости</h4>
-        {posts.map((post) => (
-          <div key={post._id} className="post-item">
-            <span>{post.title}</span>
-            <div className="post-actions">
-              <button onClick={() => handlePostEdit(post)}>Редагувати</button>
-              <button onClick={() => handlePostDelete(post._id)}>Видалити</button>
+        {posts.length ? (
+          posts.map((post) => (
+            <div key={post._id} className="post-item">
+              <span>{post.title}</span>
+              <div className="post-actions">
+                <button className="edit-btn" onClick={() => handlePostEdit(post)}>Редагувати</button>
+                <button className="delete-btn" onClick={() => handlePostDelete(post._id)}>Видалити</button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p>Пости відсутні</p>
+        )}
       </div>
     </div>
   );
