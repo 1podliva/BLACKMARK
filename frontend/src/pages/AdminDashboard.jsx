@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaTimes, FaSignOutAlt, FaImage, FaFolder } from 'react-icons/fa';
+import { FaBars, FaTimes, FaSignOutAlt, FaImage, FaFolder, FaCalendar } from 'react-icons/fa';
 import GalleryManagement from '../components/admin/GalleryManagement';
 import PostManagement from '../components/admin/PostManagement';
 import CategoryManagement from '../components/admin/CategoryManagement';
 import GalleryCategoryManagement from '../components/admin/GalleryCategoryManagement';
+import BookingManagement from '../components/admin/BookingManagement';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -16,6 +17,7 @@ const AdminDashboard = () => {
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [galleryCategories, setGalleryCategories] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const navigate = useNavigate();
 
   const token = localStorage.getItem('token');
@@ -35,11 +37,11 @@ const AdminDashboard = () => {
           throw new Error('Invalid token');
         }
         console.log('Token verified successfully');
-        // Завантажуємо дані лише після успішної верифікації
         fetchGalleryImages();
         fetchPosts();
         fetchCategories();
         fetchGalleryCategories();
+        fetchBookings();
       } catch (err) {
         console.error('Token verification error:', err);
         localStorage.removeItem('token');
@@ -52,8 +54,7 @@ const AdminDashboard = () => {
 
   const handleSubmit = async (url, method, payload, isFormData = false) => {
     setError('');
-    
-
+    setSuccess('');
     try {
       console.log('Request:', { url, method, token, payload });
       const headers = { Authorization: `Bearer ${token}` };
@@ -139,6 +140,21 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchBookings = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/bookings/all', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed to fetch bookings');
+      const data = await res.json();
+      console.log('Fetched bookings:', data);
+      setBookings(data);
+    } catch (err) {
+      console.error('Fetch bookings error:', err);
+      setError(err.message);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/admin/login');
@@ -182,6 +198,12 @@ const AdminDashboard = () => {
           >
             <FaFolder className="sidebar-icon" /> Категорії постів
           </button>
+          <button
+            className={`sidebar-item ${activeSection === 'bookings' ? 'active' : ''}`}
+            onClick={() => { setActiveSection('bookings'); setSidebarOpen(false); }}
+          >
+            <FaCalendar className="sidebar-icon" /> Бронювання
+          </button>
           <button className="sidebar-item logout" onClick={handleLogout}>
             <FaSignOutAlt className="sidebar-icon" /> Вийти
           </button>
@@ -199,7 +221,7 @@ const AdminDashboard = () => {
           </h1>
           <div className="divider"></div>
           <p className="intro-text">
-            Ласкаво просимо до адмін-панелі BLACKMARK. Тут ви можете керувати галереєю, постами та категоріями.
+            Ласкаво просимо до адмін-панелі BLACKMARK. Тут ви можете керувати галереєю, постами, категоріями та бронюваннями.
           </p>
         </div>
         {error && <p className="error-message">{error}</p>}
@@ -244,6 +266,16 @@ const AdminDashboard = () => {
             setError={setError}
             setSuccess={setSuccess}
             fetchCategories={fetchCategories}
+          />
+        )}
+        {activeSection === 'bookings' && (
+          <BookingManagement
+            bookings={bookings}
+            setBookings={setBookings}
+            handleSubmit={handleSubmit}
+            setError={setError}
+            setSuccess={setSuccess}
+            fetchBookings={fetchBookings}
           />
         )}
       </div>

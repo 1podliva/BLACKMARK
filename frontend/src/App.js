@@ -14,6 +14,7 @@ import Gallery from './components/Gallery';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
+import { AuthProvider } from './context/AuthContext';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -23,6 +24,7 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   return (
+    <AuthProvider>
     <Routes>
       <Route
         path="/"
@@ -111,6 +113,7 @@ function App() {
         }
       />
     </Routes>
+    </AuthProvider>
   );
 }
 

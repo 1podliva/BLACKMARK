@@ -75,7 +75,8 @@
   }
   
   /* Стиль для профілю */
-  .profile a {
+  .profile button {
+    border: none;
     background-color: var(--purple-accent);
     color: white;
     font-weight: 400;
@@ -88,7 +89,7 @@
   }
   
   /* Стиль при ховері для профілю */
-  .profile a:hover {
+  .profile button:hover {
     background-color: #7f00d4; /* Можна використовувати інший колір */
     box-shadow: 0px 8px 16px rgba(155, 0, 255, 0.7); /* Збільшуємо тінь при ховері */
     transform: scale(1.05); /* Легке збільшення кнопки при ховері */

@@ -8,6 +8,9 @@ const authRoutes = require('./routes/auth');
 const categoryRoutes = require('./routes/categories');
 const galleryRoutes = require('./routes/gallery');
 const galleryCategoryRoutes = require('./routes/gallery-categories');
+
+const userRoutes = require('./routes/users');
+const bookingRoutes = require('./routes/bookings');
 dotenv.config();
 
 const app = express();
@@ -19,10 +22,13 @@ app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
 // Routes
 app.use('/api/posts', postRoutes);
-app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/gallery-categories', galleryCategoryRoutes);
+
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {

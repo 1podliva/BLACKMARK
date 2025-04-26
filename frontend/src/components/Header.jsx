@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+import AuthModal from './AuthModal';
 import './Header.css';
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, logout } = useContext(AuthContext); // Додаємо AuthContext
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false); // Стан для модального вікна
 
   const handleContactsClick = (e) => {
     e.preventDefault();
@@ -26,6 +30,14 @@ const Header = () => {
 
   const getActiveClass = (path) => {
     return location.pathname === path ? 'active' : '';
+  };
+
+  const handleAuthClick = () => {
+    if (user) {
+      navigate('/profile'); // Якщо користувач увійшов, переходимо в профіль
+    } else {
+      setIsAuthModalOpen(true); // Інакше відкриваємо модальне вікно
+    }
   };
 
   return (
@@ -69,12 +81,22 @@ const Header = () => {
           </ul>
         </div>
 
-        {/* Профіль */}
+        {/* Профіль або Вхід/Реєстрація */}
         <div className="profile">
-          <Link to="/profile" className={getActiveClass('/profile')}>
-            Профіль
-          </Link>
+          <button onClick={handleAuthClick} className={getActiveClass('/profile')}>
+            {user ? 'Профіль' : 'Вхід / Реєстрація'}
+          </button>
+          {user && (
+            <button onClick={logout} className="logout-btn">
+              Вийти
+            </button>
+          )}
         </div>
+
+        {/* Модальне вікно для входу/реєстрації */}
+        {isAuthModalOpen && (
+          <AuthModal onClose={() => setIsAuthModalOpen(false)} />
+        )}
       </nav>
     </>
   );
