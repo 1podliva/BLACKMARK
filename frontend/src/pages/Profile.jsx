@@ -10,7 +10,7 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('bookings');
   const [profileForm, setProfileForm] = useState({ firstName: '', lastName: '', avatar: null });
   const [passwordForm, setPasswordForm] = useState({ oldPassword: '', newPassword: '', confirmNewPassword: '' });
-  const [bookingForm, setBookingForm] = useState({ artist: '', date: '', time: '', description: '' });
+  const [consultationForm, setConsultationForm] = useState({ artist: '', preferredDate: '', time: '' });
   const [bookings, setBookings] = useState([]);
   const [artists, setArtists] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
@@ -18,10 +18,12 @@ const Profile = () => {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
-  const allTimeSlots = [
-    '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
-    '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00'
-  ];
+  const statusTranslations = {
+    pending: 'Очікує',
+    confirmed: 'Підтверджено',
+    completed: 'Завершено',
+    cancelled: 'Скасовано',
+  };
 
   useEffect(() => {
     if (user) {
@@ -32,12 +34,16 @@ const Profile = () => {
   }, [user]);
 
   useEffect(() => {
-    if (bookingForm.artist && bookingForm.date) {
-      fetchAvailableTimes(bookingForm.artist, bookingForm.date);
+    if (consultationForm.artist && consultationForm.preferredDate) {
+      fetchAvailableTimes(consultationForm.artist, consultationForm.preferredDate);
     } else {
       setAvailableTimes([]);
     }
-  }, [bookingForm.artist, bookingForm.date]);
+  }, [consultationForm.artist, consultationForm.preferredDate]);
+
+  useEffect(() => {
+    console.log('Bookings received:', bookings);
+  }, [bookings]);
 
   const fetchBookings = async () => {
     try {
@@ -45,6 +51,7 @@ const Profile = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
+      console.log('Fetched bookings:', data);
       if (!res.ok) throw new Error(data.message);
       setBookings(data);
     } catch (err) {
@@ -71,9 +78,7 @@ const Profile = () => {
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      const bookedTimes = data.bookedTimes || [];
-      const available = allTimeSlots.filter((time) => !bookedTimes.includes(time));
-      setAvailableTimes(available);
+      setAvailableTimes(data.availableTimes || []);
     } catch (err) {
       setError(err.message);
       setAvailableTimes([]);
@@ -129,45 +134,33 @@ const Profile = () => {
     }
   };
 
-  const handleBookingSubmit = async (e) => {
+  const handleConsultationSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-
-    // Валідація: бронювання мінімум за 24 години
-    const selectedDateTime = new Date(`${bookingForm.date}T${bookingForm.time}`);
-    const minBookingTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    if (selectedDateTime < minBookingTime) {
-      setError('Бронювання можливе щонайменше за 24 години');
-      return;
-    }
-
     try {
-      const res = await fetch('http://localhost:5000/api/bookings', {
+      console.log('Sending consultation request:', consultationForm);
+      const res = await fetch('http://localhost:5000/api/consultations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(bookingForm),
+        body: JSON.stringify(consultationForm),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      setSuccess('Бронювання створено!');
-      setBookingForm({ artist: '', date: '', time: '', description: '' });
-      fetchBookings();
+      console.log('Consultation response:', data);
+      if (!res.ok) throw new Error(data.message || 'Помилка сервера');
+      setSuccess('Запит на консультацію відправлено!');
+      setConsultationForm({ artist: '', preferredDate: '', time: '' });
       setAvailableTimes([]);
     } catch (err) {
+      console.error('Consultation error:', err);
       setError(err.message);
     }
   };
 
   const handleDateChange = (date) => {
-    const formattedDate = date.toISOString().split('T')[0];
-    setBookingForm({ ...bookingForm, date: formattedDate, time: '' });
-  };
-
-  const isDateDisabled = ({ date }) => {
-    if (!bookingForm.artist) return false;
-    const formattedDate = date.toISOString().split('T')[0];
-    return availableTimes.length === 0 && bookingForm.date === formattedDate;
+    // Форматуємо дату в UTC, щоб уникнути проблем із часовим поясом
+    const formattedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).toISOString().split('T')[0];
+    setConsultationForm({ ...consultationForm, preferredDate: formattedDate, time: '' });
   };
 
   const handleLogout = () => {
@@ -302,13 +295,13 @@ const Profile = () => {
 
         {activeTab === 'bookings' && (
           <div className="profile-details">
-            <h3>Нове бронювання</h3>
-            <form onSubmit={handleBookingSubmit}>
+            <h3>Запит на консультацію</h3>
+            <form onSubmit={handleConsultationSubmit}>
               <div className="form-group">
                 <label>Майстер</label>
                 <select
-                  value={bookingForm.artist}
-                  onChange={(e) => setBookingForm({ ...bookingForm, artist: e.target.value, time: '' })}
+                  value={consultationForm.artist}
+                  onChange={(e) => setConsultationForm({ ...consultationForm, artist: e.target.value, time: '' })}
                   required
                 >
                   <option value="">Виберіть майстра</option>
@@ -318,45 +311,44 @@ const Profile = () => {
                 </select>
               </div>
               <div className="form-group">
-                <label>Дата</label>
+                <label>Бажана дата</label>
                 <Calendar
                   onChange={handleDateChange}
-                  value={bookingForm.date ? new Date(bookingForm.date) : new Date()}
+                  value={consultationForm.preferredDate ? new Date(consultationForm.preferredDate) : new Date()}
                   minDate={new Date(Date.now() + 24 * 60 * 60 * 1000)}
-                  tileDisabled={isDateDisabled}
+                  locale="uk-UA"
+                  formatShortWeekday={(locale, date) =>
+                    ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][date.getDay()]
+                  }
+                  formatMonthYear={(locale, date) =>
+                    date.toLocaleString('uk-UA', { month: 'long', year: 'numeric' })
+                  }
                 />
               </div>
               <div className="form-group">
                 <label>Час</label>
                 <select
-                  value={bookingForm.time}
-                  onChange={(e) => setBookingForm({ ...bookingForm, time: e.target.value })}
+                  value={consultationForm.time}
+                  onChange={(e) => setConsultationForm({ ...consultationForm, time: e.target.value })}
                   required
-                  disabled={!bookingForm.date || availableTimes.length === 0}
+                  disabled={!consultationForm.preferredDate || availableTimes.length === 0}
                 >
                   <option value="">Виберіть час</option>
                   {availableTimes.map((time) => (
                     <option key={time} value={time}>{time}</option>
                   ))}
                 </select>
-                {!bookingForm.date && <p className="info-message">Спочатку виберіть дату</p>}
-                {bookingForm.date && availableTimes.length === 0 && (
+                {!consultationForm.preferredDate && <p className="info-message">Спочатку виберіть дату</p>}
+                {consultationForm.preferredDate && availableTimes.length === 0 && (
                   <p className="error-message">Немає доступних слотів на цю дату</p>
                 )}
-              </div>
-              <div className="form-group">
-                <label>Опис (ідея татуювання)</label>
-                <textarea
-                  value={bookingForm.description}
-                  onChange={(e) => setBookingForm({ ...bookingForm, description: e.target.value })}
-                />
               </div>
               <button
                 type="submit"
                 className="submit-btn"
-                disabled={!bookingForm.artist || !bookingForm.date || !bookingForm.time}
+                disabled={!consultationForm.artist || !consultationForm.preferredDate || !consultationForm.time}
               >
-                Забронювати
+                Відправити запит
               </button>
             </form>
 
@@ -373,15 +365,17 @@ const Profile = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {bookings.map((booking) => (
-                    <tr key={booking._id}>
-                      <td>{booking.artist?.name || 'Невідомий'}</td>
-                      <td>{new Date(booking.date).toLocaleDateString()}</td>
-                      <td>{booking.time}</td>
-                      <td>{booking.description || 'Немає'}</td>
-                      <td>{booking.status}</td>
-                    </tr>
-                  ))}
+                  {bookings
+                    .sort((a, b) => new Date(b.date) - new Date(a.date)) // Новіші спочатку
+                    .map((booking) => (
+                      <tr key={booking._id}>
+                        <td>{booking.artist?.name || 'Невідомий'}</td>
+                        <td>{new Date(booking.date).toLocaleDateString()}</td>
+                        <td>{booking.time}</td>
+                        <td>{booking.description || 'Немає'}</td>
+                        <td>{statusTranslations[booking.status] || booking.status}</td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             ) : (

@@ -6,6 +6,7 @@ const Notification = require('../models/Notification');
 const User = require('../models/User');
 const Artist = require('../models/Artist');
 const ArtistSchedule = require('../models/ArtistSchedule');
+const Consultation = require('../models/Consultation');
 const auth = require('../middleware/auth');
 const restrictToAdmin = require('../middleware/restrictToAdmin');
 
@@ -14,7 +15,6 @@ router.get('/', auth, async (req, res) => {
   try {
     const bookings = await Booking.find({ 
       user: req.user.id,
-      status: { $in: ['pending', 'confirmed'] } // Показуємо тільки активні бронювання
     })
       .populate('artist', 'name')
       .sort({ date: 1 }); // Сортуємо за датою (ближчі перші)
@@ -39,8 +39,8 @@ router.get('/all', auth, restrictToAdmin, async (req, res) => {
   }
 });
 
-// Створити нове бронювання
-router.post('/', auth, async (req, res) => {
+// Створити нове бронювання (тільки адмін)
+router.post('/', auth, restrictToAdmin, async (req, res) => {
   const { artist, date, time, description, user } = req.body;
   try {
     // Валідація: мінімум 24 години
@@ -61,21 +61,17 @@ router.post('/', auth, async (req, res) => {
       return res.status(404).json({ message: 'Майстер не знайдений' });
     }
 
-    // Визначаємо ID користувача: для адмінів беремо user з req.body, для інших req.user.id
-    let userId = req.user.id;
-    if (req.user.role === 'admin' && user) {
-      if (!mongoose.Types.ObjectId.isValid(user)) {
-        return res.status(400).json({ message: 'Невірний ID клієнта' });
-      }
-      const userExists = await User.findById(user);
-      if (!userExists) {
-        return res.status(404).json({ message: 'Клієнт не знайдений' });
-      }
-      userId = user;
+    // Перевірка користувача
+    if (!mongoose.Types.ObjectId.isValid(user)) {
+      return res.status(400).json({ message: 'Невірний ID клієнта' });
+    }
+    const userExists = await User.findById(user);
+    if (!userExists) {
+      return res.status(404).json({ message: 'Клієнт не знайдений' });
     }
 
     const booking = new Booking({
-      user: userId,
+      user,
       artist,
       date,
       time,
@@ -85,7 +81,7 @@ router.post('/', auth, async (req, res) => {
     await booking.save();
 
     // Витягуємо дані користувача
-    const userData = await User.findById(userId).select('firstName lastName');
+    const userData = await User.findById(user).select('firstName lastName');
     if (!userData) {
       return res.status(404).json({ message: 'Користувач не знайдений' });
     }
@@ -105,6 +101,67 @@ router.post('/', auth, async (req, res) => {
     res.json(booking);
   } catch (err) {
     console.error('POST /api/bookings Error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Створити запит на консультацію
+router.post('/consultations', auth, async (req, res) => {
+  const { artist, preferredDate } = req.body;
+  try {
+    // Валідація: artist має бути дійсним ObjectId
+    if (!mongoose.Types.ObjectId.isValid(artist)) {
+      return res.status(400).json({ message: 'Невірний ID майстра' });
+    }
+
+    // Перевірка існування майстра
+    const artistData = await Artist.findById(artist);
+    if (!artistData) {
+      return res.status(404).json({ message: 'Майстер не знайдений' });
+    }
+
+    // Якщо є preferredDate, валідуємо формат
+    if (preferredDate) {
+      const parsedDate = new Date(preferredDate);
+      if (isNaN(parsedDate.getTime())) {
+        return res.status(400).json({ message: 'Невірний формат дати' });
+      }
+      const minDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      if (parsedDate < minDate) {
+        return res.status(400).json({ message: 'Дата консультації має бути щонайменше за 24 години' });
+      }
+    }
+
+    const consultation = new Consultation({
+      user: req.user.id,
+      artist,
+      description: 'Консультація',
+      preferredDate: preferredDate || null,
+      status: 'pending',
+    });
+    await consultation.save();
+
+    // Витягуємо дані користувача
+    const userData = await User.findById(req.user.id).select('firstName lastName');
+    if (!userData) {
+      return res.status(404).json({ message: 'Користувач не знайдений' });
+    }
+    const clientName = `${userData.firstName} ${userData.lastName}`.trim();
+
+    // Створюємо сповіщення для всіх адмінів
+    const admins = await User.find({ role: 'admin' });
+    const notifications = admins.map((admin) => ({
+      message: `Новий запит на консультацію від ${clientName}`,
+      details: `Консультація: ${clientName}, Майстер: ${artistData.name}${preferredDate ? `, Бажана дата: ${new Date(preferredDate).toLocaleDateString('uk-UA')}` : ''}`,
+      user: admin._id,
+      consultation: consultation._id,
+      read: false,
+    }));
+    await Notification.insertMany(notifications);
+
+    res.json(consultation);
+  } catch (err) {
+    console.error('POST /api/consultations Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
