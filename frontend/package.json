@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@tinymce/tinymce-react": "^6.1.0",
     "bootstrap": "^5.3.5",
+    "date-fns": "^4.1.0",
     "font-awesome": "^4.7.0",
     "html-to-text": "^9.0.5",
     "react": "^19.1.0",

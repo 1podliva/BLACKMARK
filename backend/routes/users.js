@@ -5,6 +5,7 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const restrictToAdmin = require('../middleware/restrictToAdmin');
 
 // Multer для аватарок
 const storage = multer.diskStorage({
@@ -16,6 +17,17 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
+
+// Отримати список всіх користувачів (тільки для адмінів)
+router.get('/', auth, restrictToAdmin, async (req, res) => {
+  try {
+    const users = await User.find().select('firstName lastName');
+    res.json(users);
+  } catch (err) {
+    console.error('GET /api/users Error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 // Отримати профіль
 router.get('/profile', auth, async (req, res) => {

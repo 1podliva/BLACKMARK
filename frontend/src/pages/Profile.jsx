@@ -63,10 +63,10 @@ const Profile = () => {
     }
   };
 
-  const fetchAvailableTimes = async (artist, date) => {
+  const fetchAvailableTimes = async (artistId, date) => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/bookings/availability?artist=${encodeURIComponent(artist)}&date=${date}`,
+        `http://localhost:5000/api/bookings/availability?artist=${artistId}&date=${date}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -136,7 +136,7 @@ const Profile = () => {
 
     // Валідація: бронювання мінімум за 24 години
     const selectedDateTime = new Date(`${bookingForm.date}T${bookingForm.time}`);
-    const minBookingTime = new Date(Date.now() + 24 * 60 * 60 * 1000); // +24 години
+    const minBookingTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
     if (selectedDateTime < minBookingTime) {
       setError('Бронювання можливе щонайменше за 24 години');
       return;
@@ -313,7 +313,7 @@ const Profile = () => {
                 >
                   <option value="">Виберіть майстра</option>
                   {artists.map((artist) => (
-                    <option key={artist._id} value={artist.name}>{artist.name}</option>
+                    <option key={artist._id} value={artist._id}>{artist.name}</option>
                   ))}
                 </select>
               </div>
@@ -322,7 +322,7 @@ const Profile = () => {
                 <Calendar
                   onChange={handleDateChange}
                   value={bookingForm.date ? new Date(bookingForm.date) : new Date()}
-                  minDate={new Date(Date.now() + 24 * 60 * 60 * 1000)} // Мінімум через 24 години
+                  minDate={new Date(Date.now() + 24 * 60 * 60 * 1000)}
                   tileDisabled={isDateDisabled}
                 />
               </div>
@@ -375,7 +375,7 @@ const Profile = () => {
                 <tbody>
                   {bookings.map((booking) => (
                     <tr key={booking._id}>
-                      <td>{booking.artist}</td>
+                      <td>{booking.artist?.name || 'Невідомий'}</td>
                       <td>{new Date(booking.date).toLocaleDateString()}</td>
                       <td>{booking.time}</td>
                       <td>{booking.description || 'Немає'}</td>

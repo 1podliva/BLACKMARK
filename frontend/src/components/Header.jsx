@@ -134,7 +134,7 @@ const Header = () => {
                   </div>
                   {nextBooking ? (
                     <div className="dropdown-booking">
-                      Наступне бронювання: {nextBooking.artist},{' '}
+                      Наступне бронювання: {nextBooking.artist?.name || 'Невідомий'},{' '}
                       {new Date(nextBooking.date).toLocaleDateString()}, {nextBooking.time}
                     </div>
                   ) : (

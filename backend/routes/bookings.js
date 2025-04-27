@@ -5,15 +5,19 @@ const Booking = require('../models/Booking');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 const Artist = require('../models/Artist');
+const ArtistSchedule = require('../models/ArtistSchedule');
 const auth = require('../middleware/auth');
 const restrictToAdmin = require('../middleware/restrictToAdmin');
 
 // Отримати бронювання користувача
 router.get('/', auth, async (req, res) => {
   try {
-    const bookings = await Booking.find({ user: req.user.id })
+    const bookings = await Booking.find({ 
+      user: req.user.id,
+      status: { $in: ['pending', 'confirmed'] } // Показуємо тільки активні бронювання
+    })
       .populate('artist', 'name')
-      .sort({ date: -1 });
+      .sort({ date: 1 }); // Сортуємо за датою (ближчі перші)
     res.json(bookings);
   } catch (err) {
     console.error('GET /api/bookings Error:', err);
@@ -37,7 +41,7 @@ router.get('/all', auth, restrictToAdmin, async (req, res) => {
 
 // Створити нове бронювання
 router.post('/', auth, async (req, res) => {
-  const { artist, date, time, description } = req.body;
+  const { artist, date, time, description, user } = req.body;
   try {
     // Валідація: мінімум 24 години
     const selectedDateTime = new Date(`${date}T${time}`);
@@ -57,8 +61,21 @@ router.post('/', auth, async (req, res) => {
       return res.status(404).json({ message: 'Майстер не знайдений' });
     }
 
+    // Визначаємо ID користувача: для адмінів беремо user з req.body, для інших req.user.id
+    let userId = req.user.id;
+    if (req.user.role === 'admin' && user) {
+      if (!mongoose.Types.ObjectId.isValid(user)) {
+        return res.status(400).json({ message: 'Невірний ID клієнта' });
+      }
+      const userExists = await User.findById(user);
+      if (!userExists) {
+        return res.status(404).json({ message: 'Клієнт не знайдений' });
+      }
+      userId = user;
+    }
+
     const booking = new Booking({
-      user: req.user.id,
+      user: userId,
       artist,
       date,
       time,
@@ -68,11 +85,11 @@ router.post('/', auth, async (req, res) => {
     await booking.save();
 
     // Витягуємо дані користувача
-    const user = await User.findById(req.user.id).select('firstName lastName');
-    if (!user) {
+    const userData = await User.findById(userId).select('firstName lastName');
+    if (!userData) {
       return res.status(404).json({ message: 'Користувач не знайдений' });
     }
-    const clientName = `${user.firstName} ${user.lastName}`.trim();
+    const clientName = `${userData.firstName} ${userData.lastName}`.trim();
 
     // Створюємо сповіщення для всіх адмінів
     const admins = await User.find({ role: 'admin' });
@@ -93,23 +110,76 @@ router.post('/', auth, async (req, res) => {
 });
 
 // Перевірка доступності
-router.get('/availability', async (req, res) => {
+router.get('/availability', auth, async (req, res) => {
   try {
     const { artist, date } = req.query;
-    if (!mongoose.Types.ObjectId.isValid(artist)) {
-      return res.status(400).json({ message: 'Невірний ID майстра' });
+    console.log('Received availability request:', { artist, date });
+    if (!artist || !date) {
+      return res.status(400).json({ message: 'Artist and date are required' });
     }
+    if (!mongoose.isValidObjectId(artist)) {
+      return res.status(400).json({ message: 'Invalid artist ID' });
+    }
+
+    console.log(`Checking availability for artist: ${artist}, date: ${date}, user: ${req.user.id}`);
+
+    // Валідація формату дати
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      console.error('Invalid date format:', date);
+      return res.status(400).json({ message: 'Invalid date format' });
+    }
+
+    // Отримати графік майстра
+    const targetDate = new Date(date);
+    const dayOfWeek = targetDate.getDay();
+    const schedule = await ArtistSchedule.findOne({ artist, dayOfWeek });
+    console.log('Schedule:', schedule);
+    if (!schedule) {
+      console.log('No schedule found for this artist and day');
+      return res.json({ bookedTimes: [], availableTimes: [] });
+    }
+
+    // Генерувати слоти на основі графіку
+    const startHour = parseInt(schedule.startTime.split(':')[0]);
+    const startMinute = parseInt(schedule.startTime.split(':')[1]);
+    const endHour = parseInt(schedule.endTime.split(':')[0]);
+    const endMinute = parseInt(schedule.endTime.split(':')[1]);
+    const availableTimes = [];
+    let currentHour = startHour;
+    let currentMinute = startMinute;
+    while (
+      currentHour < endHour ||
+      (currentHour === endHour && currentMinute <= endMinute)
+    ) {
+      availableTimes.push(`${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`);
+      currentMinute += 30;
+      if (currentMinute >= 60) {
+        currentMinute = 0;
+        currentHour += 1;
+      }
+    }
+    console.log('Generated available times:', availableTimes);
+
+    // Отримати заброньовані слоти
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
     const bookings = await Booking.find({
       artist,
-      date: {
-        $gte: new Date(date),
-        $lt: new Date(new Date(date).setDate(new Date(date).getDate() + 1)),
-      },
+      date: { $gte: startOfDay, $lte: endOfDay },
     });
-    const bookedTimes = bookings.map((booking) => booking.time);
-    res.json({ bookedTimes });
+    const bookedTimes = bookings.map((b) => b.time);
+    console.log('Booked times:', bookedTimes);
+
+    // Фільтрувати доступні слоти
+    const finalAvailableTimes = availableTimes.filter((time) => !bookedTimes.includes(time));
+    console.log('Final available times:', finalAvailableTimes);
+
+    res.json({ bookedTimes, availableTimes: finalAvailableTimes });
   } catch (err) {
-    console.error('GET /api/bookings/availability Error:', err);
+    console.error('GET /api/bookings/availability Error:', err.message, err.stack);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -120,14 +190,14 @@ router.put('/:id/status', auth, restrictToAdmin, async (req, res) => {
     const { status } = req.body;
     const booking = await Booking.findById(req.params.id);
     if (!booking) return res.status(404).json({ message: 'Бронювання не знайдено' });
-    if (!['pending', 'confirmed', 'cancelled'].includes(status)) {
+    if (!['pending', 'confirmed', 'cancelled', 'completed'].includes(status)) {
       return res.status(400).json({ message: 'Невірний статус' });
     }
     booking.status = status;
     await booking.save();
     res.json(booking);
   } catch (err) {
-    console.error('PUT /api/bookings/:id/status Error:', err);
+    console.error('PUT /api/bookings/:id/status Error:', err.message, err.stack);
     res.status(500).json({ message: 'Server error' });
   }
 });

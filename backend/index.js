@@ -14,7 +14,7 @@ const userRoutes = require('./routes/users');
 const bookingRoutes = require('./routes/bookings');
 const artistRoutes = require('./routes/artists');
 const notificationRoutes = require('./routes/notifications');
-
+const artistSchedules = require('./routes/artistSchedules');
 dotenv.config();
 
 const app = express();
@@ -44,7 +44,8 @@ app.use('/api/artists', artistRoutes);
 console.log('artistRoutes registered');
 app.use('/api/notifications', notificationRoutes);
 console.log('notificationRoutes registered');
-
+app.use('/api/artist-schedules', artistSchedules);
+console.log('artist-schedules registered');
 // MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI, {
