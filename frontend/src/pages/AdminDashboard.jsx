@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaTimes, FaSignOutAlt, FaImage, FaFolder, FaCalendar, FaBell, FaUser } from 'react-icons/fa';
+import { FaBars } from 'react-icons/fa';
+import Sidebar from '../components/admin/Sidebar';
 import GalleryManagement from '../components/admin/GalleryManagement';
 import PostManagement from '../components/admin/PostManagement';
 import CategoryManagement from '../components/admin/CategoryManagement';
@@ -71,7 +72,7 @@ const AdminDashboard = () => {
       const res = await fetch(url, { method, headers, body });
       console.log('Response status:', res.status, 'URL:', url);
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => ({}));
         if (res.status === 401 || res.status === 403) {
           localStorage.removeItem('token');
           navigate('/');
@@ -86,7 +87,7 @@ const AdminDashboard = () => {
       return responseData;
     } catch (err) {
       console.error('Request error:', err);
-      setError(err.message);
+      setError(err.message || 'Помилка запиту');
       setTimeout(() => setError(''), 3000);
       throw err;
     }
@@ -168,73 +169,22 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setSuccess('Вихід виконано! Перенаправлення...');
-    setTimeout(() => navigate('/'), 3000);
-  };
-
   if (loading) {
     return <div className="loading">Завантаження...</div>;
   }
 
   return (
+    
+    <>
+    <img src="/images/Banner.svg" id="banner" alt="Banner" />
     <div className="admin-dashboard">
-      <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <div className="sidebar-header">
-          <h2>Адмін Панель</h2>
-          <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            {sidebarOpen ? <FaTimes /> : <FaBars />}
-          </button>
-        </div>
-        <nav className="sidebar-nav">
-          <button
-            className={`sidebar-item ${activeSection === 'notifications' ? 'active' : ''}`}
-            onClick={() => { setActiveSection('notifications'); setSidebarOpen(false); }}
-          >
-            <FaBell className="sidebar-icon" /> Сповіщення
-          </button>
-          <button
-            className={`sidebar-item ${activeSection === 'gallery' ? 'active' : ''}`}
-            onClick={() => { setActiveSection('gallery'); setSidebarOpen(false); }}
-          >
-            <FaImage className="sidebar-icon" /> Галерея
-          </button>
-          <button
-            className={`sidebar-item ${activeSection === 'gallery-categories' ? 'active' : ''}`}
-            onClick={() => { setActiveSection('gallery-categories'); setSidebarOpen(false); }}
-          >
-            <FaFolder className="sidebar-icon" /> Категорії галереї
-          </button>
-          <button
-            className={`sidebar-item ${activeSection === 'posts' ? 'active' : ''}`}
-            onClick={() => { setActiveSection('posts'); setSidebarOpen(false); }}
-          >
-            <FaImage className="sidebar-icon" /> Пости
-          </button>
-          <button
-            className={`sidebar-item ${activeSection === 'categories' ? 'active' : ''}`}
-            onClick={() => { setActiveSection('categories'); setSidebarOpen(false); }}
-          >
-            <FaFolder className="sidebar-icon" /> Категорії постів
-          </button>
-          <button
-            className={`sidebar-item ${activeSection === 'bookings' ? 'active' : ''}`}
-            onClick={() => { setActiveSection('bookings'); setSidebarOpen(false); }}
-          >
-            <FaCalendar className="sidebar-icon" /> Бронювання
-          </button>
-          <button
-            className={`sidebar-item ${activeSection === 'artists' ? 'active' : ''}`}
-            onClick={() => { setActiveSection('artists'); setSidebarOpen(false); }}
-          >
-            <FaUser className="sidebar-icon" /> Майстри
-          </button>
-          <button className="sidebar-item logout" onClick={handleLogout}>
-            <FaSignOutAlt className="sidebar-icon" /> Вийти
-          </button>
-        </nav>
-      </div>
+      
+      <Sidebar
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
+        isSidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
       <div className={`admin-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
         <button className="sidebar-toggle mobile" onClick={() => setSidebarOpen(!sidebarOpen)}>
           <FaBars />
@@ -308,6 +258,7 @@ const AdminDashboard = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

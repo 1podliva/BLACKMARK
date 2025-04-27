@@ -9,7 +9,6 @@ module.exports = function (req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('restrictToAdmin: Decoded token:', decoded);
     req.user = decoded;
     if (decoded.role !== 'admin') {
       console.log('restrictToAdmin: User is not admin, role:', decoded.role);

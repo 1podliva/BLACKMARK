@@ -1,62 +1,73 @@
-import React from 'react';
-
+import React, { useEffect } from 'react';
+// import './BookingManagement.css';
 const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setSuccess, fetchBookings }) => {
-  const handleStatusChange = async (bookingId, status) => {
+  useEffect(() => {
+    fetchBookings(); // Оновлюємо список при монтажі компонента
+  }, [fetchBookings]);
+
+  const handleDeleteBooking = async (id) => {
+    if (!window.confirm('Ви впевнені, що хочете видалити це бронювання?')) return;
     try {
-      const data = await handleSubmit(
-        `http://localhost:5000/api/bookings/${bookingId}/status`,
-        'PUT',
-        { status }
-      );
-      setBookings(bookings.map((b) => (b._id === bookingId ? data : b)));
-      setSuccess('Статус оновлено!');
+      await handleSubmit(`http://localhost:5000/api/bookings/${id}`, 'DELETE');
+      setSuccess('Бронювання видалено!');
+      fetchBookings(); // Оновлюємо список після видалення
     } catch (err) {
-      // Помилка вже оброблена в handleSubmit
+      // Помилка встановлюється в handleSubmit
+    }
+  };
+
+  const handleUpdateStatus = async (id, status) => {
+    try {
+      await handleSubmit(`http://localhost:5000/api/bookings/${id}/status`, 'PUT', { status });
+      setSuccess(`Статус оновлено до ${status}!`);
+      fetchBookings(); // Оновлюємо список після зміни статусу
+    } catch (err) {
+      // Помилка встановлюється в handleSubmit
     }
   };
 
   return (
     <div className="booking-management">
       <h3>Керування бронюваннями</h3>
-      {bookings.length > 0 ? (
-        <table className="bookings-table">
-          <thead>
-            <tr>
-              <th>Користувач</th>
-              <th>Майстер</th>
-              <th>Дата</th>
-              <th>Час</th>
-              <th>Опис</th>
-              <th>Статус</th>
-              <th>Дії</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings.map((booking) => (
-              <tr key={booking._id}>
-                <td>{booking.user ? `${booking.user.firstName} ${booking.user.lastName}` : 'Невідомо'}</td>
-                <td>{booking.artist}</td>
-                <td>{new Date(booking.date).toLocaleDateString()}</td>
-                <td>{booking.time}</td>
-                <td>{booking.description || 'Немає'}</td>
-                <td>{booking.status}</td>
-                <td>
-                  <select
-                    value={booking.status}
-                    onChange={(e) => handleStatusChange(booking._id, e.target.value)}
-                  >
-                    <option value="pending">Очікує</option>
-                    <option value="confirmed">Підтверджено</option>
-                    <option value="cancelled">Скасовано</option>
-                  </select>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p>Бронювань немає</p>
-      )}
+      <div className="bookings-list">
+        <h4>Усі бронювання</h4>
+        {bookings && bookings.length > 0 ? (
+          bookings.map((booking) => (
+            <div key={booking._id} className="booking-item">
+              <span>
+                Клієнт: {booking.user?.firstName} {booking.user?.lastName || 'Невідомий'}, 
+                Майстер: {booking.artist?.name || 'Невідомий'}, 
+                Дата: {booking.date}, 
+                Час: {booking.time}, 
+                Статус: {booking.status}
+              </span>
+              <div className="booking-actions">
+                {booking.status === 'pending' && (
+                  <>
+                    <button
+                      className="submit-btn"
+                      onClick={() => handleUpdateStatus(booking._id, 'confirmed')}
+                    >
+                      Підтвердити
+                    </button>
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleUpdateStatus(booking._id, 'cancelled')}
+                    >
+                      Скасувати
+                    </button>
+                  </>
+                )}
+                <button className="delete-btn" onClick={() => handleDeleteBooking(booking._id)}>
+                  Видалити
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p>Бронювання відсутні</p>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,15 +1,19 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Booking = require('../models/Booking');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
+const Artist = require('../models/Artist');
 const auth = require('../middleware/auth');
 const restrictToAdmin = require('../middleware/restrictToAdmin');
 
 // Отримати бронювання користувача
 router.get('/', auth, async (req, res) => {
   try {
-    const bookings = await Booking.find({ user: req.user.id }).sort({ date: -1 });
+    const bookings = await Booking.find({ user: req.user.id })
+      .populate('artist', 'name')
+      .sort({ date: -1 });
     res.json(bookings);
   } catch (err) {
     console.error('GET /api/bookings Error:', err);
@@ -22,6 +26,7 @@ router.get('/all', auth, restrictToAdmin, async (req, res) => {
   try {
     const bookings = await Booking.find()
       .populate('user', 'firstName lastName email')
+      .populate('artist', 'name')
       .sort({ date: -1 });
     res.json(bookings);
   } catch (err) {
@@ -41,6 +46,17 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ message: 'Бронювання можливе щонайменше за 24 години' });
     }
 
+    // Валідація: artist має бути дійсним ObjectId
+    if (!mongoose.Types.ObjectId.isValid(artist)) {
+      return res.status(400).json({ message: 'Невірний ID майстра' });
+    }
+
+    // Перевірка існування майстра
+    const artistData = await Artist.findById(artist);
+    if (!artistData) {
+      return res.status(404).json({ message: 'Майстер не знайдений' });
+    }
+
     const booking = new Booking({
       user: req.user.id,
       artist,
@@ -51,10 +67,18 @@ router.post('/', auth, async (req, res) => {
     });
     await booking.save();
 
-    // Створити сповіщення для всіх адмінів
+    // Витягуємо дані користувача
+    const user = await User.findById(req.user.id).select('firstName lastName');
+    if (!user) {
+      return res.status(404).json({ message: 'Користувач не знайдений' });
+    }
+    const clientName = `${user.firstName} ${user.lastName}`.trim();
+
+    // Створюємо сповіщення для всіх адмінів
     const admins = await User.find({ role: 'admin' });
     const notifications = admins.map((admin) => ({
-      message: `Нове бронювання від ${artist} на ${new Date(date).toLocaleDateString()} о ${time}`,
+      message: `Нове бронювання від ${clientName} на ${new Date(date).toLocaleDateString('uk-UA')} о ${time}`,
+      details: `Бронювання: ${clientName}, ${date}, ${time}, Майстер: ${artistData.name}`,
       user: admin._id,
       booking: booking._id,
       read: false,
@@ -72,6 +96,9 @@ router.post('/', auth, async (req, res) => {
 router.get('/availability', async (req, res) => {
   try {
     const { artist, date } = req.query;
+    if (!mongoose.Types.ObjectId.isValid(artist)) {
+      return res.status(400).json({ message: 'Невірний ID майстра' });
+    }
     const bookings = await Booking.find({
       artist,
       date: {
@@ -101,6 +128,19 @@ router.put('/:id/status', auth, restrictToAdmin, async (req, res) => {
     res.json(booking);
   } catch (err) {
     console.error('PUT /api/bookings/:id/status Error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Видалити бронювання (тільки адмін)
+router.delete('/:id', auth, restrictToAdmin, async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: 'Бронювання не знайдено' });
+    await Booking.deleteOne({ _id: req.params.id });
+    res.json({ message: 'Бронювання видалено' });
+  } catch (err) {
+    console.error('DELETE /api/bookings/:id Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });

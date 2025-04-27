@@ -1,50 +1,93 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './AdminDashboard.css';
+import { FaBars, FaTimes, FaSignOutAlt, FaImage, FaFolder, FaCalendar, FaBell, FaUser } from 'react-icons/fa';
+// import './AdminDashboard.css';
 
-const Sidebar = ({ activeSection, setActiveSection, isSidebarOpen, toggleSidebar }) => {
+const Sidebar = ({ activeSection, setActiveSection, isSidebarOpen, setSidebarOpen }) => {
   const navigate = useNavigate();
 
   const handleExitAdmin = () => {
+    setSidebarOpen(false);
     navigate('/');
   };
 
   return (
-    <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+    <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
-        <h2>Адмін</h2>
-        <button className="sidebar-toggle" onClick={toggleSidebar}>
-          {isSidebarOpen ? '✕' : '☰'}
+        <h2>Адмін Панель</h2>
+        <button className="sidebar-toggle" onClick={() => setSidebarOpen(!isSidebarOpen)}>
+          {isSidebarOpen ? <FaTimes /> : <FaBars />}
         </button>
       </div>
       <nav className="sidebar-nav">
         <button
-          className={`sidebar-item ${activeSection === 'posts' ? 'active' : ''}`}
-          onClick={() => setActiveSection('posts')}
+          className={`sidebar-item ${activeSection === 'notifications' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveSection('notifications');
+            setSidebarOpen(false);
+          }}
         >
-          <span className="sidebar-icon">📝</span>
-          Пости
-        </button>
-        <button
-          className={`sidebar-item ${activeSection === 'categories' ? 'active' : ''}`}
-          onClick={() => setActiveSection('categories')}
-        >
-          <span className="sidebar-icon">🏷️</span>
-          Категорії
+          <FaBell className="sidebar-icon" /> Сповіщення
         </button>
         <button
           className={`sidebar-item ${activeSection === 'gallery' ? 'active' : ''}`}
-          onClick={() => setActiveSection('gallery')}
+          onClick={() => {
+            setActiveSection('gallery');
+            setSidebarOpen(false);
+          }}
         >
-          <span className="sidebar-icon">🖼️</span>
-          Галерея
+          <FaImage className="sidebar-icon" /> Галерея
+        </button>
+        <button
+          className={`sidebar-item ${activeSection === 'gallery-categories' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveSection('gallery-categories');
+            setSidebarOpen(false);
+          }}
+        >
+          <FaFolder className="sidebar-icon" /> Категорії галереї
+        </button>
+        <button
+          className={`sidebar-item ${activeSection === 'posts' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveSection('posts');
+            setSidebarOpen(false);
+          }}
+        >
+          <FaImage className="sidebar-icon" /> Пости
+        </button>
+        <button
+          className={`sidebar-item ${activeSection === 'categories' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveSection('categories');
+            setSidebarOpen(false);
+          }}
+        >
+          <FaFolder className="sidebar-icon" /> Категорії постів
+        </button>
+        <button
+          className={`sidebar-item ${activeSection === 'bookings' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveSection('bookings');
+            setSidebarOpen(false);
+          }}
+        >
+          <FaCalendar className="sidebar-icon" /> Бронювання
+        </button>
+        <button
+          className={`sidebar-item ${activeSection === 'artists' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveSection('artists');
+            setSidebarOpen(false);
+          }}
+        >
+          <FaUser className="sidebar-icon" /> Майстри
         </button>
         <button className="sidebar-item logout" onClick={handleExitAdmin}>
-          <span className="sidebar-icon">🚪</span>
-          Вийти з адмін-панелі
+          <FaSignOutAlt className="sidebar-icon" /> Вийти з адмін-панелі
         </button>
       </nav>
-    </aside>
+    </div>
   );
 };
 
