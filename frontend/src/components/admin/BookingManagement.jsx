@@ -40,6 +40,7 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
       console.log('Triggering fetchAvailableTimes for artist:', bookingForm.artist, 'date:', bookingForm.date);
       fetchAvailableTimes(bookingForm.artist, bookingForm.date);
     } else {
+      console.log('Resetting availableTimes: no artist or date');
       setAvailableTimes([]);
       setFormError('');
     }
@@ -71,13 +72,14 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
 
   const fetchAvailableTimes = async (artistId, date) => {
     try {
-      console.log(`Fetching available times for artist: ${artistId}, date: ${date}`);
+      console.log(`Sending request to fetch available times for artist: ${artistId}, date: ${date}`);
       const res = await fetch(
         `http://localhost:5000/api/bookings/availability?artist=${artistId}&date=${date}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         }
       );
+      console.log('Response status:', res.status);
       const data = await res.json();
       console.log('fetchAvailableTimes response:', data);
       if (!res.ok) {
