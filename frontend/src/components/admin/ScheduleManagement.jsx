@@ -6,22 +6,12 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
   const [artists, setArtists] = useState([]);
   const [form, setForm] = useState({
     artist: '',
-    dayOfWeek: '',
+    date: '',
     startTime: '',
     endTime: '',
   });
   const [editId, setEditId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  const daysOfWeek = [
-    { value: 0, label: 'Неділя' },
-    { value: 1, label: 'Понеділок' },
-    { value: 2, label: 'Вівторок' },
-    { value: 3, label: 'Середа' },
-    { value: 4, label: 'Четвер' },
-    { value: 5, label: 'П’ятниця' },
-    { value: 6, label: 'Субота' },
-  ];
 
   useEffect(() => {
     let isMounted = true;
@@ -63,7 +53,7 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
       const method = editId ? 'PUT' : 'POST';
       await handleSubmit(url, method, form);
       setSuccess(editId ? 'Графік оновлено!' : 'Графік створено!');
-      setForm({ artist: '', dayOfWeek: '', startTime: '', endTime: '' });
+      setForm({ artist: '', date: '', startTime: '', endTime: '' });
       setEditId(null);
       const data = await handleSubmit('http://localhost:5000/api/artist-schedules', 'GET');
       setSchedules(Array.isArray(data) ? data : []);
@@ -75,7 +65,7 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
   const handleEdit = (schedule) => {
     setForm({
       artist: schedule.artist?._id || '',
-      dayOfWeek: schedule.dayOfWeek.toString(),
+      date: schedule.date ? new Date(schedule.date).toISOString().split('T')[0] : '',
       startTime: schedule.startTime,
       endTime: schedule.endTime,
     });
@@ -92,6 +82,22 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  // Форматування дати
+  const formatDate = (schedule) => {
+    if (schedule.date) {
+      return new Date(schedule.date).toLocaleDateString('uk-UA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    }
+    if (schedule.dayOfWeek !== undefined) {
+      const days = ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', 'П’ятниця', 'Субота'];
+      return days[schedule.dayOfWeek];
+    }
+    return 'Невідома дата';
   };
 
   if (isLoading) {
@@ -123,19 +129,14 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
           </select>
         </div>
         <div className="form-group">
-          <label>День тижня</label>
-          <select
-            value={form.dayOfWeek}
-            onChange={(e) => setForm({ ...form, dayOfWeek: e.target.value })}
+          <label>Дата</label>
+          <input
+            type="date"
+            value={form.date}
+            onChange={(e) => setForm({ ...form, date: e.target.value })}
             required
-          >
-            <option value="">Виберіть день</option>
-            {daysOfWeek.map((day) => (
-              <option key={day.value} value={day.value}>
-                {day.label}
-              </option>
-            ))}
-          </select>
+            min={new Date().toISOString().split('T')[0]}
+          />
         </div>
         <div className="form-group">
           <label>Початковий час</label>
@@ -163,7 +164,7 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
             type="button"
             className="cancel-btn"
             onClick={() => {
-              setForm({ artist: '', dayOfWeek: '', startTime: '', endTime: '' });
+              setForm({ artist: '', date: '', startTime: '', endTime: '' });
               setEditId(null);
             }}
           >
@@ -178,7 +179,7 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
           <thead>
             <tr>
               <th>Майстер</th>
-              <th>День тижня</th>
+              <th>Дата</th>
               <th>Години</th>
               <th>Дії</th>
             </tr>
@@ -187,7 +188,7 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
             {schedules.map((schedule) => (
               <tr key={schedule._id}>
                 <td>{schedule.artist?.name || 'Невідомий'}</td>
-                <td>{daysOfWeek.find((d) => d.value === schedule.dayOfWeek)?.label}</td>
+                <td>{formatDate(schedule)}</td>
                 <td>{`${schedule.startTime} - ${schedule.endTime}`}</td>
                 <td>
                   <button className="edit-btn" onClick={() => handleEdit(schedule)}>

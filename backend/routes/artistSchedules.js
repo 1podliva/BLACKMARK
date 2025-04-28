@@ -12,7 +12,7 @@ router.get('/', auth, restrictToAdmin, async (req, res) => {
   try {
     const schedules = await ArtistSchedule.find()
       .populate('artist', 'name')
-      .sort({ artist: 1, dayOfWeek: 1 });
+      .sort({ artist: 1, date: 1 });
     res.json(schedules);
   } catch (err) {
     console.error('GET /api/artist-schedules Error:', err);
@@ -42,7 +42,7 @@ router.post(
     auth,
     restrictToAdmin,
     body('artist').isMongoId().withMessage('Невірний ID майстра'),
-    body('dayOfWeek').isInt({ min: 0, max: 6 }).withMessage('Невірний день тижня'),
+    body('date').isISO8601().toDate().withMessage('Невірна дата'),
     body('startTime').matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).withMessage('Невірний формат часу початку'),
     body('endTime').matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).withMessage('Невірний формат часу закінчення'),
     body().custom(({ startTime, endTime }) => {
@@ -64,7 +64,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
     try {
-      const { artist, dayOfWeek, startTime, endTime } = req.body;
+      const { artist, date, startTime, endTime } = req.body;
 
       // Перевірка існування майстра
       const artistData = await Artist.findById(artist);
@@ -72,15 +72,15 @@ router.post(
         return res.status(404).json({ message: 'Майстер не знайдений' });
       }
 
-      // Перевірка, чи графік для цього дня вже існує
-      const existingSchedule = await ArtistSchedule.findOne({ artist, dayOfWeek });
+      // Перевірка, чи графік для цієї дати вже існує
+      const existingSchedule = await ArtistSchedule.findOne({ artist, date });
       if (existingSchedule) {
-        return res.status(400).json({ message: 'Графік для цього дня вже існує' });
+        return res.status(400).json({ message: 'Графік для цієї дати вже існує' });
       }
 
       const schedule = new ArtistSchedule({
         artist,
-        dayOfWeek,
+        date,
         startTime,
         endTime,
       });
@@ -100,7 +100,7 @@ router.put(
     auth,
     restrictToAdmin,
     body('artist').isMongoId().withMessage('Невірний ID майстра'),
-    body('dayOfWeek').isInt({ min: 0, max: 6 }).withMessage('Невірний день тижня'),
+    body('date').isISO8601().toDate().withMessage('Невірна дата'),
     body('startTime').matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).withMessage('Невірний формат часу початку'),
     body('endTime').matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).withMessage('Невірний формат часу закінчення'),
     body().custom(({ startTime, endTime }) => {
@@ -122,7 +122,7 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
     }
     try {
-      const { artist, dayOfWeek, startTime, endTime } = req.body;
+      const { artist, date, startTime, endTime } = req.body;
 
       // Перевірка існування майстра
       const artistData = await Artist.findById(artist);
@@ -130,14 +130,14 @@ router.put(
         return res.status(404).json({ message: 'Майстер не знайдений' });
       }
 
-      // Перевірка, чи графік для цього дня вже існує (окрім поточного)
+      // Перевірка, чи графік для цієї дати вже існує (окрім поточного)
       const existingSchedule = await ArtistSchedule.findOne({
         artist,
-        dayOfWeek,
+        date,
         _id: { $ne: req.params.id },
       });
       if (existingSchedule) {
-        return res.status(400).json({ message: 'Графік для цього дня вже існує' });
+        return res.status(400).json({ message: 'Графік для цієї дати вже існує' });
       }
 
       const schedule = await ArtistSchedule.findById(req.params.id);
@@ -146,7 +146,7 @@ router.put(
       }
 
       schedule.artist = artist;
-      schedule.dayOfWeek = dayOfWeek;
+      schedule.date = date;
       schedule.startTime = startTime;
       schedule.endTime = endTime;
       await schedule.save();

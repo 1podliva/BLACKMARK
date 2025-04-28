@@ -18,6 +18,13 @@ const Profile = () => {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
+  // Перевіряємо авторизацію
+  useEffect(() => {
+    if (!user && !token) {
+      navigate('/');
+    }
+  }, [user, token, navigate]);
+
   const statusTranslations = {
     pending: 'Очікує',
     confirmed: 'Підтверджено',
@@ -47,13 +54,33 @@ const Profile = () => {
 
   const fetchBookings = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/bookings', {
+      // Запит для бронювань
+      const bookingsRes = await fetch('http://localhost:5000/api/bookings', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
-      console.log('Fetched bookings:', data);
-      if (!res.ok) throw new Error(data.message);
-      setBookings(data);
+      const bookingsData = await bookingsRes.json();
+      console.log('Fetched bookings:', bookingsData);
+      if (!bookingsRes.ok) throw new Error(bookingsData.message);
+
+      // Запит для консультацій
+      const consultationsRes = await fetch('http://localhost:5000/api/bookings/consultations', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const consultationsData = await consultationsRes.json();
+      console.log('Fetched consultations:', consultationsData);
+      if (!consultationsRes.ok) throw new Error(consultationsData.message);
+
+      // Об’єднуємо бронювання і консультації
+      const combinedBookings = [
+        ...bookingsData.map((b) => ({ ...b, type: 'booking' })),
+        ...consultationsData.map((c) => ({
+          ...c,
+          type: 'consultation',
+          date: c.preferredDate, // Для уніфікації з Booking
+          description: c.description || 'Консультація',
+        })),
+      ];
+      setBookings(combinedBookings);
     } catch (err) {
       setError(err.message);
     }
@@ -72,16 +99,25 @@ const Profile = () => {
 
   const fetchAvailableTimes = async (artistId, date) => {
     try {
+      console.log('Fetching available times for:', { artistId, date });
       const res = await fetch(
         `http://localhost:5000/api/bookings/availability?artist=${artistId}&date=${date}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      console.log('.DATA:', data);
+      console.log('Availability response:', data);
+      if (!res.ok) throw new Error(data.message || 'Помилка сервера');
       setAvailableTimes(data.availableTimes || []);
+      if (!data.availableTimes || data.availableTimes.length === 0) {
+        setError('Немає доступних слотів на цю дату');
+        setTimeout(() => setError(''), 5000);
+      }
     } catch (err) {
+      console.error('fetchAvailableTimes error:', err);
       setError(err.message);
       setAvailableTimes([]);
+      setTimeout(() => setError(''), 5000);
     }
   };
 
@@ -149,8 +185,14 @@ const Profile = () => {
       console.log('Consultation response:', data);
       if (!res.ok) throw new Error(data.message || 'Помилка сервера');
       setSuccess('Запит на консультацію відправлено!');
+      const { artist, preferredDate } = consultationForm;
       setConsultationForm({ artist: '', preferredDate: '', time: '' });
       setAvailableTimes([]);
+      // Оновлюємо історію і доступні слоти
+      await fetchBookings();
+      if (artist && preferredDate) {
+        await fetchAvailableTimes(artist, preferredDate);
+      }
     } catch (err) {
       console.error('Consultation error:', err);
       setError(err.message);
@@ -158,7 +200,10 @@ const Profile = () => {
   };
 
   const handleDateChange = (date) => {
-    const formattedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).toISOString().split('T')[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
     console.log('Selected date:', { raw: date, formatted: formattedDate });
     setConsultationForm({ ...consultationForm, preferredDate: formattedDate, time: '' });
   };
@@ -167,9 +212,9 @@ const Profile = () => {
     logout();
   };
 
-  if (!user || !token) {
-    navigate('/');
-    return null;
+  // Показуємо лоадер, поки user не ініціалізовано
+  if (user === null) {
+    return <div className="loading">Завантаження...</div>;
   }
 
   return (
@@ -194,7 +239,7 @@ const Profile = () => {
           >
             Бронювання
           </button>
-          {user.role === 'admin' && (
+          {user?.role === 'admin' && (
             <button
               className={`tab ${activeTab === 'admin' ? 'active' : ''}`}
               onClick={() => navigate('/admin')}
@@ -352,11 +397,12 @@ const Profile = () => {
               </button>
             </form>
 
-            <h3>Історія бронювань</h3>
+            <h3>Історія бронювань та консультацій</h3>
             {bookings.length > 0 ? (
               <table className="bookings-table">
                 <thead>
                   <tr>
+                    <th>Тип</th>
                     <th>Майстер</th>
                     <th>Дата</th>
                     <th>Час</th>
@@ -366,20 +412,21 @@ const Profile = () => {
                 </thead>
                 <tbody>
                   {bookings
-                    .sort((a, b) => new Date(b.date) - new Date(a.date)) // Новіші спочатку
-                    .map((booking) => (
-                      <tr key={booking._id}>
-                        <td>{booking.artist?.name || 'Невідомий'}</td>
-                        <td>{new Date(booking.date).toLocaleDateString()}</td>
-                        <td>{booking.time}</td>
-                        <td>{booking.description || 'Немає'}</td>
-                        <td>{statusTranslations[booking.status] || booking.status}</td>
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .map((item) => (
+                      <tr key={item._id}>
+                        <td>{item.type === 'booking' ? 'Бронювання' : 'Консультація'}</td>
+                        <td>{item.artist?.name || 'Невідомий'}</td>
+                        <td>{new Date(item.date).toLocaleDateString()}</td>
+                        <td>{item.time}</td>
+                        <td>{item.description || 'Немає'}</td>
+                        <td>{statusTranslations[item.status] || item.status}</td>
                       </tr>
                     ))}
                 </tbody>
               </table>
             ) : (
-              <p>Бронювань немає</p>
+              <p>Бронювань або консультацій немає</p>
             )}
           </div>
         )}

@@ -34,7 +34,8 @@
   }
   
   .form-group select,
-  .form-group input {
+  .form-group input[type="date"],
+  .form-group input[type="time"] {
     width: 100%;
     padding: 8px;
     background-color: var(--dark-bg);
@@ -42,6 +43,10 @@
     border-radius: 5px;
     color: var(--soft-white);
     font-size: 16px;
+  }
+  
+  .form-group input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
   }
   
   .submit-btn,
@@ -71,7 +76,7 @@
   }
   
   .cancel-btn:hover {
-    background-color: #CBA6DD; /* --muted-pink */
+    background-color: #CBA6DD;
   }
   
   .edit-btn {

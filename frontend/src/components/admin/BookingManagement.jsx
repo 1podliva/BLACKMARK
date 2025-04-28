@@ -7,6 +7,7 @@ import './BookingManagement.css';
 const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setSuccess, fetchBookings }) => {
   const [users, setUsers] = useState([]);
   const [artists, setArtists] = useState([]);
+  const [consultations, setConsultations] = useState([]);
   const [bookingForm, setBookingForm] = useState({
     user: '',
     artist: '',
@@ -23,6 +24,7 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
     fetchBookings();
     fetchUsers();
     fetchArtists();
+    fetchConsultations();
   }, [fetchBookings]);
 
   useEffect(() => {
@@ -65,6 +67,20 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setArtists(data);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const fetchConsultations = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/bookings/consultations/all', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      const data = await res.json();
+      console.log('Fetched consultations:', data);
+      if (!res.ok) throw new Error(data.message);
+      setConsultations(data);
     } catch (err) {
       setError(err.message);
     }
@@ -200,11 +216,32 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
     }
   };
 
-  const handleUpdateStatus = async (id, status) => {
+  const handleUpdateBookingStatus = async (id, status) => {
     try {
       await handleSubmit(`http://localhost:5000/api/bookings/${id}/status`, 'PUT', { status });
-      setSuccess(`Статус оновлено до ${status}!`);
+      setSuccess(`Статус бронювання оновлено до ${status}!`);
       fetchBookings();
+    } catch (err) {
+      // Помилка встановлюється в handleSubmit
+    }
+  };
+
+  const handleDeleteConsultation = async (id) => {
+    if (!window.confirm('Ви впевнені, що хочете видалити цю консультацію?')) return;
+    try {
+      await handleSubmit(`http://localhost:5000/api/bookings/consultations/${id}`, 'DELETE');
+      setSuccess('Консультацію видалено!');
+      fetchConsultations();
+    } catch (err) {
+      // Помилка встановлюється в handleSubmit
+    }
+  };
+
+  const handleUpdateConsultationStatus = async (id, status) => {
+    try {
+      await handleSubmit(`http://localhost:5000/api/bookings/consultations/${id}/status`, 'PUT', { status });
+      setSuccess(`Статус консультації оновлено до ${status}!`);
+      fetchConsultations();
     } catch (err) {
       // Помилка встановлюється в handleSubmit
     }
@@ -212,7 +249,7 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
 
   return (
     <div className="booking-management">
-      <h3>Керування бронюваннями</h3>
+      <h3>Керування бронюваннями та консультаціями</h3>
 
       <h4>Створити бронювання</h4>
       {formError && <p className="error-message">{formError}</p>}
@@ -307,13 +344,13 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
                   <>
                     <button
                       className="submit-btn"
-                      onClick={() => handleUpdateStatus(booking._id, 'confirmed')}
+                      onClick={() => handleUpdateBookingStatus(booking._id, 'confirmed')}
                     >
                       Підтвердити
                     </button>
                     <button
                       className="delete-btn"
-                      onClick={() => handleUpdateStatus(booking._id, 'cancelled')}
+                      onClick={() => handleUpdateBookingStatus(booking._id, 'cancelled')}
                     >
                       Скасувати
                     </button>
@@ -322,7 +359,7 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
                 {(booking.status === 'pending' || booking.status === 'confirmed') && (
                   <button
                     className="submit-btn"
-                    onClick={() => handleUpdateStatus(booking._id, 'completed')}
+                    onClick={() => handleUpdateBookingStatus(booking._id, 'completed')}
                   >
                     Завершено
                   </button>
@@ -335,6 +372,50 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
           ))
         ) : (
           <p>Бронювання відсутні</p>
+        )}
+      </div>
+
+      <h4>Усі консультації</h4>
+      <div className="consultations-list">
+        {consultations && consultations.length > 0 ? (
+          consultations.map((consultation) => (
+            <div key={consultation._id} className="consultation-item">
+              <span>
+                Клієнт: {consultation.user?.firstName} {consultation.user?.lastName || 'Невідомий'},
+                Майстер: {consultation.artist?.name || 'Невідомий'},
+                Дата: {new Date(consultation.preferredDate).toLocaleDateString()},
+                Час: {consultation.time},
+                Опис: {consultation.description || 'Немає'},
+                Статус: {consultation.status}
+              </span>
+              <div className="consultation-actions">
+                {consultation.status === 'pending' && (
+                  <>
+                    <button
+                      className="submit-btn"
+                      onClick={() => handleUpdateConsultationStatus(consultation._id, 'reviewed')}
+                    >
+                      Переглянуто
+                    </button>
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleUpdateConsultationStatus(consultation._id, 'cancelled')}
+                    >
+                      Скасувати
+                    </button>
+                  </>
+                )}
+                <button
+                  className="delete-btn"
+                  onClick={() => handleDeleteConsultation(consultation._id)}
+                >
+                  Видалити
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p>Консультації відсутні</p>
         )}
       </div>
     </div>
