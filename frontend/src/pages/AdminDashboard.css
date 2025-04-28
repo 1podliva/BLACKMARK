@@ -345,6 +345,114 @@
   color: var(--light-gray);
 }
 
+/* Стилі для ScheduleManagement */
+.schedule-management {
+  background-color: var(--navy-gray);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.schedule-management h2,
+.schedule-management h3 {
+  font-size: 22px;
+  color: var(--purple-accent);
+  margin-bottom: 15px;
+}
+
+.schedule-management .form-group {
+  margin-bottom: 15px;
+}
+
+.schedule-management .form-group label {
+  display: block;
+  font-size: 16px;
+  color: var(--light-gray);
+  margin-bottom: 5px;
+}
+
+.schedule-management .form-group input,
+.schedule-management .form-group select {
+  width: 100%;
+  padding: 8px;
+  background-color: var(--dark-bg);
+  border: 1px solid var(--light-gray);
+  border-radius: 5px;
+  color: var(--soft-white);
+  font-size: 16px;
+}
+
+.schedule-management .submit-btn,
+.schedule-management .cancel-btn,
+.schedule-management .edit-btn,
+.schedule-management .delete-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 10px;
+}
+
+.schedule-management .submit-btn {
+  background-color: var(--purple-accent);
+  color: var(--soft-white);
+}
+
+.schedule-management .submit-btn:hover {
+  background-color: var(--purple-hover);
+}
+
+.schedule-management .cancel-btn {
+  background-color: var(--light-gray);
+  color: var(--dark-bg);
+}
+
+.schedule-management .cancel-btn:hover {
+  background-color: var(--muted-pink);
+}
+
+.schedule-management .edit-btn {
+  background-color: var(--success-green);
+  color: var(--soft-white);
+}
+
+.schedule-management .edit-btn:hover {
+  background-color: #27AE60;
+}
+
+.schedule-management .delete-btn {
+  background-color: var(--error-red);
+  color: var(--soft-white);
+}
+
+.schedule-management .delete-btn:hover {
+  background-color: #E63946;
+}
+
+.schedules-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--dark-bg);
+}
+
+.schedules-table th,
+.schedules-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.schedules-table th {
+  background-color: var(--purple-accent);
+  color: var(--soft-white);
+  font-weight: 600;
+}
+
+.schedules-table td {
+  color: var(--light-gray);
+}
+
 #banner {
   display: block;
   width: 100%;
@@ -379,7 +487,9 @@
   .bookings-table th,
   .bookings-table td,
   .artists-table th,
-  .artists-table td {
+  .artists-table td,
+  .schedules-table th,
+  .schedules-table td {
     padding: 8px;
     font-size: 14px;
   }
@@ -398,4 +508,3 @@
     padding: 10px;
   }
 }
-

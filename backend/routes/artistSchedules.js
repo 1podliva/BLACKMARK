@@ -7,6 +7,19 @@ const auth = require('../middleware/auth');
 const restrictToAdmin = require('../middleware/restrictToAdmin');
 const { body, validationResult } = require('express-validator');
 
+// Отримати всі графіки (адмін)
+router.get('/', auth, restrictToAdmin, async (req, res) => {
+  try {
+    const schedules = await ArtistSchedule.find()
+      .populate('artist', 'name')
+      .sort({ artist: 1, dayOfWeek: 1 });
+    res.json(schedules);
+  } catch (err) {
+    console.error('GET /api/artist-schedules Error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Отримати графік майстра
 router.get('/:artistId', auth, async (req, res) => {
   try {
@@ -22,7 +35,7 @@ router.get('/:artistId', auth, async (req, res) => {
   }
 });
 
-// Створити або оновити графік (тільки адмін)
+// Створити графік (адмін)
 router.post(
   '/',
   [
@@ -59,12 +72,19 @@ router.post(
         return res.status(404).json({ message: 'Майстер не знайдений' });
       }
 
-      // Оновлення або створення графіку
-      const schedule = await ArtistSchedule.findOneAndUpdate(
-        { artist, dayOfWeek },
-        { startTime, endTime },
-        { upsert: true, new: true }
-      );
+      // Перевірка, чи графік для цього дня вже існує
+      const existingSchedule = await ArtistSchedule.findOne({ artist, dayOfWeek });
+      if (existingSchedule) {
+        return res.status(400).json({ message: 'Графік для цього дня вже існує' });
+      }
+
+      const schedule = new ArtistSchedule({
+        artist,
+        dayOfWeek,
+        startTime,
+        endTime,
+      });
+      await schedule.save();
       res.status(201).json(schedule);
     } catch (err) {
       console.error('POST /api/artist-schedules Error:', err);
@@ -73,7 +93,72 @@ router.post(
   }
 );
 
-// Видалити графік (тільки адмін)
+// Оновити графік (адмін)
+router.put(
+  '/:id',
+  [
+    auth,
+    restrictToAdmin,
+    body('artist').isMongoId().withMessage('Невірний ID майстра'),
+    body('dayOfWeek').isInt({ min: 0, max: 6 }).withMessage('Невірний день тижня'),
+    body('startTime').matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).withMessage('Невірний формат часу початку'),
+    body('endTime').matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).withMessage('Невірний формат часу закінчення'),
+    body().custom(({ startTime, endTime }) => {
+      if (startTime && endTime) {
+        const [startHour, startMinute] = startTime.split(':').map(Number);
+        const [endHour, endMinute] = endTime.split(':').map(Number);
+        const start = startHour * 60 + startMinute;
+        const end = endHour * 60 + endMinute;
+        if (start >= end) {
+          throw new Error('Час закінчення має бути пізніше за час початку');
+        }
+      }
+      return true;
+    }),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+      const { artist, dayOfWeek, startTime, endTime } = req.body;
+
+      // Перевірка існування майстра
+      const artistData = await Artist.findById(artist);
+      if (!artistData) {
+        return res.status(404).json({ message: 'Майстер не знайдений' });
+      }
+
+      // Перевірка, чи графік для цього дня вже існує (окрім поточного)
+      const existingSchedule = await ArtistSchedule.findOne({
+        artist,
+        dayOfWeek,
+        _id: { $ne: req.params.id },
+      });
+      if (existingSchedule) {
+        return res.status(400).json({ message: 'Графік для цього дня вже існує' });
+      }
+
+      const schedule = await ArtistSchedule.findById(req.params.id);
+      if (!schedule) {
+        return res.status(404).json({ message: 'Графік не знайдено' });
+      }
+
+      schedule.artist = artist;
+      schedule.dayOfWeek = dayOfWeek;
+      schedule.startTime = startTime;
+      schedule.endTime = endTime;
+      await schedule.save();
+      res.json(schedule);
+    } catch (err) {
+      console.error('PUT /api/artist-schedules/:id Error:', err);
+      res.status(500).json({ message: 'Server error' });
+    }
+  }
+);
+
+// Видалити графік (адмін)
 router.delete('/:id', auth, restrictToAdmin, async (req, res) => {
   try {
     const schedule = await ArtistSchedule.findById(req.params.id);

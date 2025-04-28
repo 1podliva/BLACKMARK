@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaTimes, FaSignOutAlt, FaImage, FaFolder, FaCalendar, FaBell, FaUser } from 'react-icons/fa';
-// import './AdminDashboard.css';
+import { FaBars, FaTimes, FaSignOutAlt, FaImage, FaFolder, FaCalendar, FaBell, FaUser, FaCalendarAlt } from 'react-icons/fa';
+
 
 const Sidebar = ({ activeSection, setActiveSection, isSidebarOpen, setSidebarOpen }) => {
   const navigate = useNavigate();
@@ -82,6 +82,15 @@ const Sidebar = ({ activeSection, setActiveSection, isSidebarOpen, setSidebarOpe
           }}
         >
           <FaUser className="sidebar-icon" /> Майстри
+        </button>
+        <button
+          className={`sidebar-item ${activeSection === 'schedules' ? 'active' : ''}`}
+          onClick={() => {
+            setActiveSection('schedules');
+            setSidebarOpen(false);
+          }}
+        >
+          <FaCalendarAlt className="sidebar-icon" /> Графіки
         </button>
         <button className="sidebar-item logout" onClick={handleExitAdmin}>
           <FaSignOutAlt className="sidebar-icon" /> Вийти з адмін-панелі

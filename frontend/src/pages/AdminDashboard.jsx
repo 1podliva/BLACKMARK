@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaBars } from 'react-icons/fa';
 import Sidebar from '../components/admin/Sidebar';
@@ -9,6 +9,7 @@ import GalleryCategoryManagement from '../components/admin/GalleryCategoryManage
 import BookingManagement from '../components/admin/BookingManagement';
 import NotificationManagement from '../components/admin/NotificationManagement';
 import ArtistManagement from '../components/admin/ArtistManagement';
+import ScheduleManagement from '../components/admin/ScheduleManagement';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -61,39 +62,43 @@ const AdminDashboard = () => {
     verifyAdminAccess();
   }, [token, navigate]);
 
-  const handleSubmit = async (url, method, payload, isFormData = false) => {
-    setError('');
-    setSuccess('');
-    try {
-      console.log('Request:', { url, method, token, payload });
-      const headers = { Authorization: `Bearer ${token}` };
-      if (!isFormData) headers['Content-Type'] = 'application/json';
-      const body = isFormData ? payload : JSON.stringify(payload);
-      const res = await fetch(url, { method, headers, body });
-      console.log('Response status:', res.status, 'URL:', url);
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        if (res.status === 401 || res.status === 403) {
-          localStorage.removeItem('token');
-          navigate('/');
-          throw new Error('Доступ заборонено. Увійдіть як адміністратор.');
+  const handleSubmit = useCallback(
+    async (url, method, payload, isFormData = false) => {
+      setError('');
+      try {
+        console.log('Request:', { url, method, token, payload }); // TODO: Видалити в продакшені
+        const headers = { Authorization: `Bearer ${token}` };
+        if (!isFormData) headers['Content-Type'] = 'application/json';
+        const body = isFormData ? payload : JSON.stringify(payload);
+        const res = await fetch(url, { method, headers, body });
+        console.log('Response status:', res.status, 'URL:', url); // TODO: Видалити в продакшені
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('token');
+            navigate('/');
+            throw new Error('Доступ заборонено. Увійдіть як адміністратор.');
+          }
+          throw new Error(errorData.message || 'Не вдалося обробити запит');
         }
-        throw new Error(errorData.message || 'Не вдалося обробити запит');
+        const responseData = await res.json();
+        if (method !== 'GET') {
+          setSuccess('Операція успішна!');
+          setTimeout(() => setSuccess(''), 3000);
+        }
+        console.log('Response data:', responseData); // TODO: Видалити в продакшені
+        return responseData;
+      } catch (err) {
+        console.error('Request error:', err);
+        setError(err.message || 'Помилка запиту');
+        setTimeout(() => setError(''), 3000);
+        throw err;
       }
-      const responseData = await res.json();
-      setSuccess('Операція успішна!');
-      setTimeout(() => setSuccess(''), 3000);
-      console.log('Response data:', responseData);
-      return responseData;
-    } catch (err) {
-      console.error('Request error:', err);
-      setError(err.message || 'Помилка запиту');
-      setTimeout(() => setError(''), 3000);
-      throw err;
-    }
-  };
+    },
+    [token, navigate]
+  );
 
-  const fetchGalleryImages = async () => {
+  const fetchGalleryImages = useCallback(async () => {
     try {
       const res = await fetch('http://localhost:5000/api/gallery', {
         headers: { Authorization: `Bearer ${token}` },
@@ -104,9 +109,9 @@ const AdminDashboard = () => {
     } catch (err) {
       setError(err.message);
     }
-  };
+  }, [token]);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     try {
       const res = await fetch('http://localhost:5000/api/posts', {
         headers: { Authorization: `Bearer ${token}` },
@@ -117,9 +122,9 @@ const AdminDashboard = () => {
     } catch (err) {
       setError(err.message);
     }
-  };
+  }, [token]);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const res = await fetch('http://localhost:5000/api/categories');
       if (!res.ok) throw new Error('Не вдалося отримати категорії');
@@ -128,9 +133,9 @@ const AdminDashboard = () => {
     } catch (err) {
       setError(err.message);
     }
-  };
+  }, []);
 
-  const fetchGalleryCategories = async () => {
+  const fetchGalleryCategories = useCallback(async () => {
     try {
       const res = await fetch('http://localhost:5000/api/gallery-categories', {
         headers: { Authorization: `Bearer ${token}` },
@@ -141,9 +146,9 @@ const AdminDashboard = () => {
     } catch (err) {
       setError(err.message);
     }
-  };
+  }, [token]);
 
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     try {
       const res = await fetch('http://localhost:5000/api/bookings/all', {
         headers: { Authorization: `Bearer ${token}` },
@@ -154,110 +159,122 @@ const AdminDashboard = () => {
     } catch (err) {
       setError(err.message);
     }
-  };
+  }, [token]);
 
-  const fetchArtists = async () => {
+  const fetchArtists = useCallback(async () => {
     try {
       const res = await fetch('http://localhost:5000/api/artists', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Не вдалося отримати майстрів');
       const data = await res.json();
-      setArtists(data);
+      console.log('fetchArtists response:', data); // TODO: Видалити в продакшені
+      const artistsData = Array.isArray(data) ? data : [];
+      setArtists(artistsData);
+      return artistsData;
     } catch (err) {
+      console.error('fetchArtists error:', err);
       setError(err.message);
+      return [];
     }
-  };
+  }, [token]);
 
   if (loading) {
     return <div className="loading">Завантаження...</div>;
   }
 
   return (
-    
     <>
-    <img src="/images/Banner.svg" id="banner" alt="Banner" />
-    <div className="admin-dashboard">
-      
-      <Sidebar
-        activeSection={activeSection}
-        setActiveSection={setActiveSection}
-        isSidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-      />
-      <div className={`admin-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
-        <button className="sidebar-toggle mobile" onClick={() => setSidebarOpen(!sidebarOpen)}>
-          <FaBars />
-        </button>
-        {error && <p className="error-message">{error}</p>}
-        {success && <p className="success-message">{success}</p>}
-        {activeSection === 'notifications' && (
-          <NotificationManagement token={token} setError={setError} setSuccess={setSuccess} />
-        )}
-        {activeSection === 'gallery' && (
-          <GalleryManagement
-            galleryImages={galleryImages}
-            setGalleryImages={setGalleryImages}
-            handleSubmit={handleSubmit}
-            setError={setError}
-            setSuccess={setSuccess}
-            fetchGalleryImages={fetchGalleryImages}
-            galleryCategories={galleryCategories}
-          />
-        )}
-        {activeSection === 'gallery-categories' && (
-          <GalleryCategoryManagement
-            galleryCategories={galleryCategories}
-            setGalleryCategories={setGalleryCategories}
-            handleSubmit={handleSubmit}
-            setError={setError}
-            setSuccess={setSuccess}
-            fetchGalleryCategories={fetchGalleryCategories}
-          />
-        )}
-        {activeSection === 'posts' && (
-          <PostManagement
-            posts={posts}
-            categories={categories}
-            setPosts={setPosts}
-            handleSubmit={handleSubmit}
-            setError={setError}
-            setSuccess={setSuccess}
-            fetchPosts={fetchPosts}
-          />
-        )}
-        {activeSection === 'categories' && (
-          <CategoryManagement
-            categories={categories}
-            setCategories={setCategories}
-            handleSubmit={handleSubmit}
-            setError={setError}
-            setSuccess={setSuccess}
-            fetchCategories={fetchCategories}
-          />
-        )}
-        {activeSection === 'bookings' && (
-          <BookingManagement
-            bookings={bookings}
-            setBookings={setBookings}
-            handleSubmit={handleSubmit}
-            setError={setError}
-            setSuccess={setSuccess}
-            fetchBookings={fetchBookings}
-          />
-        )}
-        {activeSection === 'artists' && (
-          <ArtistManagement
-            artists={artists}
-            setArtists={setArtists}
-            handleSubmit={handleSubmit}
-            setError={setError}
-            setSuccess={setSuccess}
-            fetchArtists={fetchArtists}
-          />
-        )}
+      <img src="/images/Banner.svg" id="banner" alt="Banner" />
+      <div className="admin-dashboard">
+        <Sidebar
+          activeSection={activeSection}
+          setActiveSection={setActiveSection}
+          isSidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+        <div className={`admin-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
+          <button className="sidebar-toggle mobile" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            <FaBars />
+          </button>
+          {error && <p className="error-message">{error}</p>}
+          {success && <p className="success-message">{success}</p>}
+          {activeSection === 'notifications' && (
+            <NotificationManagement token={token} setError={setError} setSuccess={setSuccess} />
+          )}
+          {activeSection === 'gallery' && (
+            <GalleryManagement
+              galleryImages={galleryImages}
+              setGalleryImages={setGalleryImages}
+              handleSubmit={handleSubmit}
+              setError={setError}
+              setSuccess={setSuccess}
+              fetchGalleryImages={fetchGalleryImages}
+              galleryCategories={galleryCategories}
+            />
+          )}
+          {activeSection === 'gallery-categories' && (
+            <GalleryCategoryManagement
+              galleryCategories={galleryCategories}
+              setGalleryCategories={setGalleryCategories}
+              handleSubmit={handleSubmit}
+              setError={setError}
+              setSuccess={setSuccess}
+              fetchGalleryCategories={fetchGalleryCategories}
+            />
+          )}
+          {activeSection === 'posts' && (
+            <PostManagement
+              posts={posts}
+              categories={categories}
+              setPosts={setPosts}
+              handleSubmit={handleSubmit}
+              setError={setError}
+              setSuccess={setSuccess}
+              fetchPosts={fetchPosts}
+            />
+          )}
+          {activeSection === 'categories' && (
+            <CategoryManagement
+              categories={categories}
+              setCategories={setCategories}
+              handleSubmit={handleSubmit}
+              setError={setError}
+              setSuccess={setSuccess}
+              fetchCategories={fetchCategories}
+            />
+          )}
+          {activeSection === 'bookings' && (
+            <BookingManagement
+              bookings={bookings}
+              setBookings={setBookings}
+              handleSubmit={handleSubmit}
+              setError={setError}
+              setSuccess={setSuccess}
+              fetchBookings={fetchBookings}
+            />
+          )}
+          {activeSection === 'artists' && (
+            <ArtistManagement
+              artists={artists}
+              setArtists={setArtists}
+              handleSubmit={handleSubmit}
+              setError={setError}
+              setSuccess={setSuccess}
+              fetchArtists={fetchArtists}
+            />
+          )}
+          {activeSection === 'schedules' && (
+            <ScheduleManagement
+              token={token}
+              setError={setError}
+              setSuccess={setSuccess}
+              handleSubmit={handleSubmit}
+              fetchArtists={fetchArtists}
+            />
+          )}
+        </div>
       </div>
-    </div>
     </>
   );
 };

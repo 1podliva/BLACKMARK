@@ -17,7 +17,11 @@ const consultationSchema = new mongoose.Schema({
   },
   preferredDate: {
     type: Date,
-    default: null,
+    required: true,
+  },
+  time: {
+    type: String,
+    required: true,
   },
   status: {
     type: String,

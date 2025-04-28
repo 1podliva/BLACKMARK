@@ -140,7 +140,7 @@ const Profile = () => {
     setSuccess('');
     try {
       console.log('Sending consultation request:', consultationForm);
-      const res = await fetch('http://localhost:5000/api/consultations', {
+      const res = await fetch('http://localhost:5000/api/bookings/consultations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(consultationForm),
@@ -158,8 +158,8 @@ const Profile = () => {
   };
 
   const handleDateChange = (date) => {
-    // Форматуємо дату в UTC, щоб уникнути проблем із часовим поясом
     const formattedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).toISOString().split('T')[0];
+    console.log('Selected date:', { raw: date, formatted: formattedDate });
     setConsultationForm({ ...consultationForm, preferredDate: formattedDate, time: '' });
   };
 

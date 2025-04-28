@@ -107,7 +107,7 @@ router.post('/', auth, restrictToAdmin, async (req, res) => {
 
 // Створити запит на консультацію
 router.post('/consultations', auth, async (req, res) => {
-  const { artist, preferredDate } = req.body;
+  const { artist, preferredDate, time } = req.body;
   try {
     // Валідація: artist має бути дійсним ObjectId
     if (!mongoose.Types.ObjectId.isValid(artist)) {
@@ -120,23 +120,87 @@ router.post('/consultations', auth, async (req, res) => {
       return res.status(404).json({ message: 'Майстер не знайдений' });
     }
 
-    // Якщо є preferredDate, валідуємо формат
-    if (preferredDate) {
-      const parsedDate = new Date(preferredDate);
-      if (isNaN(parsedDate.getTime())) {
-        return res.status(400).json({ message: 'Невірний формат дати' });
+    // Валідація дати
+    if (!preferredDate) {
+      return res.status(400).json({ message: 'Дата обов’язкова' });
+    }
+    const parsedDate = new Date(preferredDate);
+    if (isNaN(parsedDate.getTime())) {
+      return res.status(400).json({ message: 'Невірний формат дати' });
+    }
+    const minDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    if (parsedDate < minDate) {
+      return res.status(400).json({ message: 'Дата консультації має бути щонайменше за 24 години' });
+    }
+
+    // Валідація часу
+    if (!time) {
+      return res.status(400).json({ message: 'Час обов’язковий' });
+    }
+
+    // Перевірка доступності слота
+    const targetDate = new Date(preferredDate);
+    const dayOfWeek = targetDate.getDay();
+    const schedule = await ArtistSchedule.findOne({ artist, dayOfWeek });
+    if (!schedule) {
+      return res.status(400).json({ message: 'Графік майстра не знайдено на цей день' });
+    }
+
+    // Генерувати слоти на основі графіку
+    const startHour = parseInt(schedule.startTime.split(':')[0]);
+    const startMinute = parseInt(schedule.startTime.split(':')[1]);
+    const endHour = parseInt(schedule.endTime.split(':')[0]);
+    const endMinute = parseInt(schedule.endTime.split(':')[1]);
+    const availableTimes = [];
+    let currentHour = startHour;
+    let currentMinute = startMinute;
+    while (
+      currentHour < endHour ||
+      (currentHour === endHour && currentMinute <= endMinute)
+    ) {
+      availableTimes.push(`${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`);
+      currentMinute += 30;
+      if (currentMinute >= 60) {
+        currentMinute = 0;
+        currentHour += 1;
       }
-      const minDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      if (parsedDate < minDate) {
-        return res.status(400).json({ message: 'Дата консультації має бути щонайменше за 24 години' });
-      }
+    }
+
+    // Перевірка, чи time є в доступних слотах
+    if (!availableTimes.includes(time)) {
+      return res.status(400).json({ message: 'Обраний час недоступний' });
+    }
+
+    // Перевірка, чи слот не зайнято бронюваннями
+    const startOfDay = new Date(preferredDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(preferredDate);
+    endOfDay.setHours(23, 59, 59, 999);
+    const bookings = await Booking.find({
+      artist,
+      date: { $gte: startOfDay, $lte: endOfDay },
+      time,
+    });
+    if (bookings.length > 0) {
+      return res.status(400).json({ message: 'Цей час уже заброньовано' });
+    }
+
+    // Перевірка, чи слот не зайнято консультаціями
+    const consultations = await Consultation.find({
+      artist,
+      preferredDate: { $gte: startOfDay, $lte: endOfDay },
+      time,
+    });
+    if (consultations.length > 0) {
+      return res.status(400).json({ message: 'Цей час уже зайнято консультацією' });
     }
 
     const consultation = new Consultation({
       user: req.user.id,
       artist,
       description: 'Консультація',
-      preferredDate: preferredDate || null,
+      preferredDate,
+      time,
       status: 'pending',
     });
     await consultation.save();
@@ -152,7 +216,7 @@ router.post('/consultations', auth, async (req, res) => {
     const admins = await User.find({ role: 'admin' });
     const notifications = admins.map((admin) => ({
       message: `Новий запит на консультацію від ${clientName}`,
-      details: `Консультація: ${clientName}, Майстер: ${artistData.name}${preferredDate ? `, Бажана дата: ${new Date(preferredDate).toLocaleDateString('uk-UA')}` : ''}`,
+      details: `Консультація: ${clientName}, Майстер: ${artistData.name}, Дата: ${new Date(preferredDate).toLocaleDateString('uk-UA')}, Час: ${time}`,
       user: admin._id,
       consultation: consultation._id,
       read: false,
@@ -230,11 +294,21 @@ router.get('/availability', auth, async (req, res) => {
     const bookedTimes = bookings.map((b) => b.time);
     console.log('Booked times:', bookedTimes);
 
+    // Отримати слоти консультацій
+    const consultations = await Consultation.find({
+      artist,
+      preferredDate: { $gte: startOfDay, $lte: endOfDay },
+    });
+    const consultationTimes = consultations.map((c) => c.time);
+    console.log('Consultation times:', consultationTimes);
+
     // Фільтрувати доступні слоти
-    const finalAvailableTimes = availableTimes.filter((time) => !bookedTimes.includes(time));
+    const finalAvailableTimes = availableTimes.filter(
+      (time) => !bookedTimes.includes(time) && !consultationTimes.includes(time)
+    );
     console.log('Final available times:', finalAvailableTimes);
 
-    res.json({ bookedTimes, availableTimes: finalAvailableTimes });
+    res.json({ bookedTimes: [...bookedTimes, ...consultationTimes], availableTimes: finalAvailableTimes });
   } catch (err) {
     console.error('GET /api/bookings/availability Error:', err.message, err.stack);
     res.status(500).json({ message: 'Server error' });
