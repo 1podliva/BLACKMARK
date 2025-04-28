@@ -30,6 +30,7 @@ const Profile = () => {
     confirmed: 'Підтверджено',
     completed: 'Завершено',
     cancelled: 'Скасовано',
+    reviewed: 'Переглянуто',
   };
 
   useEffect(() => {

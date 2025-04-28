@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './NotificationManagement.css';
 
 const NotificationManagement = ({ token, setError, setSuccess }) => {
   const [notifications, setNotifications] = useState([]);
@@ -43,26 +44,30 @@ const NotificationManagement = ({ token, setError, setSuccess }) => {
           {notifications.map((notification) => (
             <li
               key={notification._id}
-              style={{
-                padding: '10px',
-                background: notification.read ? 'var(--navy-gray)' : 'var(--purple-accent)',
-                marginBottom: '5px',
-                borderRadius: '5px',
-                color: 'var(--soft-white)',
-              }}
+              className={`notification-item ${notification.read ? 'read' : 'unread'}`}
             >
-              <p>{notification.message}</p>
-              {notification.booking && (
-                <p>
-                  Бронювання: {notification.booking.artist},{' '}
-                  {new Date(notification.booking.date).toLocaleDateString()},{' '}
-                  {notification.booking.time}
-                </p>
-              )}
+              <div>
+                <p>{notification.message}</p>
+                {notification.details && <p>{notification.details}</p>}
+                {notification.booking && (
+                  <p>
+                    Бронювання: {notification.booking.artist?.name || 'Невідомий'},{' '}
+                    {new Date(notification.booking.date).toLocaleDateString('uk-UA')},{' '}
+                    {notification.booking.time}
+                  </p>
+                )}
+                {notification.consultation && (
+                  <p>
+                    Консультація: {notification.consultation.artist?.name || 'Невідомий'},{' '}
+                    {new Date(notification.consultation.preferredDate).toLocaleDateString('uk-UA')},{' '}
+                    {notification.consultation.time}
+                  </p>
+                )}
+              </div>
               {!notification.read && (
                 <button
                   onClick={() => markAsRead(notification._id)}
-                  style={{ background: 'var(--purple-hover)', border: 'none', padding: '5px 10px', borderRadius: '5px' }}
+                  className="mark-read-btn"
                 >
                   Позначити як прочитане
                 </button>

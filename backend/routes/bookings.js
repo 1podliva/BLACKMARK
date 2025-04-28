@@ -71,6 +71,7 @@ router.get('/consultations/all', auth, restrictToAdmin, async (req, res) => {
 // Створити нове бронювання (тільки адмін)
 router.post('/', auth, restrictToAdmin, async (req, res) => {
   const { artist, date, time, description, user } = req.body;
+  const io = req.app.get('io');
   try {
     const selectedDateTime = new Date(`${date}T${time}`);
     const minBookingTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -112,14 +113,23 @@ router.post('/', auth, restrictToAdmin, async (req, res) => {
     const clientName = `${userData.firstName} ${userData.lastName}`.trim();
 
     const admins = await User.find({ role: 'admin' });
-    const notifications = admins.map((admin) => ({
-      message: `Нове бронювання від ${clientName} на ${new Date(date).toLocaleDateString('uk-UA')} о ${time}`,
-      details: `Бронювання: ${clientName}, ${date}, ${time}, Майстер: ${artistData.name}`,
-      user: admin._id,
+    if (admins.length === 0) {
+      return res.status(500).json({ message: 'Адміністратори не знайдені' });
+    }
+    const notification = {
+      message: `Нове бронювання від ${clientName} для ${artistData.name} на ${new Date(date).toLocaleDateString('uk-UA')} о ${time}`,
+      details: `Дата: ${new Date(date).toLocaleDateString('uk-UA')}, Час: ${time}`,
+      user: admins[0]._id, // Сповіщення для першого адміна
       booking: booking._id,
       read: false,
-    }));
-    await Notification.insertMany(notifications);
+    };
+    const savedNotification = await new Notification(notification).save();
+
+    // Відправка сповіщення через WebSocket
+    io.emit('newNotification', {
+      ...savedNotification._doc,
+      booking: { ...booking._doc, artist: { name: artistData.name } },
+    });
 
     res.json(booking);
   } catch (err) {
@@ -131,6 +141,7 @@ router.post('/', auth, restrictToAdmin, async (req, res) => {
 // Створити запит на консультацію
 router.post('/consultations', auth, async (req, res) => {
   const { artist, preferredDate, time } = req.body;
+  const io = req.app.get('io');
   try {
     if (!mongoose.Types.ObjectId.isValid(artist)) {
       return res.status(400).json({ message: 'Невірний ID майстра' });
@@ -163,13 +174,11 @@ router.post('/consultations', auth, async (req, res) => {
     const endOfDay = new Date(startOfDay);
     endOfDay.setDate(startOfDay.getDate() + 1);
 
-    // Шукаємо графік за новою схемою (date)
     let schedule = await ArtistSchedule.findOne({
       artist: new mongoose.Types.ObjectId(artist),
       date: { $gte: startOfDay, $lt: endOfDay },
     });
 
-    // Якщо не знайдено, перевіряємо стару схему (dayOfWeek)
     if (!schedule) {
       const dayOfWeek = targetDate.getDay();
       schedule = await ArtistSchedule.findOne({
@@ -182,7 +191,6 @@ router.post('/consultations', auth, async (req, res) => {
       return res.status(400).json({ message: 'Графік майстра не знайдено на цей день' });
     }
 
-    // Генерувати слоти на основі графіку
     const startHour = parseInt(schedule.startTime.split(':')[0]);
     const startMinute = parseInt(schedule.startTime.split(':')[1]);
     const endHour = parseInt(schedule.endTime.split(':')[0]);
@@ -248,14 +256,23 @@ router.post('/consultations', auth, async (req, res) => {
     const clientName = `${userData.firstName} ${userData.lastName}`.trim();
 
     const admins = await User.find({ role: 'admin' });
-    const notifications = admins.map((admin) => ({
-      message: `Новий запит на консультацію від ${clientName}`,
-      details: `Консультація: ${clientName}, Майстер: ${artistData.name}, Дата: ${new Date(parsedDate).toLocaleDateString('uk-UA')}, Час: ${time}`,
-      user: admin._id,
+    if (admins.length === 0) {
+      return res.status(500).json({ message: 'Адміністратори не знайдені' });
+    }
+    const notification = {
+      message: `Новий запит на консультацію від ${clientName} для ${artistData.name} на ${new Date(parsedDate).toLocaleDateString('uk-UA')} о ${time}`,
+      details: `Дата: ${new Date(parsedDate).toLocaleDateString('uk-UA')}, Час: ${time}`,
+      user: admins[0]._id, // Сповіщення для першого адміна
       consultation: consultation._id,
       read: false,
-    }));
-    await Notification.insertMany(notifications);
+    };
+    const savedNotification = await new Notification(notification).save();
+
+    // Відправка сповіщення через WebSocket
+    io.emit('newNotification', {
+      ...savedNotification._doc,
+      consultation: { ...consultation._doc, artist: { name: artistData.name } },
+    });
 
     res.json(consultation);
   } catch (err) {
@@ -289,13 +306,11 @@ router.get('/availability', auth, async (req, res) => {
     const endOfDay = new Date(startOfDay);
     endOfDay.setDate(startOfDay.getDate() + 1);
 
-    // Шукаємо графік за новою схемою (date)
     let schedule = await ArtistSchedule.findOne({
       artist: new mongoose.Types.ObjectId(artist),
       date: { $gte: startOfDay, $lt: endOfDay },
     });
 
-    // Якщо не знайдено, перевіряємо стару схему (dayOfWeek)
     if (!schedule) {
       const dayOfWeek = targetDate.getDay();
       console.log('No date-based schedule found, checking dayOfWeek:', dayOfWeek);
@@ -311,7 +326,6 @@ router.get('/availability', auth, async (req, res) => {
       return res.json({ bookedTimes: [], availableTimes: [] });
     }
 
-    // Генерувати слоти на основі графіку
     const startHour = parseInt(schedule.startTime.split(':')[0]);
     const startMinute = parseInt(schedule.startTime.split(':')[1]);
     const endHour = parseInt(schedule.endTime.split(':')[0]);

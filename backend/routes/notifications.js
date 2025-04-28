@@ -8,7 +8,8 @@ const restrictToAdmin = require('../middleware/restrictToAdmin');
 router.get('/', auth, restrictToAdmin, async (req, res) => {
   try {
     const notifications = await Notification.find({ user: req.user.id })
-      .populate('booking')
+      .populate('booking', 'artist date time')
+      .populate('consultation', 'artist preferredDate time')
       .sort({ createdAt: -1 });
     res.json(notifications);
   } catch (err) {

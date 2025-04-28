@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const http = require('http');
+const { Server } = require('socket.io');
 
 // Імпорт роутів
 const postRoutes = require('./routes/posts');
@@ -15,14 +17,42 @@ const bookingRoutes = require('./routes/bookings');
 const artistRoutes = require('./routes/artists');
 const notificationRoutes = require('./routes/notifications');
 const artistSchedules = require('./routes/artistSchedules');
+
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  },
+});
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
+
+// WebSocket authentication
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token || !token.startsWith('Bearer ')) {
+    return next(new Error('Authentication error'));
+  }
+  // TODO: Додати перевірку JWT токена, якщо потрібно
+  next();
+});
+
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+// Зберігаємо io для використання в маршрутах
+app.set('io', io);
 
 // Routes
 console.log('Registering routes...');
@@ -46,6 +76,7 @@ app.use('/api/notifications', notificationRoutes);
 console.log('notificationRoutes registered');
 app.use('/api/artist-schedules', artistSchedules);
 console.log('artist-schedules registered');
+
 // MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -56,4 +87,4 @@ mongoose
   .catch((err) => console.error('MongoDB connection error:', err));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

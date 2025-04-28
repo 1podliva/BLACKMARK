@@ -66,12 +66,12 @@ const AdminDashboard = () => {
     async (url, method, payload, isFormData = false) => {
       setError('');
       try {
-        console.log('Request:', { url, method, token, payload }); // TODO: Видалити в продакшені
+        console.log('Request:', { url, method, token, payload });
         const headers = { Authorization: `Bearer ${token}` };
         if (!isFormData) headers['Content-Type'] = 'application/json';
         const body = isFormData ? payload : JSON.stringify(payload);
         const res = await fetch(url, { method, headers, body });
-        console.log('Response status:', res.status, 'URL:', url); // TODO: Видалити в продакшені
+        console.log('Response status:', res.status, 'URL:', url);
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
           if (res.status === 401 || res.status === 403) {
@@ -86,7 +86,7 @@ const AdminDashboard = () => {
           setSuccess('Операція успішна!');
           setTimeout(() => setSuccess(''), 3000);
         }
-        console.log('Response data:', responseData); // TODO: Видалити в продакшені
+        console.log('Response data:', responseData);
         return responseData;
       } catch (err) {
         console.error('Request error:', err);
@@ -168,7 +168,7 @@ const AdminDashboard = () => {
       });
       if (!res.ok) throw new Error('Не вдалося отримати майстрів');
       const data = await res.json();
-      console.log('fetchArtists response:', data); // TODO: Видалити в продакшені
+      console.log('fetchArtists response:', data);
       const artistsData = Array.isArray(data) ? data : [];
       setArtists(artistsData);
       return artistsData;

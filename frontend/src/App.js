@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Main from './components/Main';
 import About from './components/About';
-import PricingSection from './components/PricingSection';
 import BlogIntro from './components/BlogIntro';
 import Contacts from './components/Contacts';
 import Consultation from './components/Consultation';
@@ -13,6 +12,7 @@ import BlogPost from './components/BlogPost';
 import Gallery from './components/Gallery';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
+import NotificationProvider from './components/NotificationProvider';
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
 
@@ -22,6 +22,8 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
+  const token = localStorage.getItem('token');
+
   return (
     <AuthProvider>
       <Routes>
@@ -95,7 +97,9 @@ function App() {
           path="/admin"
           element={
             <ProtectedRoute>
-              <AdminDashboard />
+              <NotificationProvider token={token}>
+                <AdminDashboard />
+              </NotificationProvider>
             </ProtectedRoute>
           }
         />

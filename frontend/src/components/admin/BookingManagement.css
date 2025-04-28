@@ -2,8 +2,15 @@
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
+  font-family: 'Arial', sans-serif;
 }
 
+h3, h4 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+/* Форма */
 .form-group {
   margin-bottom: 15px;
 }
@@ -12,6 +19,7 @@
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
+  color: #333;
 }
 
 .form-group select,
@@ -21,6 +29,13 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 16px;
+  transition: border-color 0.2s;
+}
+
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #28a745;
+  outline: none;
 }
 
 .form-group textarea {
@@ -28,6 +43,7 @@
   resize: vertical;
 }
 
+/* Кнопки */
 .submit-btn {
   padding: 10px 20px;
   background-color: #28a745;
@@ -36,6 +52,11 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #218838;
 }
 
 .submit-btn:disabled {
@@ -51,60 +72,129 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 16px;
-  margin-left: 10px;
+  transition: background-color 0.2s;
 }
 
-.bookings-list {
+.delete-btn:hover {
+  background-color: #c82333;
+}
+
+/* Списки */
+.bookings-list, .consultations-list {
   margin-top: 20px;
 }
 
-.booking-item {
+.booking-item, .consultation-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
+  padding: 15px;
   border: 1px solid #ccc;
   border-radius: 4px;
   margin-bottom: 10px;
+  transition: box-shadow 0.2s;
 }
 
-.booking-actions {
+.booking-item:hover, .consultation-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Мітка для консультацій */
+.consultation-item span::before {
+  content: '[Консультація] ';
+  color: #28a745;
+  font-weight: bold;
+}
+
+.booking-item span, .consultation-item span {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.booking-actions, .consultation-actions {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
+/* Повідомлення */
 .error-message {
-  color: red;
+  color: #dc3545;
   margin: 10px 0;
+  font-size: 14px;
 }
 
 .info-message {
   color: #666;
   margin: 10px 0;
+  font-size: 14px;
 }
 
-/* Стилі для календаря */
+/* Календар */
 .react-calendar {
-  border: 1px solid #ccc;
+  border: 1px solid #e0e0e0;
   border-radius: 4px;
   width: 100%;
   max-width: 400px;
+  background-color: #fff;
 }
 
-/* Стилі для доступних дат */
 .available-date {
   background-color: #e6f3ff !important;
   color: #000 !important;
 }
 
-/* Стилі для вибраної дати */
 .react-calendar__tile--active {
   background-color: #28a745 !important;
   color: white !important;
 }
 
-/* Стилі для відключених дат */
 .react-calendar__tile--disabled {
   background-color: #f0f0f0;
   color: #ccc;
+}
+
+/* Адаптивність */
+@media (max-width: 768px) {
+  .booking-management {
+    padding: 15px;
+  }
+
+  .booking-item, .consultation-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .booking-actions, .consultation-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .submit-btn, .delete-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .react-calendar {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-group select,
+  .form-group textarea {
+    font-size: 14px;
+  }
+
+  .submit-btn, .delete-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .booking-item span, .consultation-item span {
+    font-size: 12px;
+  }
 }
