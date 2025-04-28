@@ -3,7 +3,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import io from 'socket.io-client';
 
-const NotificationProvider = ({ children, token }) => {
+const NotificationProvider = ({ children, token, role }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -15,11 +15,7 @@ const NotificationProvider = ({ children, token }) => {
         const res = await fetch('http://localhost:5000/api/auth/check-admin', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (res.ok) {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
-        }
+        setIsAdmin(res.ok);
       } catch (err) {
         console.error('Помилка перевірки адміна:', err);
         setIsAdmin(false);
@@ -30,7 +26,7 @@ const NotificationProvider = ({ children, token }) => {
   }, [token]);
 
   useEffect(() => {
-    if (!token || !isAdmin) return;
+    if (!token) return;
 
     const socket = io('http://localhost:5000', {
       auth: { token: `Bearer ${token}` },
@@ -49,8 +45,8 @@ const NotificationProvider = ({ children, token }) => {
           <p>{notification.details}</p>
           {notification.booking && (
             <p>
-              Бронювання: {notification.booking.artist?.name || 'Невідомий'},{' '}
-              {new Date(notification.booking.date).toLocaleDateString('uk-UA')},{' '}
+              {notification.booking.type === 'booking' ? 'Бронювання' : 'Консультація'}: {notification.booking.artist?.name || 'Невідомий'},{' '}
+              {new Date(notification.booking.date || notification.booking.preferredDate).toLocaleDateString('uk-UA')},{' '}
               {notification.booking.time}
             </p>
           )}
@@ -64,32 +60,37 @@ const NotificationProvider = ({ children, token }) => {
         </div>
       ) : null;
 
+      const toastOptions = {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        className: role === 'admin' ? 'admin-toast' : 'user-toast',
+      };
+
       toast.info(
         <div>
           <strong>{message}</strong>
           {details}
         </div>,
-        {
-          position: 'top-right',
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        }
+        toastOptions
       );
     });
 
     socket.on('connect_error', (err) => {
       console.error('WebSocket error:', err.message);
-      toast.error('Помилка підключення до сповіщень');
+      toast.error('Помилка підключення до сповіщень', {
+        className: role === 'admin' ? 'admin-toast' : 'user-toast',
+      });
     });
 
     return () => {
       socket.disconnect();
       console.log('WebSocket disconnected');
     };
-  }, [token, isAdmin]);
+  }, [token, role]);
 
   return (
     <>

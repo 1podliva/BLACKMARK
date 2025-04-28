@@ -172,6 +172,86 @@
   margin-bottom: 10px;
 }
 
+/* Стилі для toast у профілі */
+.user-toast {
+  background-color: var(--navy-gray) !important;
+  color: var(--soft-white) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  font-family: "Inter", sans-serif !important;
+  padding: 10px !important;
+  animation: slideIn 0.3s ease-in-out !important;
+}
+
+.user-toast .Toastify__toast-body {
+  display: flex;
+  align-items: center;
+}
+
+.user-toast .Toastify__toast-body::before {
+  font-family: "FontAwesome";
+  margin-right: 8px;
+  font-size: 20px;
+}
+
+.user-toast.Toastify__toast--info .Toastify__toast-body::before {
+  content: "\f05a"; /* fa-info-circle */
+  color: var(--purple-accent);
+}
+
+.user-toast.Toastify__toast--success .Toastify__toast-body::before {
+  content: "\f00c"; /* fa-check-circle */
+  color: var(--success-green);
+}
+
+.user-toast.Toastify__toast--error .Toastify__toast-body::before {
+  content: "\f06a"; /* fa-exclamation-circle */
+  color: var(--error-red);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Стилі для react-calendar */
+.react-calendar {
+  width: 100%;
+  background: var(--navy-gray);
+  border: none;
+  color: var(--soft-white);
+  font-family: "Inter", sans-serif;
+}
+
+.react-calendar__tile {
+  color: var(--light-gray);
+}
+
+.react-calendar__tile--active {
+  background: var(--purple-accent) !important;
+  color: var(--soft-white) !important;
+}
+
+.react-calendar__tile--now {
+  background: var(--purple-hover);
+  color: var(--soft-white);
+}
+
+.react-calendar__navigation button {
+  color: var(--soft-white);
+  background: var(--navy-gray);
+}
+
+.react-calendar__navigation button:hover {
+  background: var(--purple-hover);
+}
+
 @media (max-width: 768px) {
   .profile-section {
     padding: 20px;

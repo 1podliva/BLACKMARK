@@ -86,11 +86,13 @@ function App() {
         <Route
           path="/profile"
           element={
-            <>
-              <Header />
-              <Profile />
-              <Footer />
-            </>
+            <ProtectedRoute>
+              <NotificationProvider token={token} role="user">
+                <Header />
+                <Profile />
+                <Footer />
+              </NotificationProvider>
+            </ProtectedRoute>
           }
         />
         <Route

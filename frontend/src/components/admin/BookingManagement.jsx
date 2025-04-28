@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { format, startOfDay, addDays, parse } from 'date-fns';
-import './BookingManagement.css';
+import { toast } from 'react-toastify';
+import { FaEdit, FaCheck, FaTimes, FaTrash } from 'react-icons/fa';
 
-const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setSuccess, fetchBookings }) => {
+const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError, setSuccess, fetchBookings }) => {
   const [users, setUsers] = useState([]);
   const [artists, setArtists] = useState([]);
   const [consultations, setConsultations] = useState([]);
@@ -15,10 +17,68 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
     time: '',
     description: '',
   });
+  const [editingBooking, setEditingBooking] = useState(null);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [availableDates, setAvailableDates] = useState([]);
   const [formError, setFormError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const ws = useRef(null);
+
+  // Мапінг статусів
+  const bookingStatusMap = {
+    pending: { label: 'Очікує', color: '#F59E0B' },
+    confirmed: { label: 'Підтверджено', color: '#2ECC71' },
+    cancelled: { label: 'Скасовано', color: '#EF4444' },
+    completed: { label: 'Завершено', color: '#3B82F6' },
+  };
+
+  const consultationStatusMap = {
+    pending: { label: 'Очікує', color: '#F59E0B' },
+    reviewed: { label: 'Переглянуто', color: '#2ECC71' },
+    cancelled: { label: 'Скасовано', color: '#EF4444' },
+  };
+
+  // Ініціалізація WebSocket
+  useEffect(() => {
+    ws.current = new WebSocket('ws://localhost:5000');
+
+    ws.current.onopen = () => {
+      console.log('WebSocket connected');
+    };
+
+    ws.current.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('WebSocket message received:', data);
+
+        if (data.event === 'date-selection-required') {
+          toast.info(data.message, { className: 'admin-toast' });
+        }
+
+        if (data.event === 'no-available-slots') {
+          toast.error(data.message, { className: 'admin-toast' });
+        }
+      } catch (err) {
+        console.error('WebSocket message error:', err);
+        toast.error('Помилка обробки повідомлення', { className: 'admin-toast' });
+      }
+    };
+
+    ws.current.onclose = () => {
+      console.log('WebSocket disconnected');
+    };
+
+    ws.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      toast.error('Помилка з’єднання з WebSocket', { className: 'admin-toast' });
+    };
+
+    return () => {
+      if (ws.current) {
+        ws.current.close();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     fetchBookings();
@@ -39,12 +99,29 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
 
   useEffect(() => {
     if (bookingForm.artist && bookingForm.date) {
-      console.log('Triggering fetchAvailableTimes for artist:', bookingForm.artist, 'date:', bookingForm.date);
       fetchAvailableTimes(bookingForm.artist, bookingForm.date);
+      // Відправка події для перевірки доступних слотів
+      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+        ws.current.send(
+          JSON.stringify({
+            event: 'check-available-slots',
+            artistId: bookingForm.artist,
+            date: bookingForm.date,
+          })
+        );
+      }
     } else {
-      console.log('Resetting availableTimes: no artist or date');
       setAvailableTimes([]);
       setFormError('');
+      // Відправка події для перевірки вибору дати
+      if (ws.current && ws.current.readyState === WebSocket.OPEN && !bookingForm.date) {
+        ws.current.send(
+          JSON.stringify({
+            event: 'date-selection-required',
+            message: 'Спочатку виберіть дату',
+          })
+        );
+      }
     }
   }, [bookingForm.date, bookingForm.artist]);
 
@@ -63,7 +140,9 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
 
   const fetchArtists = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/artists');
+      const res = await fetch('http://localhost:5000/api/artists', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setArtists(data);
@@ -78,7 +157,6 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       const data = await res.json();
-      console.log('Fetched consultations:', data);
       if (!res.ok) throw new Error(data.message);
       setConsultations(data);
     } catch (err) {
@@ -88,31 +166,25 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
 
   const fetchAvailableTimes = async (artistId, date) => {
     try {
-      console.log(`Sending request to fetch available times for artist: ${artistId}, date: ${date}`);
       const res = await fetch(
         `http://localhost:5000/api/bookings/availability?artist=${artistId}&date=${date}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         }
       );
-      console.log('Response status:', res.status);
       const data = await res.json();
-      console.log('fetchAvailableTimes response:', data);
-      if (!res.ok) {
-        console.error('fetchAvailableTimes error:', data.message);
-        throw new Error(data.message);
-      }
+      if (!res.ok) throw new Error(data.message);
       const times = data.availableTimes || [];
-      console.log('Setting availableTimes:', times);
       setAvailableTimes(times);
-      if (times.length === 0) {
-        setFormError('Немає доступних слотів на цю дату');
-        setTimeout(() => setFormError(''), 5000);
-      } else {
-        setFormError('');
+      if (times.length === 0 && ws.current && ws.current.readyState === WebSocket.OPEN) {
+        ws.current.send(
+          JSON.stringify({
+            event: 'no-available-slots',
+            message: 'Немає доступних слотів',
+          })
+        );
       }
     } catch (err) {
-      console.error('Error in fetchAvailableTimes:', err.message);
       setFormError(`Помилка при отриманні часу: ${err.message}`);
       setTimeout(() => setFormError(''), 5000);
       setAvailableTimes([]);
@@ -123,13 +195,11 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
     setIsLoading(true);
     setFormError('');
     try {
-      console.log(`Fetching available dates for artist: ${artistId}`);
       const today = startOfDay(new Date());
       const endDate = addDays(today, 30);
       const dates = [];
       for (let d = new Date(today); d <= endDate; d.setDate(d.getDate() + 1)) {
         const dateStr = format(d, 'yyyy-MM-dd');
-        console.log(`Checking availability for date: ${dateStr}`);
         const res = await fetch(
           `http://localhost:5000/api/bookings/availability?artist=${artistId}&date=${dateStr}`,
           {
@@ -137,11 +207,7 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
           }
         );
         const data = await res.json();
-        console.log(`fetchAvailableDates response for ${dateStr}:`, data);
-        if (!res.ok) {
-          console.error(`Error for ${dateStr}: ${data.message}`);
-          continue;
-        }
+        if (!res.ok) continue;
         if (data.availableTimes && data.availableTimes.length > 0) {
           dates.push(dateStr);
         }
@@ -149,11 +215,10 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
       setAvailableDates(dates);
       setFormError('');
     } catch (err) {
-      console.error('Error in fetchAvailableDates:', err.message);
       setFormError(`Помилка при отриманні дат: ${err.message}`);
       setTimeout(() => setFormError(''), 5000);
     } finally {
-      setTimeout(() => setIsLoading(false), 1000);
+      setIsLoading(false);
     }
   };
 
@@ -173,20 +238,37 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
 
     try {
       await handleSubmit('http://localhost:5000/api/bookings', 'POST', bookingForm);
-      setSuccess('Бронювання створено!');
+      toast.success('Бронювання створено!', { className: 'admin-toast' });
       setBookingForm({ user: '', artist: '', date: '', time: '', description: '' });
       setAvailableTimes([]);
       setAvailableDates([]);
       fetchBookings();
     } catch (err) {
-      // Помилка встановлюється в handleSubmit
+      toast.error(err.message, { className: 'admin-toast' });
+    }
+  };
+
+  const handleEditBookingSubmit = async (e) => {
+    e.preventDefault();
+    setFormError('');
+    setError('');
+    setSuccess('');
+
+    try {
+      await handleSubmit(`http://localhost:5000/api/bookings/${editingBooking._id}`, 'PUT', bookingForm);
+      toast.success('Бронювання оновлено!', { className: 'admin-toast' });
+      setEditingBooking(null);
+      setBookingForm({ user: '', artist: '', date: '', time: '', description: '' });
+      setAvailableTimes([]);
+      setAvailableDates([]);
+      fetchBookings();
+    } catch (err) {
+      toast.error(err.message, { className: 'admin-toast' });
     }
   };
 
   const handleDateChange = (date) => {
     const formattedDate = format(startOfDay(date), 'yyyy-MM-dd');
-    console.log('Selected date:', formattedDate);
-    console.log('Calendar value before update:', bookingForm.date);
     setBookingForm({ ...bookingForm, date: formattedDate, time: '' });
   };
 
@@ -209,20 +291,20 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
     if (!window.confirm('Ви впевнені, що хочете видалити це бронювання?')) return;
     try {
       await handleSubmit(`http://localhost:5000/api/bookings/${id}`, 'DELETE');
-      setSuccess('Бронювання видалено!');
+      toast.success('Бронювання видалено!', { className: 'admin-toast' });
       fetchBookings();
     } catch (err) {
-      // Помилка встановлюється в handleSubmit
+      toast.error(err.message, { className: 'admin-toast' });
     }
   };
 
   const handleUpdateBookingStatus = async (id, status) => {
     try {
       await handleSubmit(`http://localhost:5000/api/bookings/${id}/status`, 'PUT', { status });
-      setSuccess(`Статус бронювання оновлено до ${status}!`);
+      toast.success(`Статус оновлено до "${bookingStatusMap[status].label}"!`, { className: 'admin-toast' });
       fetchBookings();
     } catch (err) {
-      // Помилка встановлюється в handleSubmit
+      toast.error(err.message, { className: 'admin-toast' });
     }
   };
 
@@ -230,196 +312,366 @@ const BookingManagement = ({ bookings, setBookings, handleSubmit, setError, setS
     if (!window.confirm('Ви впевнені, що хочете видалити цю консультацію?')) return;
     try {
       await handleSubmit(`http://localhost:5000/api/bookings/consultations/${id}`, 'DELETE');
-      setSuccess('Консультацію видалено!');
+      toast.success('Консультацію видалено!', { className: 'admin-toast' });
       fetchConsultations();
     } catch (err) {
-      // Помилка встановлюється в handleSubmit
+      toast.error(err.message, { className: 'admin-toast' });
     }
   };
 
   const handleUpdateConsultationStatus = async (id, status) => {
     try {
       await handleSubmit(`http://localhost:5000/api/bookings/consultations/${id}/status`, 'PUT', { status });
-      setSuccess(`Статус консультації оновлено до ${status}!`);
+      toast.success(`Статус оновлено до "${consultationStatusMap[status].label}"!`, { className: 'admin-toast' });
       fetchConsultations();
     } catch (err) {
-      // Помилка встановлюється в handleSubmit
+      toast.error(err.message, { className: 'admin-toast' });
     }
   };
 
-  return (
-    <div className="booking-management">
-      <h3>Керування бронюваннями та консультаціями</h3>
+  const startEditingBooking = (booking) => {
+    setEditingBooking(booking);
+    setBookingForm({
+      user: booking.user?._id || '',
+      artist: booking.artist?._id || '',
+      date: booking.date.split('T')[0],
+      time: booking.time,
+      description: booking.description || '',
+    });
+  };
 
-      <h4>Створити бронювання</h4>
-      {formError && <p className="error-message">{formError}</p>}
-      {isLoading && <p className="info-message">Завантаження доступних дат...</p>}
-      <form onSubmit={handleBookingSubmit}>
-        <div className="form-group">
-          <label>Клієнт</label>
-          <select
-            value={bookingForm.user}
-            onChange={(e) => setBookingForm({ ...bookingForm, user: e.target.value })}
-            required
-          >
-            <option value="">Виберіть клієнта</option>
-            {users.map((user) => (
-              <option key={user._id} value={user._id}>
-                {user.firstName} {user.lastName}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="form-group">
-          <label>Майстер</label>
-          <select
-            value={bookingForm.artist}
-            onChange={(e) => setBookingForm({ ...bookingForm, artist: e.target.value, date: '', time: '' })}
-            required
-          >
-            <option value="">Виберіть майстра</option>
-            {artists.map((artist) => (
-              <option key={artist._id} value={artist._id}>{artist.name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="form-group">
-          <label>Дата</label>
-          <Calendar
-            onChange={handleDateChange}
-            value={bookingForm.date ? parse(bookingForm.date, 'yyyy-MM-dd', new Date()) : startOfDay(new Date())}
-            minDate={addDays(new Date(), 1)}
-            tileDisabled={isDateDisabled}
-            tileClassName={tileClassName}
-          />
-        </div>
-        <div className="form-group">
-          <label>Час</label>
-          <select
-            value={bookingForm.time}
-            onChange={(e) => setBookingForm({ ...bookingForm, time: e.target.value })}
-            required
-            disabled={!bookingForm.date || availableTimes.length === 0}
-          >
-            <option value="">Виберіть час</option>
-            {availableTimes.map((time) => (
-              <option key={time} value={time}>{time}</option>
-            ))}
-          </select>
-          {!bookingForm.date && <p className="info-message">Спочатку виберіть дату</p>}
-          {bookingForm.date && availableTimes.length === 0 && (
-            <p className="error-message">Немає доступних слотів на цю дату</p>
-          )}
-        </div>
-        <div className="form-group">
-          <label>Опис</label>
-          <textarea
-            value={bookingForm.description}
-            onChange={(e) => setBookingForm({ ...bookingForm, description: e.target.value })}
-          />
-        </div>
-        <button
-          type="submit"
-          className="submit-btn"
-          disabled={!bookingForm.user || !bookingForm.artist || !bookingForm.date || !bookingForm.time}
-        >
-          Створити бронювання
-        </button>
-      </form>
-
-      <h4>Усі бронювання</h4>
-      <div className="bookings-list">
-        {bookings && bookings.length > 0 ? (
-          bookings.map((booking) => (
-            <div key={booking._id} className="booking-item">
-              <span>
-                Клієнт: {booking.user?.firstName} {booking.user?.lastName || 'Невідомий'},
-                Майстер: {booking.artist?.name || 'Невідомий'},
-                Дата: {new Date(booking.date).toLocaleDateString()},
-                Час: {booking.time},
-                Статус: {booking.status}
-              </span>
-              <div className="booking-actions">
-                {booking.status === 'pending' && (
-                  <>
-                    <button
-                      className="submit-btn"
-                      onClick={() => handleUpdateBookingStatus(booking._id, 'confirmed')}
-                    >
-                      Підтвердити
-                    </button>
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleUpdateBookingStatus(booking._id, 'cancelled')}
-                    >
-                      Скасувати
-                    </button>
-                  </>
-                )}
-                {(booking.status === 'pending' || booking.status === 'confirmed') && (
-                  <button
-                    className="submit-btn"
-                    onClick={() => handleUpdateBookingStatus(booking._id, 'completed')}
-                  >
-                    Завершено
-                  </button>
-                )}
-                <button className="delete-btn" onClick={() => handleDeleteBooking(booking._id)}>
-                  Видалити
-                </button>
-              </div>
+  if (mode === 'add') {
+    return (
+      <div className="booking-management">
+        <h3>{editingBooking ? 'Редагувати бронювання' : 'Додати бронювання'}</h3>
+        {formError && <p className="error-message">{formError}</p>}
+        {isLoading && <p className="info-message">Завантаження доступних дат...</p>}
+        <form onSubmit={editingBooking ? handleEditBookingSubmit : handleBookingSubmit} className="booking-form">
+          <div className="form-grid">
+            <div className="form-group">
+              <label>Клієнт</label>
+              <select
+                value={bookingForm.user}
+                onChange={(e) => setBookingForm({ ...bookingForm, user: e.target.value })}
+                required
+              >
+                <option value="">Виберіть клієнта</option>
+                {users.map((user) => (
+                  <option key={user._id} value={user._id}>
+                    {user.firstName} {user.lastName}
+                  </option>
+                ))}
+              </select>
             </div>
-          ))
-        ) : (
-          <p>Бронювання відсутні</p>
-        )}
+            <div className="form-group">
+              <label>Майстер</label>
+              <select
+                value={bookingForm.artist}
+                onChange={(e) => setBookingForm({ ...bookingForm, artist: e.target.value, date: '', time: '' })}
+                required
+              >
+                <option value="">Виберіть майстра</option>
+                {artists.map((artist) => (
+                  <option key={artist._id} value={artist._id}>{artist.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Дата</label>
+              <Calendar
+                onChange={handleDateChange}
+                value={bookingForm.date ? parse(bookingForm.date, 'yyyy-MM-dd', new Date()) : startOfDay(new Date())}
+                minDate={addDays(new Date(), 1)}
+                tileDisabled={isDateDisabled}
+                tileClassName={tileClassName}
+              />
+            </div>
+            <div className="form-group">
+              <label>Час</label>
+              <select
+                value={bookingForm.time}
+                onChange={(e) => setBookingForm({ ...bookingForm, time: e.target.value })}
+                required
+                disabled={!bookingForm.date || availableTimes.length === 0}
+              >
+                <option value="">Виберіть час</option>
+                {availableTimes.map((time) => (
+                  <option key={time} value={time}>{time}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group full-width">
+              <label>Опис</label>
+              <textarea
+                value={bookingForm.description}
+                onChange={(e) => setBookingForm({ ...bookingForm, description: e.target.value })}
+                placeholder="Опишіть деталі бронювання"
+              />
+            </div>
+          </div>
+          <div className="form-actions">
+            <button
+              type="submit"
+              className="submit-btn"
+              disabled={!bookingForm.user || !bookingForm.artist || !bookingForm.date || !bookingForm.time}
+            >
+              {editingBooking ? 'Зберегти' : 'Створити'}
+            </button>
+            {editingBooking && (
+              <button type="button" className="cancel-btn" onClick={() => setEditingBooking(null)}>
+                Скасувати
+              </button>
+            )}
+          </div>
+        </form>
       </div>
+    );
+  }
 
-      <h4>Усі консультації</h4>
-      <div className="consultations-list">
-        {consultations && consultations.length > 0 ? (
-          consultations.map((consultation) => (
-            <div key={consultation._id} className="consultation-item">
-              <span>
-                Клієнт: {consultation.user?.firstName} {consultation.user?.lastName || 'Невідомий'},
-                Майстер: {consultation.artist?.name || 'Невідомий'},
-                Дата: {new Date(consultation.preferredDate).toLocaleDateString()},
-                Час: {consultation.time},
-                Опис: {consultation.description || 'Немає'},
-                Статус: {consultation.status}
-              </span>
-              <div className="consultation-actions">
-                {consultation.status === 'pending' && (
-                  <>
-                    <button
-                      className="submit-btn"
-                      onClick={() => handleUpdateConsultationStatus(consultation._id, 'reviewed')}
-                    >
-                      Переглянуто
-                    </button>
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleUpdateConsultationStatus(consultation._id, 'cancelled')}
-                    >
-                      Скасувати
-                    </button>
-                  </>
-                )}
-                <button
-                  className="delete-btn"
-                  onClick={() => handleDeleteConsultation(consultation._id)}
+  if (mode === 'edit') {
+    return (
+      <div className="booking-management">
+        <h3>Редагувати бронювання</h3>
+        {editingBooking ? (
+          <form onSubmit={handleEditBookingSubmit} className="booking-form">
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Клієнт</label>
+                <select
+                  value={bookingForm.user}
+                  onChange={(e) => setBookingForm({ ...bookingForm, user: e.target.value })}
+                  required
                 >
-                  Видалити
-                </button>
+                  <option value="">Виберіть клієнта</option>
+                  {users.map((user) => (
+                    <option key={user._id} value={user._id}>
+                      {user.firstName} {user.lastName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Майстер</label>
+                <select
+                  value={bookingForm.artist}
+                  onChange={(e) => setBookingForm({ ...bookingForm, artist: e.target.value, date: '', time: '' })}
+                  required
+                >
+                  <option value="">Виберіть майстра</option>
+                  {artists.map((artist) => (
+                    <option key={artist._id} value={artist._id}>{artist.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Дата</label>
+                <Calendar
+                  onChange={handleDateChange}
+                  value={bookingForm.date ? parse(bookingForm.date, 'yyyy-MM-dd', new Date()) : startOfDay(new Date())}
+                  minDate={addDays(new Date(), 1)}
+                  tileDisabled={isDateDisabled}
+                  tileClassName={tileClassName}
+                />
+              </div>
+              <div className="form-group">
+                <label>Час</label>
+                <select
+                  value={bookingForm.time}
+                  onChange={(e) => setBookingForm({ ...bookingForm, time: e.target.value })}
+                  required
+                  disabled={!bookingForm.date || availableTimes.length === 0}
+                >
+                  <option value="">Виберіть час</option>
+                  {availableTimes.map((time) => (
+                    <option key={time} value={time}>{time}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group full-width">
+                <label>Опис</label>
+                <textarea
+                  value={bookingForm.description}
+                  onChange={(e) => setBookingForm({ ...bookingForm, description: e.target.value })}
+                  placeholder="Опишіть деталі бронювання"
+                />
               </div>
             </div>
-          ))
+            <div className="form-actions">
+              <button
+                type="submit"
+                className="submit-btn"
+                disabled={!bookingForm.user || !bookingForm.artist || !bookingForm.date || !bookingForm.time}
+              >
+                Зберегти
+              </button>
+              <button type="button" className="cancel-btn" onClick={() => setEditingBooking(null)}>
+                Скасувати
+              </button>
+            </div>
+          </form>
         ) : (
-          <p>Консультації відсутні</p>
+          <>
+            <h4>Усі бронювання</h4>
+            <div className="table-wrapper">
+              <table className="bookings-table">
+                <thead>
+                  <tr>
+                    <th>Клієнт</th>
+                    <th>Майстер</th>
+                    <th>Дата</th>
+                    <th>Час</th>
+                    <th>Статус</th>
+                    <th>Дії</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bookings && bookings.length > 0 ? (
+                    bookings.map((booking) => (
+                      <tr key={booking._id}>
+                        <td>{booking.user?.firstName} {booking.user?.lastName || 'Невідомий'}</td>
+                        <td>{booking.artist?.name || 'Невідомий'}</td>
+                        <td>{new Date(booking.date).toLocaleDateString()}</td>
+                        <td>{booking.time}</td>
+                        <td>
+                          <span
+                            className="status-badge"
+                            style={{ backgroundColor: bookingStatusMap[booking.status]?.color || '#6B7280' }}
+                          >
+                            {bookingStatusMap[booking.status]?.label || booking.status}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="action-buttons">
+                            <button
+                              className="action-btn edit"
+                              onClick={() => startEditingBooking(booking)}
+                              title="Редагувати"
+                            >
+                              <FaEdit />
+                            </button>
+                            {booking.status === 'pending' && (
+                              <>
+                                <button
+                                  className="action-btn confirm"
+                                  onClick={() => handleUpdateBookingStatus(booking._id, 'confirmed')}
+                                  title="Підтвердити"
+                                >
+                                  <FaCheck />
+                                </button>
+                                <button
+                                  className="action-btn cancel"
+                                  onClick={() => handleUpdateBookingStatus(booking._id, 'cancelled')}
+                                  title="Скасувати"
+                                >
+                                  <FaTimes />
+                                </button>
+                              </>
+                            )}
+                            {(booking.status === 'pending' || booking.status === 'confirmed') && (
+                              <button
+                                className="action-btn complete"
+                                onClick={() => handleUpdateBookingStatus(booking._id, 'completed')}
+                                title="Завершено"
+                              >
+                                <FaCheck />
+                              </button>
+                            )}
+                            <button
+                              className="action-btn delete"
+                              onClick={() => handleDeleteBooking(booking._id)}
+                              title="Видалити"
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6">Бронювання відсутні</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <h4>Усі консультації</h4>
+            <div className="table-wrapper">
+              <table className="bookings-table">
+                <thead>
+                  <tr>
+                    <th>Клієнт</th>
+                    <th>Майстер</th>
+                    <th>Дата</th>
+                    <th>Час</th>
+                    <th>Опис</th>
+                    <th>Статус</th>
+                    <th>Дії</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {consultations && consultations.length > 0 ? (
+                    consultations.map((consultation) => (
+                      <tr key={consultation._id}>
+                        <td>{consultation.user?.firstName} {consultation.user?.lastName || 'Невідомий'}</td>
+                        <td>{consultation.artist?.name || 'Невідомий'}</td>
+                        <td>{new Date(consultation.preferredDate).toLocaleDateString()}</td>
+                        <td>{consultation.time}</td>
+                        <td>{consultation.description || 'Немає'}</td>
+                        <td>
+                          <span
+                            className="status-badge"
+                            style={{ backgroundColor: consultationStatusMap[consultation.status]?.color || '#6B7280' }}
+                          >
+                            {consultationStatusMap[consultation.status]?.label || consultation.status}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="action-buttons">
+                            {consultation.status === 'pending' && (
+                              <>
+                                <button
+                                  className="action-btn confirm"
+                                  onClick={() => handleUpdateConsultationStatus(consultation._id, 'reviewed')}
+                                  title="Переглянуто"
+                                >
+                                  <FaCheck />
+                                </button>
+                                <button
+                                  className="action-btn cancel"
+                                  onClick={() => handleUpdateConsultationStatus(consultation._id, 'cancelled')}
+                                  title="Скасувати"
+                                >
+                                  <FaTimes />
+                                </button>
+                              </>
+                            )}
+                            <button
+                              className="action-btn delete"
+                              onClick={() => handleDeleteConsultation(consultation._id)}
+                              title="Видалити"
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7">Консультації відсутні</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
-    </div>
-  );
+    );
+  }
+
+  return null;
 };
 
 export default BookingManagement;

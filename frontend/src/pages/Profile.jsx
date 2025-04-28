@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './Profile.css';
@@ -14,8 +15,6 @@ const Profile = () => {
   const [bookings, setBookings] = useState([]);
   const [artists, setArtists] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
   // Перевіряємо авторизацію
@@ -26,7 +25,7 @@ const Profile = () => {
   }, [user, token, navigate]);
 
   const statusTranslations = {
-    pending: 'Очікує',
+    pending: 'На розгляді',
     confirmed: 'Підтверджено',
     completed: 'Завершено',
     cancelled: 'Скасовано',
@@ -83,7 +82,7 @@ const Profile = () => {
       ];
       setBookings(combinedBookings);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { className: 'user-toast' });
     }
   };
 
@@ -94,7 +93,7 @@ const Profile = () => {
       if (!res.ok) throw new Error(data.message);
       setArtists(data);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { className: 'user-toast' });
     }
   };
 
@@ -106,26 +105,21 @@ const Profile = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
-      console.log('.DATA:', data);
       console.log('Availability response:', data);
       if (!res.ok) throw new Error(data.message || 'Помилка сервера');
       setAvailableTimes(data.availableTimes || []);
       if (!data.availableTimes || data.availableTimes.length === 0) {
-        setError('Немає доступних слотів на цю дату');
-        setTimeout(() => setError(''), 5000);
+        toast.error('Немає доступних слотів на цю дату', { className: 'user-toast' });
       }
     } catch (err) {
       console.error('fetchAvailableTimes error:', err);
-      setError(err.message);
+      toast.error(err.message, { className: 'user-toast' });
       setAvailableTimes([]);
-      setTimeout(() => setError(''), 5000);
     }
   };
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     try {
       const formData = new FormData();
       formData.append('firstName', profileForm.firstName);
@@ -139,18 +133,16 @@ const Profile = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      setSuccess('Профіль оновлено!');
+      toast.success('Профіль оновлено!', { className: 'user-toast' });
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { className: 'user-toast' });
     }
   };
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     if (passwordForm.newPassword !== passwordForm.confirmNewPassword) {
-      setError('Нові паролі не співпадають');
+      toast.error('Нові паролі не співпадають', { className: 'user-toast' });
       return;
     }
     try {
@@ -164,17 +156,15 @@ const Profile = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      setSuccess('Пароль оновлено!');
+      toast.success('Пароль оновлено!', { className: 'user-toast' });
       setPasswordForm({ oldPassword: '', newPassword: '', confirmNewPassword: '' });
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { className: 'user-toast' });
     }
   };
 
   const handleConsultationSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     try {
       console.log('Sending consultation request:', consultationForm);
       const res = await fetch('http://localhost:5000/api/bookings/consultations', {
@@ -185,7 +175,7 @@ const Profile = () => {
       const data = await res.json();
       console.log('Consultation response:', data);
       if (!res.ok) throw new Error(data.message || 'Помилка сервера');
-      setSuccess('Запит на консультацію відправлено!');
+      toast.success('Запит на консультацію відправлено!', { className: 'user-toast' });
       const { artist, preferredDate } = consultationForm;
       setConsultationForm({ artist: '', preferredDate: '', time: '' });
       setAvailableTimes([]);
@@ -196,7 +186,7 @@ const Profile = () => {
       }
     } catch (err) {
       console.error('Consultation error:', err);
-      setError(err.message);
+      toast.error(err.message, { className: 'user-toast' });
     }
   };
 
@@ -252,9 +242,6 @@ const Profile = () => {
             Вийти
           </button>
         </div>
-
-        {error && <p className="error-message">{error}</p>}
-        {success && <p className="success-message">{success}</p>}
 
         {activeTab === 'personal' && (
           <div className="profile-details">

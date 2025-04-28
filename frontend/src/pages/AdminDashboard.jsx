@@ -13,7 +13,7 @@ import ScheduleManagement from '../components/admin/ScheduleManagement';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-  const [activeSection, setActiveSection] = useState('notifications');
+  const [activeSection, setActiveSection] = useState({ category: 'notifications', subcategory: null });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -26,6 +26,24 @@ const AdminDashboard = () => {
   const [artists, setArtists] = useState([]);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
+
+  // Визначаємо підкатегорії для кожної категорії
+  const subcategories = {
+    gallery: [
+      { id: 'add-image', label: 'Додати зображення' },
+      { id: 'edit-images', label: 'Редагувати зображення' },
+      { id: 'manage-categories', label: 'Управління категоріями' },
+    ],
+    posts: [
+      { id: 'add-post', label: 'Додати пост' },
+      { id: 'edit-posts', label: 'Редагувати пости' },
+      { id: 'manage-categories', label: 'Управління категоріями' },
+    ],
+    bookings: [
+      { id: 'add-booking', label: 'Додати бронювання' },
+      { id: 'edit-bookings', label: 'Редагувати бронювання' },
+    ],
+  };
 
   useEffect(() => {
     if (!token) {
@@ -40,7 +58,6 @@ const AdminDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error('Доступ заборонено: тільки для адміністраторів');
-        console.log('Адмін-доступ підтверджено');
         await Promise.all([
           fetchGalleryImages(),
           fetchPosts(),
@@ -50,7 +67,6 @@ const AdminDashboard = () => {
           fetchArtists(),
         ]);
       } catch (err) {
-        console.error('Помилка перевірки адмін-доступу:', err);
         setError(err.message);
         localStorage.removeItem('token');
         setTimeout(() => navigate('/'), 3000);
@@ -66,12 +82,10 @@ const AdminDashboard = () => {
     async (url, method, payload, isFormData = false) => {
       setError('');
       try {
-        console.log('Request:', { url, method, token, payload });
         const headers = { Authorization: `Bearer ${token}` };
         if (!isFormData) headers['Content-Type'] = 'application/json';
         const body = isFormData ? payload : JSON.stringify(payload);
         const res = await fetch(url, { method, headers, body });
-        console.log('Response status:', res.status, 'URL:', url);
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
           if (res.status === 401 || res.status === 403) {
@@ -86,10 +100,8 @@ const AdminDashboard = () => {
           setSuccess('Операція успішна!');
           setTimeout(() => setSuccess(''), 3000);
         }
-        console.log('Response data:', responseData);
         return responseData;
       } catch (err) {
-        console.error('Request error:', err);
         setError(err.message || 'Помилка запиту');
         setTimeout(() => setError(''), 3000);
         throw err;
@@ -168,12 +180,10 @@ const AdminDashboard = () => {
       });
       if (!res.ok) throw new Error('Не вдалося отримати майстрів');
       const data = await res.json();
-      console.log('fetchArtists response:', data);
       const artistsData = Array.isArray(data) ? data : [];
       setArtists(artistsData);
       return artistsData;
     } catch (err) {
-      console.error('fetchArtists error:', err);
       setError(err.message);
       return [];
     }
@@ -188,8 +198,8 @@ const AdminDashboard = () => {
       <img src="/images/Banner.svg" id="banner" alt="Banner" />
       <div className="admin-dashboard">
         <Sidebar
-          activeSection={activeSection}
-          setActiveSection={setActiveSection}
+          activeSection={activeSection.category}
+          setActiveSection={(category) => setActiveSection({ category, subcategory: null })}
           isSidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
         />
@@ -199,62 +209,118 @@ const AdminDashboard = () => {
           </button>
           {error && <p className="error-message">{error}</p>}
           {success && <p className="success-message">{success}</p>}
-          {activeSection === 'notifications' && (
+          {/* Навігація підкатегорій */}
+          {activeSection.category !== 'notifications' &&
+            activeSection.category !== 'artists' &&
+            activeSection.category !== 'schedules' && (
+              <div className="subcategory-nav">
+                {subcategories[activeSection.category].map((sub) => (
+                  <button
+                    key={sub.id}
+                    className={`subcategory-tab ${activeSection.subcategory === sub.id ? 'active' : ''}`}
+                    onClick={() => setActiveSection({ ...activeSection, subcategory: sub.id })}
+                  >
+                    {sub.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          {/* Контент */}
+          {activeSection.category === 'notifications' && (
             <NotificationManagement token={token} setError={setError} setSuccess={setSuccess} />
           )}
-          {activeSection === 'gallery' && (
-            <GalleryManagement
-              galleryImages={galleryImages}
-              setGalleryImages={setGalleryImages}
-              handleSubmit={handleSubmit}
-              setError={setError}
-              setSuccess={setSuccess}
-              fetchGalleryImages={fetchGalleryImages}
-              galleryCategories={galleryCategories}
-            />
+          {activeSection.category === 'gallery' && (
+            <>
+              {activeSection.subcategory === 'add-image' && (
+                <GalleryManagement
+                  mode="add"
+                  galleryImages={galleryImages}
+                  setGalleryImages={setGalleryImages}
+                  handleSubmit={handleSubmit}
+                  setError={setError}
+                  setSuccess={setSuccess}
+                  fetchGalleryImages={fetchGalleryImages}
+                  galleryCategories={galleryCategories}
+                />
+              )}
+              {activeSection.subcategory === 'edit-images' && (
+                <GalleryManagement
+                  mode="edit"
+                  galleryImages={galleryImages}
+                  setGalleryImages={setGalleryImages}
+                  handleSubmit={handleSubmit}
+                  setError={setError}
+                  setSuccess={setSuccess}
+                  fetchGalleryImages={fetchGalleryImages}
+                  galleryCategories={galleryCategories}
+                />
+              )}
+              {activeSection.subcategory === 'manage-categories' && (
+                <GalleryCategoryManagement
+                  galleryCategories={galleryCategories}
+                  setGalleryCategories={setGalleryCategories}
+                  handleSubmit={handleSubmit}
+                  setError={setError}
+                  setSuccess={setSuccess}
+                  fetchGalleryCategories={fetchGalleryCategories}
+                />
+              )}
+            </>
           )}
-          {activeSection === 'gallery-categories' && (
-            <GalleryCategoryManagement
-              galleryCategories={galleryCategories}
-              setGalleryCategories={setGalleryCategories}
-              handleSubmit={handleSubmit}
-              setError={setError}
-              setSuccess={setSuccess}
-              fetchGalleryCategories={fetchGalleryCategories}
-            />
+          {activeSection.category === 'posts' && (
+            <>
+              {activeSection.subcategory === 'add-post' && (
+                <PostManagement
+                  mode="add"
+                  posts={posts}
+                  categories={categories}
+                  setPosts={setPosts}
+                  handleSubmit={handleSubmit}
+                  setError={setError}
+                  setSuccess={setSuccess}
+                  fetchPosts={fetchPosts}
+                />
+              )}
+              {activeSection.subcategory === 'edit-posts' && (
+                <PostManagement
+                  mode="edit"
+                  posts={posts}
+                  categories={categories}
+                  setPosts={setPosts}
+                  handleSubmit={handleSubmit}
+                  setError={setError}
+                  setSuccess={setSuccess}
+                  fetchPosts={fetchPosts}
+                />
+              )}
+              {activeSection.subcategory === 'manage-categories' && (
+                <CategoryManagement
+                  categories={categories}
+                  setCategories={setCategories}
+                  handleSubmit={handleSubmit}
+                  setError={setError}
+                  setSuccess={setSuccess}
+                  fetchCategories={fetchCategories}
+                />
+              )}
+            </>
           )}
-          {activeSection === 'posts' && (
-            <PostManagement
-              posts={posts}
-              categories={categories}
-              setPosts={setPosts}
-              handleSubmit={handleSubmit}
-              setError={setError}
-              setSuccess={setSuccess}
-              fetchPosts={fetchPosts}
-            />
+          {activeSection.category === 'bookings' && (
+            <>
+              {(activeSection.subcategory === 'add-booking' || activeSection.subcategory === 'edit-bookings') && (
+                <BookingManagement
+                  mode={activeSection.subcategory === 'add-booking' ? 'add' : 'edit'}
+                  bookings={bookings}
+                  setBookings={setBookings}
+                  handleSubmit={handleSubmit}
+                  setError={setError}
+                  setSuccess={setSuccess}
+                  fetchBookings={fetchBookings}
+                />
+              )}
+            </>
           )}
-          {activeSection === 'categories' && (
-            <CategoryManagement
-              categories={categories}
-              setCategories={setCategories}
-              handleSubmit={handleSubmit}
-              setError={setError}
-              setSuccess={setSuccess}
-              fetchCategories={fetchCategories}
-            />
-          )}
-          {activeSection === 'bookings' && (
-            <BookingManagement
-              bookings={bookings}
-              setBookings={setBookings}
-              handleSubmit={handleSubmit}
-              setError={setError}
-              setSuccess={setSuccess}
-              fetchBookings={fetchBookings}
-            />
-          )}
-          {activeSection === 'artists' && (
+          {activeSection.category === 'artists' && (
             <ArtistManagement
               artists={artists}
               setArtists={setArtists}
@@ -264,7 +330,7 @@ const AdminDashboard = () => {
               fetchArtists={fetchArtists}
             />
           )}
-          {activeSection === 'schedules' && (
+          {activeSection.category === 'schedules' && (
             <ScheduleManagement
               token={token}
               setError={setError}

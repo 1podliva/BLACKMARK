@@ -1,15 +1,24 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaTimes, FaSignOutAlt, FaImage, FaFolder, FaCalendar, FaBell, FaUser, FaCalendarAlt } from 'react-icons/fa';
-
+import { FaBars, FaTimes, FaSignOutAlt, FaImage, FaCalendar, FaBell, FaUser, FaCalendarAlt } from 'react-icons/fa';
 
 const Sidebar = ({ activeSection, setActiveSection, isSidebarOpen, setSidebarOpen }) => {
   const navigate = useNavigate();
 
   const handleExitAdmin = () => {
+    localStorage.removeItem('token');
     setSidebarOpen(false);
     navigate('/');
   };
+
+  const menuItems = [
+    { id: 'notifications', label: 'Сповіщення', icon: <FaBell className="sidebar-icon" /> },
+    { id: 'gallery', label: 'Галерея', icon: <FaImage className="sidebar-icon" /> },
+    { id: 'posts', label: 'Пости', icon: <FaImage className="sidebar-icon" /> },
+    { id: 'bookings', label: 'Бронювання', icon: <FaCalendar className="sidebar-icon" /> },
+    { id: 'artists', label: 'Майстри', icon: <FaUser className="sidebar-icon" /> },
+    { id: 'schedules', label: 'Графіки', icon: <FaCalendarAlt className="sidebar-icon" /> },
+  ];
 
   return (
     <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
@@ -20,78 +29,19 @@ const Sidebar = ({ activeSection, setActiveSection, isSidebarOpen, setSidebarOpe
         </button>
       </div>
       <nav className="sidebar-nav">
-        <button
-          className={`sidebar-item ${activeSection === 'notifications' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveSection('notifications');
-            setSidebarOpen(false);
-          }}
-        >
-          <FaBell className="sidebar-icon" /> Сповіщення
-        </button>
-        <button
-          className={`sidebar-item ${activeSection === 'gallery' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveSection('gallery');
-            setSidebarOpen(false);
-          }}
-        >
-          <FaImage className="sidebar-icon" /> Галерея
-        </button>
-        <button
-          className={`sidebar-item ${activeSection === 'gallery-categories' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveSection('gallery-categories');
-            setSidebarOpen(false);
-          }}
-        >
-          <FaFolder className="sidebar-icon" /> Категорії галереї
-        </button>
-        <button
-          className={`sidebar-item ${activeSection === 'posts' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveSection('posts');
-            setSidebarOpen(false);
-          }}
-        >
-          <FaImage className="sidebar-icon" /> Пости
-        </button>
-        <button
-          className={`sidebar-item ${activeSection === 'categories' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveSection('categories');
-            setSidebarOpen(false);
-          }}
-        >
-          <FaFolder className="sidebar-icon" /> Категорії постів
-        </button>
-        <button
-          className={`sidebar-item ${activeSection === 'bookings' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveSection('bookings');
-            setSidebarOpen(false);
-          }}
-        >
-          <FaCalendar className="sidebar-icon" /> Бронювання
-        </button>
-        <button
-          className={`sidebar-item ${activeSection === 'artists' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveSection('artists');
-            setSidebarOpen(false);
-          }}
-        >
-          <FaUser className="sidebar-icon" /> Майстри
-        </button>
-        <button
-          className={`sidebar-item ${activeSection === 'schedules' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveSection('schedules');
-            setSidebarOpen(false);
-          }}
-        >
-          <FaCalendarAlt className="sidebar-icon" /> Графіки
-        </button>
+        {menuItems.map((item) => (
+          <button
+            key={item.id}
+            className={`sidebar-item ${activeSection === item.id ? 'active' : ''}`}
+            onClick={() => {
+              setActiveSection(item.id);
+              setSidebarOpen(false);
+            }}
+          >
+            {item.icon}
+            {item.label}
+          </button>
+        ))}
         <button className="sidebar-item logout" onClick={handleExitAdmin}>
           <FaSignOutAlt className="sidebar-icon" /> Вийти з адмін-панелі
         </button>
