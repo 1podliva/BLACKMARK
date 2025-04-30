@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Modal from 'react-modal';
+import { toast } from 'react-toastify';
 import './GalleryManagement.css';
 
-const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setError, setSuccess, fetchGalleryImages, galleryCategories }) => {
+Modal.setAppElement('#root');
+
+const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setError, setSuccess, fetchGalleryImages, galleryCategories, mode }) => {
   const [imageForm, setImageForm] = useState({
     id: '',
     alt: '',
@@ -13,69 +17,121 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
   });
   const [imagePreview, setImagePreview] = useState('');
   const [activeStyle, setActiveStyle] = useState('All');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const prevImageRef = useRef(null); // Для очищення URL.createObjectURL
 
   useEffect(() => {
     console.log('Gallery images:', galleryImages);
     console.log('Gallery categories:', galleryCategories);
-  }, [galleryImages, galleryCategories]);
+    console.log('Mode:', mode);
+  }, [galleryImages, galleryCategories, mode]);
+
+  useEffect(() => {
+    // Очищення URL.createObjectURL при зміні imagePreview
+    return () => {
+      if (prevImageRef.current) {
+        URL.revokeObjectURL(prevImageRef.current);
+      }
+    };
+  }, [imagePreview]);
 
   const handleImageSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     if (!imageForm.styles.length) {
-      setError('Будь ласка, виберіть принаймні одну категорію');
+      toast.error('Будь ласка, виберіть принаймні одну категорію', {
+        className: 'admin-toast',
+        autoClose: 3000,
+        toastId: 'form-error-toast',
+      });
       return;
     }
-    const formData = new FormData();
-    formData.append('alt', imageForm.alt);
-    formData.append('title', imageForm.title);
-    formData.append('description', imageForm.description);
-    imageForm.styles.forEach(style => {
-      formData.append('styles', style);
-      console.log('Appending style:', style);
-    });
-    if (imageForm.image) formData.append('image', imageForm.image);
-    if (imageForm.id && imageForm.imageUrl && !imageForm.image) formData.append('image', imageForm.imageUrl);
-    console.log('FormData entries:', Array.from(formData.entries()));
+    if (!imageForm.title.trim()) {
+      toast.error('Заголовок обов’язковий', {
+        className: 'admin-toast',
+        autoClose: 3000,
+        toastId: 'form-error-toast',
+      });
+      return;
+    }
+    if (!imageForm.description.trim()) {
+      toast.error('Опис обов’язковий', {
+        className: 'admin-toast',
+        autoClose: 3000,
+        toastId: 'form-error-toast',
+      });
+      return;
+    }
+    if (!imageForm.alt.trim()) {
+      toast.error('Alt текст обов’язковий', {
+        className: 'admin-toast',
+        autoClose: 3000,
+        toastId: 'form-error-toast',
+      });
+      return;
+    }
+    if (!imageForm.id && !imageForm.image) {
+      toast.error('Зображення обов’язкове для додавання', {
+        className: 'admin-toast',
+        autoClose: 3000,
+        toastId: 'form-error-toast',
+      });
+      return;
+    }
+
     try {
+      const formData = new FormData();
+      formData.append('alt', imageForm.alt);
+      formData.append('title', imageForm.title);
+      formData.append('description', imageForm.description);
+      imageForm.styles.forEach((style) => formData.append('styles', style));
+      if (imageForm.image) {
+        formData.append('image', imageForm.image);
+      }
+
       const url = imageForm.id ? `http://localhost:5000/api/gallery/${imageForm.id}` : 'http://localhost:5000/api/gallery';
       const method = imageForm.id ? 'PUT' : 'POST';
-      const data = await handleSubmit(url, method, formData, true);
-      setSuccess(imageForm.id ? 'Зображення оновлено!' : 'Зображення додано!');
+      await handleSubmit(url, method, formData, true);
+      toast.success(imageForm.id ? 'Зображення оновлено!' : 'Зображення додано!', {
+        className: 'admin-toast',
+        autoClose: 3000,
+        toastId: imageForm.id ? 'update-image-toast' : 'create-image-toast',
+      });
       setImageForm({ id: '', alt: '', title: '', description: '', styles: [], image: null, imageUrl: '' });
       setImagePreview('');
+      setIsModalOpen(false);
       fetchGalleryImages();
     } catch (err) {
-      // Error set by handleSubmit
+      // Помилка обробляється в handleSubmit
     }
   };
 
   const handleImageEdit = (image) => {
-    const imageStyles = image.styles?.length ? image.styles : [image.style].filter(Boolean);
+    const imageStyles = Array.isArray(image.styles) && image.styles.length ? image.styles : (image.style ? [image.style] : []);
     setImageForm({
       id: image._id,
-      alt: image.alt,
-      title: image.title,
-      description: image.description,
+      alt: image.alt || '',
+      title: image.title || '',
+      description: image.description || '',
       styles: imageStyles,
       image: null,
-      imageUrl: image.src,
+      imageUrl: image.src || '',
     });
     setImagePreview(image.src ? `http://localhost:5000${image.src}` : '');
+    setIsModalOpen(true);
   };
 
   const handleImageDelete = async (id) => {
     if (!window.confirm('Ви впевнені, що хочете видалити це зображення?')) return;
-    console.log('Deleting image ID:', id);
     try {
-      const res = await handleSubmit(`http://localhost:5000/api/gallery/${id}`, 'DELETE');
-      console.log('Delete response:', res);
-      setSuccess('Зображення видалено!');
+      await handleSubmit(`http://localhost:5000/api/gallery/${id}`, 'DELETE');
+      toast.success('Зображення видалено!', {
+        className: 'admin-toast',
+        autoClose: 3000,
+        toastId: 'delete-image-toast',
+      });
       fetchGalleryImages();
     } catch (err) {
-      console.error('Delete error:', err);
-      setError('Не вдалося видалити зображення: ' + err.message);
+      // Помилка обробляється в handleSubmit
     }
   };
 
@@ -83,119 +139,187 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
     const file = e.target.files[0];
     setImageForm({ ...imageForm, image: file });
     if (file) {
-      setImagePreview(URL.createObjectURL(file));
+      if (prevImageRef.current) {
+        URL.revokeObjectURL(prevImageRef.current);
+      }
+      const previewUrl = URL.createObjectURL(file);
+      prevImageRef.current = previewUrl;
+      setImagePreview(previewUrl);
     } else {
       setImagePreview(imageForm.imageUrl ? `http://localhost:5000${imageForm.imageUrl}` : '');
     }
   };
 
   const handleImageClear = () => {
+    if (prevImageRef.current) {
+      URL.revokeObjectURL(prevImageRef.current);
+      prevImageRef.current = null;
+    }
     setImageForm({ ...imageForm, image: null, imageUrl: '' });
     setImagePreview('');
   };
 
   const handleStylesChange = (e) => {
-    const selected = Array.from(e.target.selectedOptions).map(option => option.value);
-    console.log('Selected styles:', selected);
+    const selected = Array.from(e.target.selectedOptions).map((option) => option.value);
     setImageForm({ ...imageForm, styles: selected });
   };
 
-  return (
-    <div className="gallery-management">
-      <h3>Керування галереєю</h3>
-      <form className="admin-form" onSubmit={handleImageSubmit}>
-        <div className="form-group">
-          <label>Зображення</label>
-          <input type="file" accept="image/*" onChange={handleImageChange} required={!imageForm.id} />
-          {imagePreview && (
-            <div className="image-preview-container">
-              <img src={imagePreview} alt="Preview" className="image-preview" />
-              <button type="button" className="image-clear-btn" onClick={handleImageClear}>
-                ✕
-              </button>
-            </div>
-          )}
-        </div>
-        <div className="form-group">
-          <label>Заголовок</label>
-          <input
-            type="text"
-            value={imageForm.title}
-            onChange={(e) => setImageForm({ ...imageForm, title: e.target.value })}
-            placeholder="Введіть заголовок"
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Опис</label>
-          <input
-            type="text"
-            value={imageForm.description}
-            onChange={(e) => setImageForm({ ...imageForm, description: e.target.value })}
-            placeholder="Введіть опис"
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Категорії (утримуйте Ctrl для вибору кількох)</label>
-          {galleryCategories && galleryCategories.length > 0 ? (
-            <select multiple value={imageForm.styles} onChange={handleStylesChange} required>
-              {galleryCategories.map(category => (
-                <option key={category._id} value={category.name}>{category.name}</option>
-              ))}
-            </select>
-          ) : (
-            <p>Категорії не завантажено</p>
-          )}
-        </div>
-        <div className="form-group">
-          <label>Alt текст</label>
-          <input
-            type="text"
-            value={imageForm.alt}
-            onChange={(e) => setImageForm({ ...imageForm, alt: e.target.value })}
-            placeholder="Введіть alt текст"
-            required
-          />
-        </div>
-        <button type="submit" className="submit-btn">
-          {imageForm.id ? 'Оновити зображення' : 'Додати зображення'}
-        </button>
-      </form>
+  const closeModal = () => {
+    if (prevImageRef.current) {
+      URL.revokeObjectURL(prevImageRef.current);
+      prevImageRef.current = null;
+    }
+    setIsModalOpen(false);
+    setImageForm({ id: '', alt: '', title: '', description: '', styles: [], image: null, imageUrl: '' });
+    setImagePreview('');
+  };
 
-      <div className="gallery-tabs">
-        {['All', ...(galleryCategories || []).map(cat => cat.name)].map(style => (
-          <button
-            key={style}
-            className={`gallery-tab-btn ${activeStyle === style ? 'active' : ''}`}
-            onClick={() => setActiveStyle(style)}
-          >
-            {style}
-          </button>
-        ))}
+  // Компонент форми для повторного використання
+  const ImageForm = ({ isModal = false }) => (
+    <form className="admin-form" onSubmit={handleImageSubmit}>
+      <div className="form-group">
+        <label>Зображення</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          required={!imageForm.id} // Файл не потрібен для редагування, якщо зображення не змінюється
+        />
+        {imagePreview && (
+          <div className="image-preview-container">
+            <img src={imagePreview} alt="Preview" className="image-preview" />
+            <button type="button" className="image-clear-btn" onClick={handleImageClear}>
+              ✕
+            </button>
+          </div>
+        )}
       </div>
+      <div className="form-group">
+        <label>Заголовок</label>
+        <input
+          type="text"
+          value={imageForm.title}
+          onChange={(e) => setImageForm({ ...imageForm, title: e.target.value })}
+          placeholder="Введіть заголовок"
+          required
+        />
+      </div>
+      <div className="form-group">
+        <label>Опис</label>
+        <input
+          type="text"
+          value={imageForm.description}
+          onChange={(e) => setImageForm({ ...imageForm, description: e.target.value })}
+          placeholder="Введіть опис"
+          required
+        />
+      </div>
+      <div className="form-group">
+        <label>Категорії (утримуйте Ctrl для вибору кількох)</label>
+        {Array.isArray(galleryCategories) && galleryCategories.length > 0 ? (
+          <select multiple value={imageForm.styles} onChange={handleStylesChange} required>
+            {galleryCategories.map((category) => (
+              <option key={category._id} value={category.name}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <p>Категорії не завантажено</p>
+        )}
+      </div>
+      <div className="form-group">
+        <label>Alt текст</label>
+        <input
+          type="text"
+          value={imageForm.alt}
+          onChange={(e) => setImageForm({ ...imageForm, alt: e.target.value })}
+          placeholder="Введіть alt текст"
+          required
+        />
+      </div>
+      {isModal ? (
+        <div className="modal-actions">
+          <button type="submit" className="submit-btn">
+            {imageForm.id ? 'Оновити зображення' : 'Додати зображення'}
+          </button>
+          <button type="button" className="cancel-btn" onClick={closeModal}>
+            Скасувати
+          </button>
+        </div>
+      ) : (
+        <button type="submit" className="submit-btn">
+          Додати зображення
+        </button>
+      )}
+    </form>
+  );
 
-      <div className="gallery-list">
-        {galleryImages
-          .filter(img => activeStyle === 'All' || (img.styles || [img.style]).includes(activeStyle))
-          .map(img => {
-            console.log('Rendering image:', img);
-            return (
-              <div key={img._id} className="gallery-item-admin">
-                <img src={`http://localhost:5000${img.src}`} alt={img.alt} className="gallery-item-image" />
-                <div className="gallery-item-info">
-                  <h3>{img.title}</h3>
-                  <p>{img.description}</p>
-                  <p><strong>Категорії:</strong> {(img.styles?.length ? img.styles : [img.style]).filter(Boolean).join(', ')}</p>
-                  <div className="gallery-item-actions">
-                    <button className="edit-btn" onClick={() => handleImageEdit(img)}>Редагувати</button>
-                    <button className="delete-btn" onClick={() => handleImageDelete(img._id)}>Видалити</button>
+  return (
+    <div className={`gallery-management ${mode}`}>
+      {mode === 'add' && (
+        <>
+          <h3>Додати зображення</h3>
+          <ImageForm />
+        </>
+      )}
+
+      {mode === 'edit' && (
+        <>
+          <h3>Редагувати зображення</h3>
+          <div className="gallery-tabs">
+            {['All', ...(Array.isArray(galleryCategories) ? galleryCategories.map((cat) => cat.name) : [])].map((style) => (
+              <button
+                key={style}
+                className={`gallery-tab-btn ${activeStyle === style ? 'active' : ''}`}
+                onClick={() => setActiveStyle(style)}
+              >
+                {style}
+              </button>
+            ))}
+          </div>
+
+          <div className="gallery-list">
+            {galleryImages
+              .filter((img) => {
+                if (activeStyle === 'All') return true;
+                const styles = Array.isArray(img.styles) && img.styles.length ? img.styles : (img.style ? [img.style] : []);
+                return styles.includes(activeStyle);
+              })
+              .map((img) => (
+                <div key={img._id} className="gallery-item-admin">
+                  <img src={`http://localhost:5000${img.src}`} alt={img.alt || ''} className="gallery-item-image" />
+                  <div className="gallery-item-info">
+                    <h3>{img.title || 'Без назви'}</h3>
+                    <p>{img.description || 'Без опису'}</p>
+                    <p>
+                      <strong>Категорії:</strong>{' '}
+                      {(Array.isArray(img.styles) && img.styles.length ? img.styles : (img.style ? [img.style] : [])).join(', ') || 'Немає'}
+                    </p>
+                    <div className="gallery-item-actions">
+                      <button className="edit-btn" onClick={() => handleImageEdit(img)}>
+                        Редагувати
+                      </button>
+                      <button className="delete-btn" onClick={() => handleImageDelete(img._id)}>
+                        Видалити
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-      </div>
+              ))}
+          </div>
+
+          <Modal
+            isOpen={isModalOpen}
+            onRequestClose={closeModal}
+            className="modal"
+            overlayClassName="modal-overlay"
+          >
+            <h2>{imageForm.id ? 'Редагувати зображення' : 'Додати зображення'}</h2>
+            <ImageForm isModal={true} />
+          </Modal>
+        </>
+      )}
     </div>
   );
 };

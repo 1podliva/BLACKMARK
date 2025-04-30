@@ -12,7 +12,7 @@
 .profile-section {
   background-color: var(--dark-bg);
   color: var(--soft-white);
-  font-family: "Inter", sans-serif;
+  /* font-family: "Inter", sans-serif; */
   min-height: 100vh;
   padding: 40px;
 }
@@ -178,7 +178,7 @@
   color: var(--soft-white) !important;
   border-radius: 8px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-  font-family: "Inter", sans-serif !important;
+  /* font-family: "Inter", sans-serif !important; */
   padding: 10px !important;
   animation: slideIn 0.3s ease-in-out !important;
 }
@@ -226,7 +226,7 @@
   background: var(--navy-gray);
   border: none;
   color: var(--soft-white);
-  font-family: "Inter", sans-serif;
+  /* font-family: "Inter", sans-serif; */
 }
 
 .react-calendar__tile {

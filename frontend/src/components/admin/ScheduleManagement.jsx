@@ -13,6 +13,16 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
   const [editId, setEditId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Палітра кольорів для майстрів
+  const artistColors = [
+    '#9B00FF', // --purple-accent
+    '#FF6B6B', // Червоний
+    '#4ECDC4', // Бірюзовий
+    '#FFD93D', // Жовтий
+    '#6B7280', // Сірий
+    '#FF9F43', // Помаранчевий
+  ];
+
   useEffect(() => {
     let isMounted = true;
 
@@ -107,6 +117,8 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
   return (
     <div className="schedule-management">
       <h2>Керування графіками майстрів</h2>
+
+      {/* Форма */}
       <h3>{editId ? 'Редагувати графік' : 'Додати графік'}</h3>
       <form onSubmit={handleFormSubmit}>
         <div className="form-group">
@@ -156,24 +168,57 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
             required
           />
         </div>
-        <button type="submit" className="submit-btn">
-          {editId ? 'Оновити' : 'Додати'}
-        </button>
-        {editId && (
-          <button
-            type="button"
-            className="cancel-btn"
-            onClick={() => {
-              setForm({ artist: '', date: '', startTime: '', endTime: '' });
-              setEditId(null);
-            }}
-          >
-            Скасувати
+        <div className="form-actions">
+          <button type="submit" className="submit-btn">
+            {editId ? 'Оновити' : 'Додати'}
           </button>
-        )}
+          {editId && (
+            <button
+              type="button"
+              className="cancel-btn"
+              onClick={() => {
+                setForm({ artist: '', date: '', startTime: '', endTime: '' });
+                setEditId(null);
+              }}
+            >
+              Скасувати
+            </button>
+          )}
+        </div>
       </form>
 
-      <h3>Список графіків</h3>
+      {/* Список карток */}
+      <h3>Графіки майстрів</h3>
+      {Array.isArray(schedules) && schedules.length > 0 ? (
+        <div className="schedule-cards">
+          {schedules.map((schedule, index) => (
+            <div
+              key={schedule._id}
+              className="schedule-card"
+              style={{ borderLeft: `4px solid ${artistColors[index % artistColors.length]}` }}
+            >
+              <div className="card-content">
+                <p><strong>Майстер:</strong> {schedule.artist?.name || 'Невідомий'}</p>
+                <p><strong>Дата:</strong> {formatDate(schedule)}</p>
+                <p><strong>Години:</strong> {`${schedule.startTime} - ${schedule.endTime}`}</p>
+              </div>
+              <div className="card-actions">
+                <button className="edit-btn" onClick={() => handleEdit(schedule)}>
+                  Редагувати
+                </button>
+                <button className="delete-btn" onClick={() => handleDelete(schedule._id)}>
+                  Видалити
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p>Графіків немає</p>
+      )}
+
+      {/* Таблиця */}
+      <h3>Таблиця графіків</h3>
       {Array.isArray(schedules) && schedules.length > 0 ? (
         <table className="schedules-table">
           <thead>
@@ -185,8 +230,11 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
             </tr>
           </thead>
           <tbody>
-            {schedules.map((schedule) => (
-              <tr key={schedule._id}>
+            {schedules.map((schedule, index) => (
+              <tr
+                key={schedule._id}
+                style={{ borderLeft: `4px solid ${artistColors[index % artistColors.length]}` }}
+              >
                 <td>{schedule.artist?.name || 'Невідомий'}</td>
                 <td>{formatDate(schedule)}</td>
                 <td>{`${schedule.startTime} - ${schedule.endTime}`}</td>

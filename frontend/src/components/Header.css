@@ -112,7 +112,7 @@
   top: 80px;
   right: 160px;
   background-color: var(--navy-gray);
-  border: 1px solid var(--light-gray);
+  border: 1px solid #262626;
   border-radius: 8px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
   min-width: 220px;
@@ -159,8 +159,8 @@
   font-size: 14px;
   cursor: default;
   padding: 8px 16px;
-  border-top: 1px solid var(--light-gray);
-  border-bottom: 1px solid var(--light-gray);
+  border-top: 1px solid #262626;
+  border-bottom: 1px solid #262626;
 }
 
 .dropdown-booking:hover {

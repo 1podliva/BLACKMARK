@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import './GalleryCategoryManagement.css';
 
 const GalleryCategoryManagement = ({ galleryCategories, setGalleryCategories, handleSubmit, setError, setSuccess, fetchGalleryCategories }) => {
@@ -6,18 +7,27 @@ const GalleryCategoryManagement = ({ galleryCategories, setGalleryCategories, ha
 
   const handleCategorySubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-    console.log('Submitting gallery category:', categoryForm);
+    if (!categoryForm.name.trim()) {
+      toast.error('Назва категорії обов’язкова', {
+        className: 'admin-toast',
+        autoClose: 3000,
+        toastId: 'form-error-toast',
+      });
+      return;
+    }
     try {
       const url = categoryForm.id ? `http://localhost:5000/api/gallery-categories/${categoryForm.id}` : 'http://localhost:5000/api/gallery-categories';
       const method = categoryForm.id ? 'PUT' : 'POST';
-      const data = await handleSubmit(url, method, { name: categoryForm.name });
-      setSuccess(categoryForm.id ? 'Категорію оновлено!' : 'Категорію додано!');
+      await handleSubmit(url, method, { name: categoryForm.name });
+      toast.success(categoryForm.id ? 'Категорію оновлено!' : 'Категорію додано!', {
+        className: 'admin-toast',
+        autoClose: 3000,
+        toastId: categoryForm.id ? 'update-category-toast' : 'create-category-toast',
+      });
       setCategoryForm({ id: '', name: '' });
       fetchGalleryCategories();
     } catch (err) {
-      // Error set by handleSubmit
+      // Помилка обробляється в handleSubmit
     }
   };
 
@@ -27,15 +37,16 @@ const GalleryCategoryManagement = ({ galleryCategories, setGalleryCategories, ha
 
   const handleCategoryDelete = async (id) => {
     if (!window.confirm('Ви впевнені, що хочете видалити цю категорію?')) return;
-    console.log('Deleting gallery category ID:', id);
     try {
-      const res = await handleSubmit(`http://localhost:5000/api/gallery-categories/${id}`, 'DELETE');
-      console.log('Delete response:', res);
-      setSuccess('Категорію видалено!');
+      await handleSubmit(`http://localhost:5000/api/gallery-categories/${id}`, 'DELETE');
+      toast.success('Категорію видалено!', {
+        className: 'admin-toast',
+        autoClose: 3000,
+        toastId: 'delete-category-toast',
+      });
       fetchGalleryCategories();
     } catch (err) {
-      console.error('Delete error:', err);
-      setError('Не вдалося видалити категорію: ' + err.message);
+      // Помилка обробляється в handleSubmit
     }
   };
 
@@ -61,12 +72,16 @@ const GalleryCategoryManagement = ({ galleryCategories, setGalleryCategories, ha
       <div className="category-list">
         <h4>Усі категорії</h4>
         {galleryCategories.length ? (
-          galleryCategories.map(category => (
+          galleryCategories.map((category) => (
             <div key={category._id} className="category-item">
               <span>{category.name}</span>
               <div className="category-actions">
-                <button className="edit-btn" onClick={() => handleCategoryEdit(category)}>Редагувати</button>
-                <button className="delete-btn" onClick={() => handleCategoryDelete(category._id)}>Видалити</button>
+                <button className="edit-btn" onClick={() => handleCategoryEdit(category)}>
+                  Редагувати
+                </button>
+                <button className="delete-btn" onClick={() => handleCategoryDelete(category._id)}>
+                  Видалити
+                </button>
               </div>
             </div>
           ))

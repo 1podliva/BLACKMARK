@@ -5,23 +5,21 @@
   --purple-hover: #7F00D4;
   --soft-white: #F8F9FA;
   --light-gray: #D1D5DB;
-  --muted-pink: #CBA6DD;
   --error-red: #EF4444;
   --success-green: #2ECC71;
   --warning-orange: #F59E0B;
   --info-blue: #3B82F6;
+  --muted-pink: #CBA6DD;
 }
 
-/* Основний контейнер адмін-панелі */
 .admin-dashboard {
   display: flex;
   min-height: 100vh;
   background-color: var(--dark-bg);
   color: var(--soft-white);
-  font-family: "Inter", Helvetica, sans-serif;
+  font-family: 'Urbanist', sans-serif;
 }
 
-/* Бічна панель */
 .sidebar {
   width: 250px;
   background-color: var(--navy-gray);
@@ -39,7 +37,6 @@
   transform: translateX(0);
 }
 
-/* Заголовок бічної панелі */
 .sidebar-header {
   display: flex;
   justify-content: space-between;
@@ -53,9 +50,9 @@
   font-weight: 700;
   color: var(--purple-accent);
   margin: 0;
+  font-family: 'Urbanist', sans-serif;
 }
 
-/* Кнопка для перемикання бічної панелі */
 .sidebar-toggle {
   background: none;
   border: none;
@@ -69,7 +66,6 @@
   color: var(--purple-accent);
 }
 
-/* Навігація бічної панелі */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
@@ -88,6 +84,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: 'Urbanist', sans-serif;
 }
 
 .sidebar-item:hover {
@@ -115,19 +112,23 @@
   color: var(--soft-white);
 }
 
-/* Основний контент */
 .admin-content {
   flex-grow: 1;
   padding: 20px;
   margin-left: 0;
   transition: margin-left 0.3s ease;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .admin-content.sidebar-open {
   margin-left: 250px;
 }
 
-/* Навігація підкатегорій */
 .subcategory-nav {
   display: flex;
   flex-wrap: wrap;
@@ -149,12 +150,14 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: 'Urbanist', sans-serif;
 }
 
 .subcategory-tab:hover {
   background: var(--purple-hover);
   color: var(--soft-white);
   border-color: var(--purple-hover);
+  transform: scale(1.05);
 }
 
 .subcategory-tab.active {
@@ -163,7 +166,6 @@
   border-color: var(--purple-accent);
 }
 
-/* Повідомлення про помилки та успіх */
 .error-message {
   background-color: var(--error-red);
   color: var(--soft-white);
@@ -172,6 +174,7 @@
   margin-bottom: 20px;
   text-align: center;
   font-size: 14px;
+  font-family: 'Urbanist', sans-serif;
 }
 
 .success-message {
@@ -182,9 +185,9 @@
   margin-bottom: 20px;
   text-align: center;
   font-size: 14px;
+  font-family: 'Urbanist', sans-serif;
 }
 
-/* Стилі для компонентів */
 .notification-management,
 .gallery-management,
 .post-management,
@@ -207,6 +210,7 @@
   color: var(--purple-accent);
   margin-bottom: 20px;
   font-weight: 600;
+  font-family: 'Urbanist', sans-serif;
 }
 
 .notification-management h4,
@@ -219,13 +223,13 @@
   color: var(--soft-white);
   margin-bottom: 15px;
   font-weight: 500;
+  font-family: 'Urbanist', sans-serif;
 }
 
-/* Форми */
 .booking-form {
   max-width: 800px;
   margin: 0 auto;
-  animation: fade-in 0.3s ease-in-out;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .form-grid {
@@ -248,6 +252,7 @@
   color: var(--light-gray);
   margin-bottom: 6px;
   font-weight: 500;
+  font-family: 'Urbanist', sans-serif;
 }
 
 .form-group select,
@@ -259,6 +264,7 @@
   border-radius: 6px;
   color: var(--soft-white);
   font-size: 14px;
+  font-family: 'Urbanist', sans-serif;
   transition: border-color 0.2s ease;
 }
 
@@ -279,8 +285,6 @@
   margin-top: 20px;
 }
 
-
-/* Календар */
 .react-calendar {
   border: 1px solid var(--light-gray);
   border-radius: 8px;
@@ -288,10 +292,9 @@
   color: var(--soft-white);
   width: 100%;
   max-width: 350px;
-  font-family: "Inter", sans-serif;
-  overflow: hidden; /* Обрізаємо обводку в кутах */
+  font-family: 'Urbanist', sans-serif;
+  overflow: hidden;
 }
-
 
 .react-calendar__navigation {
   display: flex;
@@ -341,6 +344,7 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  font-family: 'Urbanist', sans-serif;
 }
 
 .react-calendar__navigation__label:hover {
@@ -352,7 +356,6 @@
   outline: none;
 }
 
-/* Стилі для днів */
 .available-date {
   background-color: var(--purple-hover) !important;
   color: var(--soft-white) !important;
@@ -373,9 +376,9 @@
   padding: 10px;
   font-size: 14px;
   transition: background-color 0.2s ease;
+  font-family: 'Urbanist', sans-serif;
 }
 
-/* Таблиці */
 .table-wrapper {
   overflow-x: auto;
   border-radius: 8px;
@@ -394,6 +397,7 @@
   text-align: left;
   border-bottom: 1px solid var(--light-gray);
   font-size: 14px;
+  font-family: 'Urbanist', sans-serif;
 }
 
 .bookings-table th {
@@ -417,9 +421,9 @@
   font-size: 12px;
   font-weight: 500;
   color: var(--soft-white);
+  font-family: 'Urbanist', sans-serif;
 }
 
-/* Кнопки */
 .submit-btn,
 .cancel-btn,
 .action-btn {
@@ -429,6 +433,7 @@
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
+  font-family: 'Urbanist', sans-serif;
   transition: all 0.2s ease;
 }
 
@@ -439,6 +444,7 @@
 
 .submit-btn:hover {
   background-color: var(--purple-hover);
+  transform: scale(1.05);
 }
 
 .submit-btn:disabled {
@@ -453,6 +459,7 @@
 
 .cancel-btn:hover {
   background-color: var(--muted-pink);
+  transform: scale(1.05);
 }
 
 .action-buttons {
@@ -473,6 +480,7 @@
 
 .action-btn.edit:hover {
   background-color: #2563EB;
+  transform: scale(1.05);
 }
 
 .action-btn.confirm {
@@ -482,6 +490,7 @@
 
 .action-btn.confirm:hover {
   background-color: #27AE60;
+  transform: scale(1.05);
 }
 
 .action-btn.cancel {
@@ -491,6 +500,7 @@
 
 .action-btn.cancel:hover {
   background-color: #DC2626;
+  transform: scale(1.05);
 }
 
 .action-btn.complete {
@@ -500,6 +510,7 @@
 
 .action-btn.complete:hover {
   background-color: #2563EB;
+  transform: scale(1.05);
 }
 
 .action-btn.delete {
@@ -509,22 +520,22 @@
 
 .action-btn.delete:hover {
   background-color: #DC2626;
+  transform: scale(1.05);
 }
 
-/* Повідомлення */
 .info-message {
   color: var(--light-gray);
   font-size: 14px;
   margin-top: 8px;
+  font-family: 'Urbanist', sans-serif;
 }
 
-/* Toast */
 .admin-toast {
   background-color: rgba(203, 166, 221, 0.2);
   color: var(--soft-white);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  font-family: "Inter", sans-serif;
+  font-family: 'Urbanist', sans-serif;
   padding: 12px;
   transform: translateX(0);
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
@@ -546,23 +557,23 @@
 }
 
 .admin-toast .Toastify__toast-body::before {
-  font-family: "FontAwesome";
+  font-family: 'FontAwesome';
   margin-right: 8px;
   font-size: 18px;
 }
 
 .admin-toast.Toastify__toast--info .Toastify__toast-body::before {
-  content: "\f05a";
+  content: '\f05a';
   color: var(--purple-accent);
 }
 
 .admin-toast.Toastify__toast--success .Toastify__toast-body::before {
-  content: "\f00c";
+  content: '\f00c';
   color: var(--success-green);
 }
 
 .admin-toast.Toastify__toast--error .Toastify__toast-body::before {
-  content: "\f06a";
+  content: '\f06a';
   color: var(--error-red);
 }
 
@@ -576,6 +587,7 @@
     opacity: 1;
   }
 }
+
 #banner {
   display: block;
   width: 100%;
@@ -584,7 +596,6 @@
   padding: 0;
 }
 
-/* Адаптивність */
 @media (max-width: 1024px) {
   .form-grid {
     grid-template-columns: 1fr;
