@@ -1,4 +1,3 @@
-
 :root {
   --dark-bg: #0F0F10;
   --navy-gray: #1A1A1D;
@@ -280,6 +279,7 @@
   margin-top: 20px;
 }
 
+
 /* Календар */
 .react-calendar {
   border: 1px solid var(--light-gray);
@@ -292,7 +292,7 @@
   overflow: hidden; /* Обрізаємо обводку в кутах */
 }
 
-/* Стилі для навігації календаря */
+
 .react-calendar__navigation {
   display: flex;
   align-items: center;
@@ -361,7 +361,6 @@
 .react-calendar__tile--active {
   background-color: var(--purple-accent) !important;
   color: var(--soft-white) !important;
-  border-radius: 4px; /* Додаємо заокруглення для активних плиток */
 }
 
 .react-calendar__tile--disabled {
@@ -374,11 +373,6 @@
   padding: 10px;
   font-size: 14px;
   transition: background-color 0.2s ease;
-  border-radius: 4px; /* Заокруглення для всіх плиток */
-}
-
-.react-calendar__tile:hover {
-  background-color: var(--purple-hover);
 }
 
 /* Таблиці */
@@ -526,13 +520,24 @@
 
 /* Toast */
 .admin-toast {
-  background-color: rgba(203, 166, 221, 0.2) !important;
-  color: var(--soft-white) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-  font-family: "Inter", sans-serif !important;
-  padding: 12px !important;
-  animation: slideIn 0.3s ease-in-out !important;
+  background-color: rgba(203, 166, 221, 0.2);
+  color: var(--soft-white);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-family: "Inter", sans-serif;
+  padding: 12px;
+  transform: translateX(0);
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.admin-toast.Toastify__toast--enter {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.admin-toast.Toastify__toast--exit {
+  transform: translateX(100%);
+  opacity: 0;
 }
 
 .admin-toast .Toastify__toast-body {
@@ -571,18 +576,6 @@
     opacity: 1;
   }
 }
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 #banner {
   display: block;
   width: 100%;

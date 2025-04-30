@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -22,7 +21,7 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
   const [availableDates, setAvailableDates] = useState([]);
   const [formError, setFormError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const ws = useRef(null);
+  const hasShownDateToast = useRef(false);
 
   // Мапінг статусів
   const bookingStatusMap = {
@@ -38,49 +37,8 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
     cancelled: { label: 'Скасовано', color: '#EF4444' },
   };
 
-  // Ініціалізація WebSocket
   useEffect(() => {
-    ws.current = new WebSocket('ws://localhost:5000');
-
-    ws.current.onopen = () => {
-      console.log('WebSocket connected');
-    };
-
-    ws.current.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        console.log('WebSocket message received:', data);
-
-        if (data.event === 'date-selection-required') {
-          toast.info(data.message, { className: 'admin-toast' });
-        }
-
-        if (data.event === 'no-available-slots') {
-          toast.error(data.message, { className: 'admin-toast' });
-        }
-      } catch (err) {
-        console.error('WebSocket message error:', err);
-        toast.error('Помилка обробки повідомлення', { className: 'admin-toast' });
-      }
-    };
-
-    ws.current.onclose = () => {
-      console.log('WebSocket disconnected');
-    };
-
-    ws.current.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      toast.error('Помилка з’єднання з WebSocket', { className: 'admin-toast' });
-    };
-
-    return () => {
-      if (ws.current) {
-        ws.current.close();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
+    console.log('Token:', localStorage.getItem('token'));
     fetchBookings();
     fetchUsers();
     fetchArtists();
@@ -98,29 +56,17 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
   }, [bookingForm.artist]);
 
   useEffect(() => {
+    console.log('useEffect triggered:', { artist: bookingForm.artist, date: bookingForm.date, hasShownDateToast: hasShownDateToast.current });
     if (bookingForm.artist && bookingForm.date) {
       fetchAvailableTimes(bookingForm.artist, bookingForm.date);
-      // Відправка події для перевірки доступних слотів
-      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-        ws.current.send(
-          JSON.stringify({
-            event: 'check-available-slots',
-            artistId: bookingForm.artist,
-            date: bookingForm.date,
-          })
-        );
-      }
+      hasShownDateToast.current = false; // Скидаємо, якщо дата вибрана
     } else {
       setAvailableTimes([]);
       setFormError('');
-      // Відправка події для перевірки вибору дати
-      if (ws.current && ws.current.readyState === WebSocket.OPEN && !bookingForm.date) {
-        ws.current.send(
-          JSON.stringify({
-            event: 'date-selection-required',
-            message: 'Спочатку виберіть дату',
-          })
-        );
+      if (!bookingForm.date && !hasShownDateToast.current) {
+        console.log('Showing toast: Спочатку виберіть дату');
+        toast.info('Спочатку виберіть дату', { className: 'admin-toast', autoClose: 3000 });
+        hasShownDateToast.current = true;
       }
     }
   }, [bookingForm.date, bookingForm.artist]);
@@ -131,7 +77,13 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      if (!res.ok) {
+        if (res.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }
+        throw new Error(data.message);
+      }
       setUsers(data);
     } catch (err) {
       setError(err.message);
@@ -144,7 +96,13 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      if (!res.ok) {
+        if (res.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }
+        throw new Error(data.message);
+      }
       setArtists(data);
     } catch (err) {
       setError(err.message);
@@ -157,7 +115,13 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      if (!res.ok) {
+        if (res.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }
+        throw new Error(data.message);
+      }
       setConsultations(data);
     } catch (err) {
       setError(err.message);
@@ -173,16 +137,18 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
         }
       );
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      if (!res.ok) {
+        if (res.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }
+        throw new Error(data.message);
+      }
       const times = data.availableTimes || [];
       setAvailableTimes(times);
-      if (times.length === 0 && ws.current && ws.current.readyState === WebSocket.OPEN) {
-        ws.current.send(
-          JSON.stringify({
-            event: 'no-available-slots',
-            message: 'Немає доступних слотів',
-          })
-        );
+      if (times.length === 0) {
+        console.log('Showing toast: Немає доступних слотів');
+        toast.error('Немає доступних слотів', { className: 'admin-toast', autoClose: 3000 });
       }
     } catch (err) {
       setFormError(`Помилка при отриманні часу: ${err.message}`);
@@ -190,6 +156,8 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
       setAvailableTimes([]);
     }
   };
+
+  // Решта коду залишається без змін (handleBookingSubmit, handleEditBookingSubmit, тощо)
 
   const fetchAvailableDates = async (artistId) => {
     setIsLoading(true);
@@ -207,7 +175,13 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
           }
         );
         const data = await res.json();
-        if (!res.ok) continue;
+        if (!res.ok) {
+          if (res.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+          }
+          continue;
+        }
         if (data.availableTimes && data.availableTimes.length > 0) {
           dates.push(dateStr);
         }
@@ -238,13 +212,13 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
 
     try {
       await handleSubmit('http://localhost:5000/api/bookings', 'POST', bookingForm);
-      toast.success('Бронювання створено!', { className: 'admin-toast' });
+      toast.success('Бронювання створено!', { className: 'admin-toast', autoClose: 3000 });
       setBookingForm({ user: '', artist: '', date: '', time: '', description: '' });
       setAvailableTimes([]);
       setAvailableDates([]);
       fetchBookings();
     } catch (err) {
-      toast.error(err.message, { className: 'admin-toast' });
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   };
 
@@ -256,14 +230,14 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
 
     try {
       await handleSubmit(`http://localhost:5000/api/bookings/${editingBooking._id}`, 'PUT', bookingForm);
-      toast.success('Бронювання оновлено!', { className: 'admin-toast' });
+      toast.success('Бронювання оновлено!', { className: 'admin-toast', autoClose: 3000 });
       setEditingBooking(null);
       setBookingForm({ user: '', artist: '', date: '', time: '', description: '' });
       setAvailableTimes([]);
       setAvailableDates([]);
       fetchBookings();
     } catch (err) {
-      toast.error(err.message, { className: 'admin-toast' });
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   };
 
@@ -291,20 +265,23 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
     if (!window.confirm('Ви впевнені, що хочете видалити це бронювання?')) return;
     try {
       await handleSubmit(`http://localhost:5000/api/bookings/${id}`, 'DELETE');
-      toast.success('Бронювання видалено!', { className: 'admin-toast' });
+      toast.success('Бронювання видалено!', { className: 'admin-toast', autoClose: 3000 });
       fetchBookings();
     } catch (err) {
-      toast.error(err.message, { className: 'admin-toast' });
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   };
 
   const handleUpdateBookingStatus = async (id, status) => {
     try {
       await handleSubmit(`http://localhost:5000/api/bookings/${id}/status`, 'PUT', { status });
-      toast.success(`Статус оновлено до "${bookingStatusMap[status].label}"!`, { className: 'admin-toast' });
+      toast.success(`Статус оновлено до "${bookingStatusMap[status].label}"!`, {
+        className: 'admin-toast',
+        autoClose: 3000,
+      });
       fetchBookings();
     } catch (err) {
-      toast.error(err.message, { className: 'admin-toast' });
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   };
 
@@ -312,20 +289,23 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
     if (!window.confirm('Ви впевнені, що хочете видалити цю консультацію?')) return;
     try {
       await handleSubmit(`http://localhost:5000/api/bookings/consultations/${id}`, 'DELETE');
-      toast.success('Консультацію видалено!', { className: 'admin-toast' });
+      toast.success('Консультацію видалено!', { className: 'admin-toast', autoClose: 3000 });
       fetchConsultations();
     } catch (err) {
-      toast.error(err.message, { className: 'admin-toast' });
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   };
 
   const handleUpdateConsultationStatus = async (id, status) => {
     try {
       await handleSubmit(`http://localhost:5000/api/bookings/consultations/${id}/status`, 'PUT', { status });
-      toast.success(`Статус оновлено до "${consultationStatusMap[status].label}"!`, { className: 'admin-toast' });
+      toast.success(`Статус оновлено до "${consultationStatusMap[status].label}"!`, {
+        className: 'admin-toast',
+        autoClose: 3000,
+      });
       fetchConsultations();
     } catch (err) {
-      toast.error(err.message, { className: 'admin-toast' });
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   };
 
@@ -528,7 +508,9 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
                   {bookings && bookings.length > 0 ? (
                     bookings.map((booking) => (
                       <tr key={booking._id}>
-                        <td>{booking.user?.firstName} {booking.user?.lastName || 'Невідомий'}</td>
+                        <td>
+                          {booking.user?.firstName} {booking.user?.lastName || 'Невідомий'}
+                        </td>
                         <td>{booking.artist?.name || 'Невідомий'}</td>
                         <td>{new Date(booking.date).toLocaleDateString()}</td>
                         <td>{booking.time}</td>
@@ -613,7 +595,9 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
                   {consultations && consultations.length > 0 ? (
                     consultations.map((consultation) => (
                       <tr key={consultation._id}>
-                        <td>{consultation.user?.firstName} {consultation.user?.lastName || 'Невідомий'}</td>
+                        <td>
+                          {consultation.user?.firstName} {consultation.user?.lastName || 'Невідомий'}
+                        </td>
                         <td>{consultation.artist?.name || 'Невідомий'}</td>
                         <td>{new Date(consultation.preferredDate).toLocaleDateString()}</td>
                         <td>{consultation.time}</td>
@@ -621,7 +605,9 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
                         <td>
                           <span
                             className="status-badge"
-                            style={{ backgroundColor: consultationStatusMap[consultation.status]?.color || '#6B7280' }}
+                            style={{
+                              backgroundColor: consultationStatusMap[consultation.status]?.color || '#6B7280',
+                            }}
                           >
                             {consultationStatusMap[consultation.status]?.label || consultation.status}
                           </span>
