@@ -5,7 +5,7 @@ import { format, startOfDay, addDays, parse } from 'date-fns';
 import { toast } from 'react-toastify';
 import { FaEdit, FaCheck, FaTimes, FaTrash } from 'react-icons/fa';
 
-const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError, setSuccess, fetchBookings }) => {
+const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError, setSuccess, fetchBookings, onNotificationReceived }) => {
   const [users, setUsers] = useState([]);
   const [artists, setArtists] = useState([]);
   const [consultations, setConsultations] = useState([]);
@@ -63,13 +63,22 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
     } else {
       setAvailableTimes([]);
       setFormError('');
-      // if (!bookingForm.date && !hasShownDateToast.current) {
-      //   console.log('Showing toast: Спочатку виберіть дату');
-      //   toast.info('Спочатку виберіть дату', { className: 'admin-toast', autoClose: 3000 });
-      //   hasShownDateToast.current = true;
-      // }
     }
   }, [bookingForm.date, bookingForm.artist]);
+
+  // Callback to handle notifications from NotificationProvider
+  const handleNotification = (notification) => {
+    if (notification.consultation) {
+      fetchConsultations(); // Refetch consultations to update the list
+    }
+  };
+
+  // Register the callback with NotificationProvider
+  useEffect(() => {
+    if (onNotificationReceived) {
+      onNotificationReceived(handleNotification);
+    }
+  }, [onNotificationReceived]);
 
   const fetchUsers = async () => {
     try {
@@ -80,7 +89,7 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
       if (!res.ok) {
         if (res.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/login';
+          window.location.href = '/';
         }
         throw new Error(data.message);
       }
@@ -99,7 +108,7 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
       if (!res.ok) {
         if (res.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/login';
+          window.location.href = '/';
         }
         throw new Error(data.message);
       }
@@ -118,7 +127,7 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
       if (!res.ok) {
         if (res.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/login';
+          window.location.href = '/';
         }
         throw new Error(data.message);
       }
@@ -140,7 +149,7 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
       if (!res.ok) {
         if (res.status === 401) {
           localStorage.removeItem('token');
-          window.location.href = '/login';
+          window.location.href = '/';
         }
         throw new Error(data.message);
       }
@@ -156,8 +165,6 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
       setAvailableTimes([]);
     }
   };
-
-  // Решта коду залишається без змін (handleBookingSubmit, handleEditBookingSubmit, тощо)
 
   const fetchAvailableDates = async (artistId) => {
     setIsLoading(true);
@@ -178,7 +185,7 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
         if (!res.ok) {
           if (res.status === 401) {
             localStorage.removeItem('token');
-            window.location.href = '/login';
+            window.location.href = '/';
           }
           continue;
         }
@@ -575,7 +582,7 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
                     </tr>
                   )}
                 </tbody>
-              </table>
+rosse              </table>
             </div>
             <h4>Усі консультації</h4>
             <div className="table-wrapper">

@@ -12,7 +12,7 @@ import ArtistManagement from '../components/admin/ArtistManagement';
 import ScheduleManagement from '../components/admin/ScheduleManagement';
 import './AdminDashboard.css';
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ onNotificationReceived }) => {
   const [activeSection, setActiveSection] = useState({ category: 'notifications', subcategory: null });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [error, setError] = useState('');
@@ -24,7 +24,7 @@ const AdminDashboard = () => {
   const [galleryCategories, setGalleryCategories] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [artists, setArtists] = useState([]);
-  const [notifications, setNotifications] = useState([]); // Додаємо стан для повідомлень
+  const [notifications, setNotifications] = useState([]);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
@@ -65,7 +65,7 @@ const AdminDashboard = () => {
           fetchGalleryCategories(),
           fetchBookings(),
           fetchArtists(),
-          fetchNotifications(), // Додаємо завантаження повідомлень
+          fetchNotifications(),
         ]);
       } catch (err) {
         setError(err.message);
@@ -91,38 +91,6 @@ const AdminDashboard = () => {
       setError(err.message);
     }
   }, [token]);
-
-  const handleSubmit = useCallback(
-    async (url, method, payload, isFormData = false) => {
-      setError('');
-      try {
-        const headers = { Authorization: `Bearer ${token}` };
-        if (!isFormData) headers['Content-Type'] = 'application/json';
-        const body = isFormData ? payload : JSON.stringify(payload);
-        const res = await fetch(url, { method, headers, body });
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          if (res.status === 401 || res.status === 403) {
-            localStorage.removeItem('token');
-            navigate('/');
-            throw new Error('Доступ заборонено. Увійдіть як адміністратор.');
-          }
-          throw new Error(errorData.message || 'Не вдалося обробити запит');
-        }
-        const responseData = await res.json();
-        if (method !== 'GET') {
-          setSuccess('Операція успішна!');
-          setTimeout(() => setSuccess(''), 3000);
-        }
-        return responseData;
-      } catch (err) {
-        setError(err.message || 'Помилка запиту');
-        setTimeout(() => setError(''), 3000);
-        throw err;
-      }
-    },
-    [token, navigate]
-  );
 
   const fetchGalleryImages = useCallback(async () => {
     try {
@@ -203,6 +171,58 @@ const AdminDashboard = () => {
     }
   }, [token]);
 
+  const handleSubmit = useCallback(
+    async (url, method, payload, isFormData = false) => {
+      setError('');
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+        if (!isFormData) headers['Content-Type'] = 'application/json';
+        const body = isFormData ? payload : JSON.stringify(payload);
+        const res = await fetch(url, { method, headers, body });
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('token');
+            navigate('/');
+            throw new Error('Доступ заборонено. Увійдіть як адміністратор.');
+          }
+          throw new Error(errorData.message || 'Не вдалося обробити запит');
+        }
+        const responseData = await res.json();
+        if (method !== 'GET') {
+          setSuccess('Операція успішна!');
+          setTimeout(() => setSuccess(''), 3000);
+        }
+        return responseData;
+      } catch (err) {
+        setError(err.message || 'Помилка запиту');
+        setTimeout(() => setError(''), 3000);
+        throw err;
+      }
+    },
+    [token, navigate]
+  );
+
+  // Handle notifications from NotificationProvider
+  const handleNotification = useCallback(
+    (notification) => {
+      if (notification.consultation) {
+        fetchBookings(); // Refetch bookings if the notification is about a consultation
+        fetchNotifications(); // Refetch notifications to update the list
+      } else if (notification.booking) {
+        fetchBookings(); // Refetch bookings for booking-related notifications
+        fetchNotifications(); // Refetch notifications to update the list
+      }
+    },
+    [fetchBookings, fetchNotifications]
+  );
+
+  useEffect(() => {
+    if (onNotificationReceived) {
+      onNotificationReceived(handleNotification);
+    }
+  }, [onNotificationReceived, handleNotification]);
+
   if (loading) {
     return <div className="loading">Завантаження...</div>;
   }
@@ -243,8 +263,9 @@ const AdminDashboard = () => {
               token={token}
               setError={setError}
               setSuccess={setSuccess}
-              notifications={notifications} // Передаємо повідомлення
-              fetchNotifications={fetchNotifications} // Передаємо функцію для оновлення
+              notifications={notifications}
+              fetchNotifications={fetchNotifications}
+              onNotificationReceived={onNotificationReceived}
             />
           )}
           {activeSection.category === 'gallery' && (
@@ -334,6 +355,7 @@ const AdminDashboard = () => {
                   setError={setError}
                   setSuccess={setSuccess}
                   fetchBookings={fetchBookings}
+                  onNotificationReceived={onNotificationReceived}
                 />
               )}
             </>

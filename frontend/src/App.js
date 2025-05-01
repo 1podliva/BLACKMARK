@@ -48,7 +48,6 @@ function App() {
               <Header />
               <Main />
               <About />
-              {/* <PricingSection /> */}
               <HomeGalleryPreview />
               <Consultation />
               <BlogIntro />
@@ -102,9 +101,13 @@ function App() {
           element={
             <ProtectedRoute>
               <NotificationProvider token={token} role="user">
-                <Header />
-                <Profile />
-                <Footer />
+                {(onNotificationReceived) => (
+                  <>
+                    <Header />
+                    <Profile onNotificationReceived={onNotificationReceived} />
+                    <Footer />
+                  </>
+                )}
               </NotificationProvider>
             </ProtectedRoute>
           }
@@ -113,8 +116,10 @@ function App() {
           path="/admin"
           element={
             <ProtectedRoute>
-              <NotificationProvider token={token}>
-                <AdminDashboard />
+              <NotificationProvider token={token} role="admin">
+                {(onNotificationReceived) => (
+                  <AdminDashboard onNotificationReceived={onNotificationReceived} />
+                )}
               </NotificationProvider>
             </ProtectedRoute>
           }

@@ -413,14 +413,18 @@ const Profile = () => {
               <h3>Сеанси попереду</h3>
               {bookings.filter(
                 (item) =>
-                  (item.status === 'pending' || item.status === 'confirmed') &&
+                  (item.status === 'pending' ||
+                   item.status === 'confirmed' ||
+                   (item.type === 'consultation' && item.status === 'reviewed')) &&
                   new Date(item.date) > new Date()
               ).length > 0 ? (
                 <div className="booking-list">
                   {bookings
                     .filter(
                       (item) =>
-                        (item.status === 'pending' || item.status === 'confirmed') &&
+                        (item.status === 'pending' ||
+                         item.status === 'confirmed' ||
+                         (item.type === 'consultation' && item.status === 'reviewed')) &&
                         new Date(item.date) > new Date()
                     )
                     .sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -436,7 +440,7 @@ const Profile = () => {
                           <p>Час: {item.time}</p>
                           <p>Статус: {statusTranslations[item.status] || item.status}</p>
                         </div>
-                        {item.createdByAdmin && item.status !== 'cancelled' && item.status !== 'completed' && (
+                        {item.status !== 'cancelled' && item.status !== 'completed' && (
                           <div className="booking-actions">
                             {item.status === 'pending' ? (
                               <button

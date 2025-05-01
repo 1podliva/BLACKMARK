@@ -1,10 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import io from 'socket.io-client';
 
-const NotificationProvider = ({ children, token, role }) => {
+const NotificationProvider = ({ children, token, role, onNotificationReceived }) => {
   const [isAdmin, setIsAdmin] = useState(false);
+  const listeners = useRef(new Set());
+
+  // Function to notify all listeners of a new consultation-related notification
+  const notifyListeners = (notification) => {
+    if (notification.consultation || notification.booking) {
+      listeners.current.forEach((listener) => listener(notification));
+    }
+  };
+
+  // Allow child components to subscribe to consultation notifications
+  useEffect(() => {
+    if (onNotificationReceived) {
+      listeners.current.add(onNotificationReceived);
+      return () => {
+        listeners.current.delete(onNotificationReceived);
+      };
+    }
+  }, [onNotificationReceived]);
 
   useEffect(() => {
     if (!token) return;
@@ -29,7 +47,8 @@ const NotificationProvider = ({ children, token, role }) => {
     if (!token) return;
 
     const socket = io('http://localhost:5000', {
-      auth: { token: `Bearer ${token}` },
+      query: { token },
+      transports: ['websocket'],
     });
 
     socket.on('connect', () => {
@@ -77,6 +96,9 @@ const NotificationProvider = ({ children, token, role }) => {
         </div>,
         toastOptions
       );
+
+      // Notify listeners if the notification is about a consultation or booking
+      notifyListeners(notification);
     });
 
     socket.on('connect_error', (err) => {
@@ -84,6 +106,10 @@ const NotificationProvider = ({ children, token, role }) => {
       toast.error('Помилка підключення до сповіщень', {
         className: role === 'admin' ? 'admin-toast' : 'user-toast',
       });
+      if (err.message === 'Authentication error') {
+        localStorage.removeItem('token');
+        window.location.href = '/';
+      }
     });
 
     return () => {
@@ -92,9 +118,13 @@ const NotificationProvider = ({ children, token, role }) => {
     };
   }, [token, role]);
 
+  // If children is a function (render prop), call it with onNotificationReceived
+  // Otherwise, render children directly
+  const renderChildren = typeof children === 'function' ? children(onNotificationReceived) : children;
+
   return (
     <>
-      {children}
+      {renderChildren}
       <ToastContainer />
     </>
   );
