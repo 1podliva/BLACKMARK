@@ -12,9 +12,9 @@ const Main = () => {
         const contactsSection = document.getElementById('contacts');
         if (contactsSection) {
           contactsSection.scrollIntoView({ behavior: 'smooth' });
-          navigate(location.pathname, { replace: true, state: {} }); // очищаємо state
+          navigate(location.pathname, { replace: true, state: {} });
         }
-      }, 200); // Можна збільшити затримку, якщо треба більше часу на рендер DOM
+      }, 200);
     }
   }, [location, navigate]);
 

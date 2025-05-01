@@ -10,27 +10,25 @@ const Header = () => {
   const { user, token, logout } = useContext(AuthContext);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [nextBooking, setNextBooking] = useState(null);
 
   useEffect(() => {
     const fetchNextBooking = async () => {
       if (!user || !token) return;
       try {
-        // Отримання бронювань
         const bookingsRes = await fetch('http://localhost:5000/api/bookings', {
           headers: { Authorization: `Bearer ${token}` },
         });
         const bookingsData = await bookingsRes.json();
         if (!bookingsRes.ok) throw new Error(bookingsData.message);
 
-        // Отримання консультацій
         const consultationsRes = await fetch('http://localhost:5000/api/bookings/consultations', {
           headers: { Authorization: `Bearer ${token}` },
         });
         const consultationsData = await consultationsRes.json();
         if (!consultationsRes.ok) throw new Error(consultationsData.message);
 
-        // Об'єднання бронювань і консультацій
         const combined = [
           ...bookingsData.map((b) => ({ ...b, type: 'booking' })),
           ...consultationsData.map((c) => ({
@@ -40,7 +38,6 @@ const Header = () => {
           })),
         ];
 
-        // Фільтрація майбутніх записів зі статусом pending або confirmed
         const futureBookings = combined
           .filter(
             (item) =>
@@ -73,6 +70,7 @@ const Header = () => {
         contactsSection.scrollIntoView({ behavior: 'smooth' });
       }
     }
+    setIsMobileMenuOpen(false);
   };
 
   const getActiveClass = (path) => {
@@ -80,16 +78,27 @@ const Header = () => {
   };
 
   const handleMouseEnter = () => {
-    setIsDropdownOpen(true);
+    if (window.innerWidth > 768) {
+      setIsDropdownOpen(true);
+    }
   };
 
   const handleMouseLeave = () => {
-    setIsDropdownOpen(false);
+    if (window.innerWidth > 768) {
+      setIsDropdownOpen(false);
+    }
+  };
+
+  const handleProfileClick = () => {
+    if (window.innerWidth <= 768) {
+      setIsDropdownOpen(!isDropdownOpen);
+    }
   };
 
   const handleLogout = () => {
     logout();
     setIsDropdownOpen(false);
+    setIsMobileMenuOpen(false);
     navigate('/');
   };
 
@@ -99,26 +108,32 @@ const Header = () => {
       <nav className="navbar">
         <h1 className="logo">BLACKMARK</h1>
 
-        {/* Центральні лінки */}
-        <div className="nav-links-container">
+        <button
+          className="mobile-menu-toggle"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? '✕' : '☰'}
+        </button>
+
+        <div className={`nav-links-container ${isMobileMenuOpen ? 'open' : ''}`}>
           <ul className="nav-links">
             <li>
-              <Link to="/" className={getActiveClass('/')}>
+              <Link to="/" className={getActiveClass('/')} onClick={() => setIsMobileMenuOpen(false)}>
                 Головна
               </Link>
             </li>
             <li>
-              <Link to="/about" className={getActiveClass('/about')}>
+              <Link to="/about" className={getActiveClass('/about')} onClick={() => setIsMobileMenuOpen(false)}>
                 Про нас
               </Link>
             </li>
             <li>
-              <Link to="/gallery" className={getActiveClass('/gallery')}>
+              <Link to="/gallery" className={getActiveClass('/gallery')} onClick={() => setIsMobileMenuOpen(false)}>
                 Галерея
               </Link>
             </li>
             <li>
-              <Link to="/blog" className={getActiveClass('/blog')}>
+              <Link to="/blog" className={getActiveClass('/blog')} onClick={() => setIsMobileMenuOpen(false)}>
                 Блог
               </Link>
             </li>
@@ -131,74 +146,74 @@ const Header = () => {
                 Контакти
               </a>
             </li>
+            <li className="profile-mobile">
+              {token ? (
+                <div
+                  className="profile-wrapper"
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  <button
+                    id="profile-btn"
+                    className={getActiveClass('/profile')}
+                    onClick={handleProfileClick}
+                  >
+                    Профіль
+                  </button>
+                  {isDropdownOpen && (
+                    <div className="dropdown">
+                      <div className="dropdown-greeting">Привіт, {user?.firstName}!</div>
+                      <div
+                        className="dropdown-item"
+                        onClick={() => {
+                          navigate('/profile');
+                          setIsDropdownOpen(false);
+                          setIsMobileMenuOpen(false);
+                        }}
+                      >
+                        Мій профіль
+                      </div>
+                      {nextBooking ? (
+                        <div className="dropdown-booking">
+                          Наступне бронювання: {nextBooking.artist?.name || 'Невідомий'},{' '}
+                          {new Date(nextBooking.date).toLocaleDateString()}, {nextBooking.time}
+                        </div>
+                      ) : (
+                        <div className="dropdown-booking">Бронювань немає</div>
+                      )}
+                      {user?.role === 'admin' && (
+                        <div
+                          className="dropdown-item"
+                          onClick={() => {
+                            navigate('/admin');
+                            setIsDropdownOpen(false);
+                            setIsMobileMenuOpen(false);
+                          }}
+                        >
+                          Адмін-панель
+                        </div>
+                      )}
+                      <div className="dropdown-item" onClick={handleLogout}>
+                        Вийти
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  id="auth-btn"
+                  onClick={() => {
+                    setIsAuthModalOpen(true);
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  Вхід / Реєстрація
+                </button>
+              )}
+            </li>
           </ul>
         </div>
 
-        {/* Профіль або Вхід/Реєстрація */}
-        <div className="profile">
-          {token ? (
-            <div
-              className="profile-wrapper"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              <button className={getActiveClass('/profile')}>
-                Профіль
-              </button>
-              {isDropdownOpen && (
-                <div className="dropdown">
-                  <div className="dropdown-greeting">Привіт, {user?.firstName}!</div>
-                  <div
-                    className="dropdown-item"
-                    onClick={() => {
-                      navigate('/profile');
-                      setIsDropdownOpen(false);
-                    }}
-                  >
-                    Мій профіль
-                  </div>
-                  {nextBooking ? (
-                    <div className="dropdown-booking">
-                      Наступне бронювання: {nextBooking.artist?.name || 'Невідомий'},{' '}
-                      {new Date(nextBooking.date).toLocaleDateString()}, {nextBooking.time}
-                    </div>
-                  ) : (
-                    <div className="dropdown-booking">Бронювань немає</div>
-                  )}
-                  <div
-                    className="dropdown-item"
-                    onClick={() => {
-                      navigate('/profile');
-                      setIsDropdownOpen(false);
-                    }}
-                  >
-                    Мої бронювання
-                  </div>
-                  {user?.role === 'admin' && (
-                    <div
-                      className="dropdown-item"
-                      onClick={() => {
-                        navigate('/admin');
-                        setIsDropdownOpen(false);
-                      }}
-                    >
-                      Адмін-панель
-                    </div>
-                  )}
-                  <div className="dropdown-item" onClick={handleLogout}>
-                    Вийти
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <button onClick={() => setIsAuthModalOpen(true)}>
-              Вхід / Реєстрація
-            </button>
-          )}
-        </div>
-
-        {/* Модальне вікно для входу/реєстрації */}
         {isAuthModalOpen && (
           <AuthModal onClose={() => setIsAuthModalOpen(false)} />
         )}

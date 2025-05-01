@@ -1,27 +1,16 @@
-:root {
-  --dark-bg: #0F0F10;
-  --navy-gray: #1A1A1D;
-  --purple-accent: #9B00FF;
-  --purple-hover: #7F00D4;
-  --soft-white: #F8F9FA;
-  --light-gray: #D1D5DB;
-  --muted-pink: #CBA6DD;
-}
-
 .blog-intro-section {
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
   padding: 120px 10%;
   background-color: var(--dark-bg);
   color: var(--soft-white);
   position: relative;
   overflow: hidden;
-  min-height: 800px;
 }
 
 .blog-intro-content {
-  max-width: 600px;
+  max-width: 1200px;
   width: 100%;
   position: relative;
   z-index: 1;
@@ -115,10 +104,10 @@
 .background-macbook-container {
   position: absolute;
   top: 50%;
-  right: 0;
-  width: 60%;
-  max-width: 1200px;
-  height: 90%;
+  right: 10%;
+  width: 50%;
+  max-width: 800px;
+  height: 80%;
   transform: translateY(-50%);
   z-index: 0;
 }
@@ -128,7 +117,6 @@
   height: 100%;
   object-fit: contain;
   display: block;
-  /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); */
   transition: transform 0.3s ease;
 }
 
@@ -139,17 +127,16 @@
 @media (max-width: 1024px) {
   .blog-intro-section {
     padding: 80px 5%;
-    min-height: 700px;
   }
 
   .blog-intro-content {
-    max-width: 500px;
+    max-width: 800px;
   }
 
   .background-macbook-container {
-    width: 55%;
-    max-width: 900px;
-    height: 85%;
+    width: 45%;
+    max-width: 600px;
+    height: 75%;
   }
 }
 
@@ -203,7 +190,6 @@
   }
 
   .macbook-image {
-    /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
     width: 100%;
     height: auto;
   }

@@ -1,51 +1,76 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Consultation.css';
 
 const Consultation = () => {
-  const [formSubmitted, setFormSubmitted] = useState(false);
+  const navigate = useNavigate();
 
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    setFormSubmitted(true);
+  const handleRegisterClick = () => {
+    navigate('/register');
   };
 
   return (
     <section className="consultation-section" id="consultation">
       <div className="consultation-content">
         <div className="intro-block">
-          <h2 className="section-subtitle">Запис на консультацію</h2>
+          <h2 className="section-subtitle">Перший крок до татуювання</h2>
           <h1 className="main-title">
-            <span className="first-line">Ваше татуювання</span>
-            <span className="second-line">Починається тут</span>
+            <span className="first-line">Створіть акаунт</span>
+            <span className="second-line">Та отримайте більше</span>
           </h1>
           <div className="divider"></div>
           <p className="intro-text">
-            Розкажіть нам про вашу ідею, і ми допоможемо втілити її в мистецтво на вашій шкірі.
+            Зареєструйтесь, щоб отримати персональний доступ до всіх можливостей студії:
           </p>
         </div>
 
-        <div className="consultation-grid">
-          <div className="consultation-form-container">
-            <h3>Забронюйте консультацію</h3>
-            <form className="consultation-form" onSubmit={handleFormSubmit}>
-              <input type="text" placeholder="Ваше ім’я" required />
-              <input type="email" placeholder="Ваш Email" required />
-              <input type="date" placeholder="Бажана дата" required />
-              <textarea placeholder="Опишіть вашу ідею татуювання" required></textarea>
-              <button type="submit">Надіслати заявку</button>
-              {formSubmitted && <p className="form-success">Заявку відправлено! Ми зв’яжемося з вами незабаром.</p>}
-            </form>
+        <div className="registration-grid">
+          <div className="registration-benefits">
+            <div className="benefit-card">
+              <div className="benefit-icon">🎨</div>
+              <h3>Персональний кабінет</h3>
+              <p>Зберігайте улюблені ескізи, історію записів та персональні налаштування</p>
+            </div>
+            
+            <div className="benefit-card">
+              <div className="benefit-icon">⏱️</div>
+              <h3>Швидкий запис</h3>
+              <p>Записуйтесь на консультацію в 1 клік, без необхідності заповнювати форми</p>
+            </div>
+
+            <div className="benefit-card">
+              <div className="benefit-icon">💎</div>
+              <h3>Ексклюзивні пропозиції</h3>
+              <p>Отримуйте спеціальні пропозиції та знижки для зареєстрованих користувачів</p>
+            </div>
+
+            <div className="benefit-card">
+              <div className="benefit-icon">📅</div>
+              <h3>Особистий календар</h3>
+              <p>Керуйте своїми записами та отримуйте нагадування про сеанси</p>
+            </div>
           </div>
 
-          <div className="consultation-info">
-            <h3>Чому консультація?</h3>
-            <p>
-              Наші майстри допоможуть вам визначитися з дизайном, розміром та розташуванням татуювання. 
-              Ми врахуємо всі ваші побажання, щоб створити щось унікальне.
-            </p>
-            <p className="contact-snippet">
-              Маєте термінове питання? Телефонуйте: <a href="tel:+380999999999">+38 (099) 999 99 99</a>
-            </p>
+          <div className="registration-cta">
+            <div className="cta-card">
+              <h3>Почніть зараз!</h3>
+              <p>Створіть акаунт та отримайте:</p>
+              <ul className="benefits-list">
+                <li>✅ Миттєвий запис на консультацію</li>
+                <li>✅ Персональні рекомендації</li>
+                <li>✅ Історію ваших татуювань</li>
+                <li>✅ Ексклюзивні пропозиції</li>
+              </ul>
+              <button 
+                className="cta-button"
+                onClick={handleRegisterClick}
+              >
+                Зареєструватися за 30 секунд
+              </button>
+              <p className="login-text">
+                Вже маєте акаунт? <a href="/login">Увійти</a>
+              </p>
+            </div>
           </div>
         </div>
       </div>

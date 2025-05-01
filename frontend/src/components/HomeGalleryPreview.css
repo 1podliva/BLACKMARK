@@ -10,7 +10,7 @@
 }
 
 .gallery-content {
-  max-width: 800px; /* Matches About's text-content max-width */
+  max-width: 1200px; /* Increased to match other sections */
   width: 100%;
   position: relative;
   z-index: 2;
@@ -53,32 +53,26 @@
   line-height: 1.8;
   color: var(--light-gray);
   max-width: 600px;
-  margin-bottom: 60px; /* Matches About's intro-block margin-bottom */
+  margin-bottom: 60px;
 }
 
 .gallery-preview-grid {
   display: flex;
-  flex-wrap: wrap; /* Ensures items stay in a single row */
-  gap: 30px; /* Matches About's features gap */
-
+  flex-wrap: wrap;
+  gap: 30px;
   padding-bottom: 60px;
-  /* padding: 60px 0; Matches About's section spacing */
-  justify-content:center;
-  /* padding: 0 5vw; додає простір по боках без обмеження max-width */
+  justify-content: center;
 }
 
 .gallery-btn-wrapper {
   display: flex;
   justify-content: center;
-  margin-top: 40px; /* відстань від галереї */
-  margin-bottom: 60px; /* відстань знизу */
+  margin-top: 40px;
+  margin-bottom: 60px;
 }
 
-
-
-
 .preview-item {
-  flex: 0 0 300px; /* Fixed width for each item */
+  flex: 0 0 300px;
   display: flex;
   flex-direction: column;
   border-radius: 1rem;
@@ -168,39 +162,34 @@
   box-shadow: 0 4px 15px rgba(155, 0, 255, 0.3);
 }
 
-
 .gallery-btn:hover {
   background-color: #7f00d4;
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(155, 0, 255, 0.4);
 }
 
-
-
 .gallery-fullwidth {
   width: 100%;
   background-color: var(--dark-bg);
-  /* padding: 60px 0; відступи зверху і знизу */
 }
-
 
 @media (max-width: 768px) {
   .home-gallery-preview {
-    padding: 80px 5%; /* Matches About's responsive padding */
+    padding: 80px 5%;
   }
 
   .gallery-preview-grid {
-    gap: 20px; /* Reduced gap for smaller screens */
-    padding: 40px 0; /* Adjusted for mobile */
+    gap: 20px;
+    padding: 40px 0;
   }
 
   .preview-item {
-    flex: 0 0 250px; /* Slightly smaller width for mobile */
+    flex: 0 0 250px;
   }
 
   .intro-text {
     font-size: 1rem;
-    margin-bottom: 40px; /* Matches About's responsive adjustment */
+    margin-bottom: 40px;
   }
 
   .section-subtitle {
@@ -220,6 +209,6 @@
   }
 
   .gallery-btn {
-    margin-top: 60px; /* Matches About's cta-block adjustment */
+    margin-top: 60px;
   }
 }

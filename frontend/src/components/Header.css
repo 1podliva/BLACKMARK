@@ -2,13 +2,12 @@
   --dark-bg: #0F0F10;
   --navy-gray: #1A1A1D;
   --purple-accent: #9B00FF;
-  --purple-hover: #7F00D4;
+  --purple-hover: #8A00E6;
   --soft-white: #F8F9FA;
   --light-gray: #D1D5DB;
   --muted-pink: #CBA6DD;
 }
 
-/* Стиль для зображення */
 #banner {
   display: block;
   width: 100%;
@@ -17,18 +16,17 @@
   padding: 0;
 }
 
-/* Стиль для навігаційного бару */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 99px;
-  padding: 0 160px;
+  padding: 0 10%;
   margin: 0;
   background-color: var(--navy-gray);
+  position: relative;
 }
 
-/* Логотип */
 .logo {
   font-family: "Inter-Bold", Helvetica;
   font-weight: 700;
@@ -37,14 +35,12 @@
   color: var(--soft-white);
 }
 
-/* Стиль для контейнера навігаційних лінків */
 .nav-links-container {
   display: flex;
   justify-content: center;
   flex-grow: 1;
 }
 
-/* Стиль для навігаційних лінків */
 .nav-links {
   display: flex;
   gap: 30px;
@@ -53,14 +49,13 @@
   align-items: center;
 }
 
-/* Стиль для кожного елемента списку */
 .navbar li {
   display: flex;
   align-items: center;
 }
 
-/* Стиль для лінків */
-.nav-links li a {
+.nav-links li a,
+.nav-links li button {
   display: block;
   color: var(--light-gray);
   font-weight: 500;
@@ -68,49 +63,53 @@
   transition: all 0.3s ease;
   text-decoration: none;
   border-radius: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
-/* Ховер ефект для лінків */
-.nav-links li a:hover {
+.nav-links li a:hover,
+.nav-links li button:hover {
   background-color: var(--purple-hover);
   color: var(--soft-white);
   border-radius: 10px;
 }
 
-/* Стиль для активного лінка */
-.nav-links li a.active {
+.nav-links li a.active,
+.nav-links li button.active {
   background-color: #0f0f1070;
   color: var(--soft-white);
   border-radius: 10px;
 }
 
-/* Стиль для профілю */
-.profile button {
+#profile-btn,
+#auth-btn {
   border: none;
   background-color: var(--purple-accent);
   color: var(--soft-white);
-  font-weight: 400;
-  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
   letter-spacing: 1px;
   padding: 10px 16px;
   border-radius: 10px;
-  box-shadow: 0px 4px 12px rgba(155, 0, 255, 0.5);
-  transition: all 0.3s ease;
+  box-shadow: 0px 4px 12px rgba(155, 0, 255, 0.4);
+  transition: background-color 0.3s ease;
   cursor: pointer;
 }
 
-/* Стиль при ховері для профілю */
-.profile button:hover {
+#profile-btn:hover,
+#auth-btn:hover {
   background-color: var(--purple-hover);
-  box-shadow: 0px 8px 16px rgba(155, 0, 255, 0.7);
-  transform: scale(1.05);
 }
 
-/* Стиль для випадаючого меню */
+.profile-wrapper {
+  position: relative;
+}
+
 .dropdown {
   position: absolute;
-  top: 80px;
-  right: 160px;
+  top: 100%;
+  right: 0;
   background-color: var(--navy-gray);
   border: 1px solid #262626;
   border-radius: 8px;
@@ -119,13 +118,13 @@
   z-index: 1000;
   overflow: hidden;
   opacity: 0;
-  transform: translateY(-10px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
 .profile-wrapper:hover .dropdown {
   opacity: 1;
-  transform: translateY(0);
+  visibility: visible;
 }
 
 .dropdown div {
@@ -133,7 +132,7 @@
   color: var(--soft-white);
   font-size: 16px;
   font-weight: 400;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.3s ease;
 }
 
 .dropdown-item {
@@ -167,50 +166,130 @@
   background-color: transparent;
 }
 
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--soft-white);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+@media (max-width: 1024px) {
+  .navbar {
+    padding: 0 5%;
+  }
+
+  .logo {
+    font-size: 36px;
+  }
+
+  .nav-links {
+    gap: 20px;
+  }
+
+  .dropdown {
+    right: 0;
+  }
+}
+
 @media (max-width: 768px) {
   .navbar {
-    padding: 0 20px;
+    flex-wrap: wrap;
+    height: auto;
+    padding: 15px 5%;
   }
 
   .logo {
     font-size: 32px;
   }
 
+  .mobile-menu-toggle {
+    display: block;
+  }
+
+  .nav-links-container {
+    display: none;
+    width: 100%;
+    margin-top: 15px;
+  }
+
+  .nav-links-container.open {
+    display: block;
+  }
+
   .nav-links {
+    flex-direction: column;
     gap: 15px;
   }
 
+  .nav-links li {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .nav-links li a,
+  .nav-links li button {
+    padding: 10px;
+    text-align: center;
+    width: auto;
+    display: inline-block;
+  }
+
+  #profile-btn,
+  #auth-btn {
+    width: auto;
+    display: inline-block;
+    padding: 10px 16px;
+  }
+
+  .profile-mobile {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .profile-wrapper {
+    display: inline-block;
+    text-align: center;
+  }
+
   .dropdown {
-    right: 20px;
-    min-width: 180px;
+    position: static;
+    width: 100%;
+    opacity: 1;
+    visibility: visible;
+    border: 1px solid #262626; /* Add 1px border with color #262626 */
+    border-radius: 8px; /* Round the corners */
+    box-shadow: none;
+    background-color: #262626;
+    margin-top: 8px; /* Add spacing between the button and dropdown */
+  }
+
+  .profile-wrapper:hover .dropdown {
+    opacity: 1;
+    visibility: visible;
   }
 }
 
 @media (max-width: 480px) {
   .navbar {
-    flex-direction: column;
-    height: auto;
-    padding: 10px 20px;
+    padding: 10px 5%;
   }
 
-  .nav-links-container {
-    margin: 10px 0;
+  .logo {
+    font-size: 28px;
   }
 
-  .nav-links {
-    flex-direction: column;
-    gap: 10px;
+  .nav-links li a,
+  .nav-links li button {
+    font-size: 14px;
   }
 
-  .profile button {
-    width: 100%;
-    text-align: center;
-  }
-
-  .dropdown {
-    top: auto;
-    right: 20px;
-    width: 100%;
-    max-width: 280px;
+  #profile-btn,
+  #auth-btn {
+    font-size: 14px;
+    padding: 8px 14px;
   }
 }
