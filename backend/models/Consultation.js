@@ -32,6 +32,10 @@ const consultationSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  createdByAdmin: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model('Consultation', consultationSchema);
