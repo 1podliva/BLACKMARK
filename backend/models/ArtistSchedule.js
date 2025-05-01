@@ -22,7 +22,7 @@ const artistScheduleSchema = new mongoose.Schema({
   },
 });
 
-// Унікальний індекс
+// Унікальний індекс на artist і date
 artistScheduleSchema.index({ artist: 1, date: 1 }, { unique: true });
 
 module.exports = mongoose.model('ArtistSchedule', artistScheduleSchema);

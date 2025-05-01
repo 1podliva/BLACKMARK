@@ -103,10 +103,6 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
         day: 'numeric',
       });
     }
-    if (schedule.dayOfWeek !== undefined) {
-      const days = ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', 'П’ятниця', 'Субота'];
-      return days[schedule.dayOfWeek];
-    }
     return 'Невідома дата';
   };
 

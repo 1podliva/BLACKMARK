@@ -24,10 +24,10 @@ const AdminDashboard = () => {
   const [galleryCategories, setGalleryCategories] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [artists, setArtists] = useState([]);
+  const [notifications, setNotifications] = useState([]); // Додаємо стан для повідомлень
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
-  // Визначаємо підкатегорії для кожної категорії
   const subcategories = {
     gallery: [
       { id: 'add-image', label: 'Додати зображення' },
@@ -65,6 +65,7 @@ const AdminDashboard = () => {
           fetchGalleryCategories(),
           fetchBookings(),
           fetchArtists(),
+          fetchNotifications(), // Додаємо завантаження повідомлень
         ]);
       } catch (err) {
         setError(err.message);
@@ -77,6 +78,19 @@ const AdminDashboard = () => {
 
     verifyAdminAccess();
   }, [token, navigate]);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/notifications', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Не вдалося отримати повідомлення');
+      const data = await res.json();
+      setNotifications(data);
+    } catch (err) {
+      setError(err.message);
+    }
+  }, [token]);
 
   const handleSubmit = useCallback(
     async (url, method, payload, isFormData = false) => {
@@ -209,7 +223,6 @@ const AdminDashboard = () => {
           </button>
           {error && <p className="error-message">{error}</p>}
           {success && <p className="success-message">{success}</p>}
-          {/* Навігація підкатегорій */}
           {activeSection.category !== 'notifications' &&
             activeSection.category !== 'artists' &&
             activeSection.category !== 'schedules' && (
@@ -225,9 +238,14 @@ const AdminDashboard = () => {
                 ))}
               </div>
             )}
-          {/* Контент */}
           {activeSection.category === 'notifications' && (
-            <NotificationManagement token={token} setError={setError} setSuccess={setSuccess} />
+            <NotificationManagement
+              token={token}
+              setError={setError}
+              setSuccess={setSuccess}
+              notifications={notifications} // Передаємо повідомлення
+              fetchNotifications={fetchNotifications} // Передаємо функцію для оновлення
+            />
           )}
           {activeSection.category === 'gallery' && (
             <>

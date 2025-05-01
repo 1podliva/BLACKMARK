@@ -16,14 +16,39 @@ const Header = () => {
     const fetchNextBooking = async () => {
       if (!user || !token) return;
       try {
-        const res = await fetch('http://localhost:5000/api/bookings', {
+        // Отримання бронювань
+        const bookingsRes = await fetch('http://localhost:5000/api/bookings', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const bookings = await res.json();
-        if (!res.ok) throw new Error(bookings.message);
-        const futureBookings = bookings
-          .filter((b) => new Date(b.date) >= new Date())
+        const bookingsData = await bookingsRes.json();
+        if (!bookingsRes.ok) throw new Error(bookingsData.message);
+
+        // Отримання консультацій
+        const consultationsRes = await fetch('http://localhost:5000/api/bookings/consultations', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const consultationsData = await consultationsRes.json();
+        if (!consultationsRes.ok) throw new Error(consultationsData.message);
+
+        // Об'єднання бронювань і консультацій
+        const combined = [
+          ...bookingsData.map((b) => ({ ...b, type: 'booking' })),
+          ...consultationsData.map((c) => ({
+            ...c,
+            type: 'consultation',
+            date: c.preferredDate,
+          })),
+        ];
+
+        // Фільтрація майбутніх записів зі статусом pending або confirmed
+        const futureBookings = combined
+          .filter(
+            (item) =>
+              new Date(item.date) >= new Date() &&
+              (item.status === 'pending' || item.status === 'confirmed')
+          )
           .sort((a, b) => new Date(a.date) - new Date(b.date));
+
         setNextBooking(futureBookings[0] || null);
       } catch (err) {
         console.error('Fetch next booking error:', err);

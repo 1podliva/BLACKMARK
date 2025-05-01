@@ -63,11 +63,11 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
     } else {
       setAvailableTimes([]);
       setFormError('');
-      if (!bookingForm.date && !hasShownDateToast.current) {
-        console.log('Showing toast: Спочатку виберіть дату');
-        toast.info('Спочатку виберіть дату', { className: 'admin-toast', autoClose: 3000 });
-        hasShownDateToast.current = true;
-      }
+      // if (!bookingForm.date && !hasShownDateToast.current) {
+      //   console.log('Showing toast: Спочатку виберіть дату');
+      //   toast.info('Спочатку виберіть дату', { className: 'admin-toast', autoClose: 3000 });
+      //   hasShownDateToast.current = true;
+      // }
     }
   }, [bookingForm.date, bookingForm.artist]);
 

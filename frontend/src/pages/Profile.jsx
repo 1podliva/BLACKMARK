@@ -15,12 +15,12 @@ const Profile = () => {
   const [bookings, setBookings] = useState([]);
   const [artists, setArtists] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
+  const [artistSchedules, setArtistSchedules] = useState([]);
   const [profileErrors, setProfileErrors] = useState({});
   const [passwordErrors, setPasswordErrors] = useState({});
   const [consultationErrors, setConsultationErrors] = useState({});
   const navigate = useNavigate();
 
-  // Перевіряємо авторизацію
   useEffect(() => {
     if (!user && !token) {
       navigate('/');
@@ -50,6 +50,15 @@ const Profile = () => {
       setAvailableTimes([]);
     }
   }, [consultationForm.artist, consultationForm.preferredDate]);
+
+  useEffect(() => {
+    if (consultationForm.artist) {
+      fetchArtistSchedules(consultationForm.artist);
+    } else {
+      setArtistSchedules([]);
+      setAvailableTimes([]);
+    }
+  }, [consultationForm.artist]);
 
   const fetchBookings = async () => {
     try {
@@ -88,6 +97,20 @@ const Profile = () => {
       setArtists(data);
     } catch (err) {
       toast.error(err.message, { toastId: 'fetch-artists-error', className: 'user-toast', autoClose: 3000 });
+    }
+  };
+
+  const fetchArtistSchedules = async (artistId) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/artist-schedules/${artistId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Помилка сервера');
+      setArtistSchedules(data || []);
+    } catch (err) {
+      toast.error(err.message, { toastId: 'fetch-schedules-error', className: 'user-toast', autoClose: 3000 });
+      setArtistSchedules([]);
     }
   };
 
@@ -187,6 +210,7 @@ const Profile = () => {
       const { artist, preferredDate } = consultationForm;
       setConsultationForm({ artist: '', preferredDate: '', time: '' });
       setAvailableTimes([]);
+      setArtistSchedules([]);
       await fetchBookings();
       if (artist && preferredDate) {
         await fetchAvailableTimes(artist, preferredDate);
@@ -210,7 +234,7 @@ const Profile = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Помилка сервера');
       toast.success(`${type === 'booking' ? 'Бронювання' : 'Консультація'} скасовано!`, {
-        toastId: `cancel-${id}`, // Унікальний ID для тосту
+        toastId: `cancel-${id}`,
         className: 'user-toast',
         autoClose: 3000,
       });
@@ -220,12 +244,74 @@ const Profile = () => {
     }
   };
 
+  const handleRequestCancellation = async (id, type) => {
+    if (!window.confirm('Ви впевнені, що хочете надіслати запит на скасування менеджеру?')) return;
+    try {
+      const endpoint =
+        type === 'booking'
+          ? `http://localhost:5000/api/bookings/${id}/request-cancel`
+          : `http://localhost:5000/api/bookings/consultations/${id}/request-cancel`;
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Помилка сервера');
+      toast.success('Запит на скасування надіслано менеджеру!', {
+        toastId: `request-cancel-${id}`,
+        className: 'user-toast',
+        autoClose: 3000,
+      });
+    } catch (err) {
+      toast.error(err.message, { toastId: `request-cancel-error-${id}`, className: 'user-toast', autoClose: 3000 });
+    }
+  };
+
   const handleDateChange = (date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const formattedDate = `${year}-${month}-${day}`;
     setConsultationForm({ ...consultationForm, preferredDate: formattedDate, time: '' });
+  };
+
+  // Функція для визначення робочих дат з урахуванням локального часового поясу
+  const isWorkingDay = (date) => {
+    if (!artistSchedules.length) return false;
+
+    // Отримуємо рік, місяць і день з календаря
+    const calendarYear = date.getFullYear();
+    const calendarMonth = date.getMonth(); // 0-11
+    const calendarDay = date.getDate();
+
+    return artistSchedules.some((schedule) => {
+      const scheduleDate = new Date(schedule.date);
+      // Отримуємо рік, місяць і день з графіка
+      const scheduleYear = scheduleDate.getFullYear();
+      const scheduleMonth = scheduleDate.getMonth(); // 0-11
+      const scheduleDay = scheduleDate.getDate();
+
+      // Порівнюємо рік, місяць і день
+      return (
+        scheduleYear === calendarYear &&
+        scheduleMonth === calendarMonth &&
+        scheduleDay === calendarDay
+      );
+    });
+  };
+
+  const tileClassName = ({ date, view }) => {
+    if (view !== 'month') return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const isPast = date < tomorrow;
+    const isWorking = isWorkingDay(date);
+
+    if (isPast) return 'react-calendar__tile--past';
+    if (isWorking) return 'react-calendar__tile--working';
+    return null;
   };
 
   const handleLogout = () => {
@@ -279,11 +365,8 @@ const Profile = () => {
 
         {activeTab === 'dashboard' && (
           <div className="dashboard">
-            {/* Заголовок */}
             <h2 className="dashboard-welcome">Вітаємо, {user.firstName}!</h2>
-
             <div className="dashboard-grid">
-              {/* Центральний блок */}
               <div className="dashboard-main">
                 <div className="profile-card">
                   <div className="avatar-container">
@@ -302,8 +385,6 @@ const Profile = () => {
                     <p>
                       <i className="fas fa-envelope"></i> {user.email}
                     </p>
-                    {/* Якщо додано поле телефону в моделі User, можна розкоментувати */}
-                    {/* <p><i className="fas fa-phone"></i> {user.phone || 'Не вказано'}</p> */}
                   </div>
                   <button
                     className="edit-profile-btn"
@@ -313,8 +394,6 @@ const Profile = () => {
                   </button>
                 </div>
               </div>
-
-              {/* Блок "Останні дії" */}
               <div className="dashboard-activity">
                 <h3>Останні дії</h3>
                 <div className="activity-list">
@@ -330,8 +409,6 @@ const Profile = () => {
                 </div>
               </div>
             </div>
-
-            {/* Блок "Сеанси попереду" */}
             <div className="dashboard-upcoming">
               <h3>Сеанси попереду</h3>
               {bookings.filter(
@@ -360,12 +437,23 @@ const Profile = () => {
                           <p>Статус: {statusTranslations[item.status] || item.status}</p>
                         </div>
                         {item.createdByAdmin && item.status !== 'cancelled' && item.status !== 'completed' && (
-                          <button
-                            className="cancel-btn"
-                            onClick={() => handleCancelBooking(item._id, item.type)}
-                          >
-                            Скасувати
-                          </button>
+                          <div className="booking-actions">
+                            {item.status === 'pending' ? (
+                              <button
+                                className="cancel-btn"
+                                onClick={() => handleCancelBooking(item._id, item.type)}
+                              >
+                                Скасувати
+                              </button>
+                            ) : (
+                              <button
+                                className="request-cancel-btn"
+                                onClick={() => handleRequestCancellation(item._id, item.type)}
+                              >
+                                Звернутися до менеджера
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
                     ))}
@@ -374,8 +462,6 @@ const Profile = () => {
                 <p>Майбутніх сеансів немає</p>
               )}
             </div>
-
-            {/* Блок "Останні записи" */}
             <div className="dashboard-bookings">
               <h3>Останні записи</h3>
               {bookings.filter(
@@ -392,7 +478,7 @@ const Profile = () => {
                         item.status === 'cancelled' ||
                         new Date(item.date) <= new Date()
                     )
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .sort((a, b) => new Date(b.date) - new Date(b.date))
                     .slice(0, 3)
                     .map((item) => (
                       <div key={item._id} className="booking-item">
@@ -555,6 +641,7 @@ const Profile = () => {
                     formatMonthYear={(locale, date) =>
                       date.toLocaleString('uk-UA', { month: 'long', year: 'numeric' })
                     }
+                    tileClassName={tileClassName}
                   />
                   {consultationErrors.preferredDate && <p className="error-message">{consultationErrors.preferredDate}</p>}
                 </div>
@@ -566,7 +653,7 @@ const Profile = () => {
                       value={consultationForm.time}
                       onChange={(e) => setConsultationForm({ ...consultationForm, time: e.target.value })}
                       required
-                      disabled={!consultationForm.preferredDate || availableTimes.length === 0}
+                      disabled={!consultationForm.artist || !consultationForm.preferredDate || availableTimes.length === 0}
                     >
                       <option value="">Виберіть час</option>
                       {availableTimes.map((time) => (
@@ -575,10 +662,6 @@ const Profile = () => {
                     </select>
                   </div>
                   {consultationErrors.time && <p className="error-message">{consultationErrors.time}</p>}
-                  {!consultationForm.preferredDate && <p className="info-message">Спочатку виберіть дату</p>}
-                  {consultationForm.preferredDate && availableTimes.length === 0 && (
-                    <p className="error-message">Немає доступних слотів на цю дату</p>
-                  )}
                 </div>
                 <button
                   type="submit"
