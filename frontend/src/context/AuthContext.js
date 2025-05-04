@@ -6,11 +6,15 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const [loading, setLoading] = useState(true); // Add loading state
   const navigate = useNavigate();
 
   useEffect(() => {
     const verifyToken = async () => {
-      if (!token) return;
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
         const res = await fetch('http://localhost:5000/api/auth/verify', {
           headers: { Authorization: `Bearer ${token}` },
@@ -19,6 +23,10 @@ export const AuthProvider = ({ children }) => {
         const userRes = await fetch('http://localhost:5000/api/users/profile', {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (!userRes.ok) {
+          const userData = await userRes.json();
+          throw new Error(userData.message || 'Failed to fetch user profile');
+        }
         const userData = await userRes.json();
         setUser(userData);
       } catch (err) {
@@ -26,6 +34,8 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
         setToken(null);
         setUser(null);
+      } finally {
+        setLoading(false); // Set loading to false after verification completes
       }
     };
     verifyToken();
@@ -46,6 +56,7 @@ export const AuthProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${data.token}` },
       });
       const userData = await userRes.json();
+      if (!userRes.ok) throw new Error(userData.message || 'Failed to fetch user profile');
       setUser(userData);
       return { success: true };
     } catch (err) {
@@ -68,6 +79,7 @@ export const AuthProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${data.token}` },
       });
       const userData = await userRes.json();
+      if (!userRes.ok) throw new Error(userData.message || 'Failed to fetch user profile');
       setUser(userData);
       return { success: true };
     } catch (err) {
@@ -83,7 +95,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

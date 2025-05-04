@@ -9,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './Profile.css';
 
 const Profile = () => {
-  const { user, token, logout } = useContext(AuthContext);
+  const { user, token, logout, loading } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [profileForm, setProfileForm] = useState({ firstName: '', lastName: '', avatar: null, isEditing: false });
   const [passwordForm, setPasswordForm] = useState({ oldPassword: '', newPassword: '', confirmNewPassword: '' });
@@ -24,10 +24,12 @@ const Profile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (loading) return; // Wait for auth verification to complete
+
     if (!user || !token) {
       navigate('/');
     }
-  }, [user, token, navigate]);
+  }, [user, token, loading, navigate]);
 
   const statusTranslations = {
     pending: 'На розгляді',
@@ -253,7 +255,7 @@ const Profile = () => {
           ? `http://localhost:5000/api/bookings/${id}/request-cancel`
           : `http://localhost:5000/api/bookings/consultations/${id}/request-cancel`;
       const res = await fetch(endpoint, {
-        method: 'PUT', // Changed from POST to PUT to match backend
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -305,6 +307,7 @@ const Profile = () => {
 
   const handleLogout = () => {
     logout();
+    navigate('/'); // Explicitly navigate to homepage after logout
   };
 
   const renderDashboard = () => (
@@ -497,8 +500,12 @@ const Profile = () => {
     </div>
   );
 
-  if (user === null) {
+  if (loading) {
     return <div className="loading">Завантаження...</div>;
+  }
+
+  if (!user) {
+    return null; // Redirect will happen via useEffect
   }
 
   return (
