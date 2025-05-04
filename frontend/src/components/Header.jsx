@@ -42,7 +42,9 @@ const Header = () => {
           .filter(
             (item) =>
               new Date(item.date) >= new Date() &&
-              (item.status === 'pending' || item.status === 'confirmed')
+              (item.type === 'booking'
+                ? ['pending', 'confirmed'].includes(item.status)
+                : ['pending', 'reviewed'].includes(item.status))
           )
           .sort((a, b) => new Date(a.date) - new Date(b.date));
 
