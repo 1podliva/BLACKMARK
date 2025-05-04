@@ -35,13 +35,20 @@ const BlogPost = () => {
     try {
       const res = await fetch(`http://localhost:5000/api/posts/${id}/comments`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 
+          'Content-Type': 'application/json', 
+          Authorization: `Bearer ${token}` 
+        },
         body: JSON.stringify({ text: commentText }),
       });
-      if (!res.ok) throw new Error('Failed to add comment');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Failed to add comment');
+      }
       const updatedPost = await res.json();
       setPost(updatedPost);
       setCommentText('');
+      setError('');
     } catch (err) {
       setError(err.message);
     }
@@ -126,7 +133,9 @@ const BlogPost = () => {
           </h3>
           {post.comments.map((comment) => (
             <div key={comment._id} className="comment">
-              <p><strong>{comment.user.name}</strong>: {comment.text}</p>
+              <p>
+                <strong>{comment.user.firstName} {comment.user.lastName}</strong>: {comment.text}
+              </p>
               <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
             </div>
           ))}

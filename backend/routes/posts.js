@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
   try {
     const isAdmin = req.headers.authorization;
     const query = isAdmin ? {} : { status: 'published' };
-    const posts = await Post.find(query).populate('comments.user', 'name');
+    const posts = await Post.find(query).populate('comments.user', 'firstName lastName'); // Updated to populate firstName and lastName
     res.json(posts);
   } catch (err) {
     console.error('GET /api/posts Error:', err);
@@ -40,7 +40,7 @@ router.get('/', async (req, res) => {
 // Get single post by ID
 router.get('/:id', async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id).populate('comments.user', 'name');
+    const post = await Post.findById(req.params.id).populate('comments.user', 'firstName lastName'); // Updated to populate firstName and lastName
     if (!post) return res.status(404).json({ message: 'Post not found' });
     const isAdmin = req.headers.authorization;
     if (!isAdmin && post.status !== 'published') {
@@ -115,11 +115,18 @@ router.post('/:id/comments', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
     const { text } = req.body;
     if (!text) return res.status(400).json({ message: 'Comment text is required' });
+
     post.comments.push({ user: req.user._id, text });
     await post.save();
-    res.status(201).json(post);
+    const updatedPost = await Post.findById(req.params.id).populate('comments.user', 'firstName lastName'); // Updated to populate firstName and lastName
+    res.status(201).json(updatedPost);
   } catch (err) {
     console.error('POST /api/posts/:id/comments Error:', err);
     res.status(500).json({ message: err.message });
