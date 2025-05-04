@@ -582,8 +582,9 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
                     </tr>
                   )}
                 </tbody>
-rosse              </table>
+              </table>
             </div>
+            <br />
             <h4>Усі консультації</h4>
             <div className="table-wrapper">
               <table className="bookings-table">

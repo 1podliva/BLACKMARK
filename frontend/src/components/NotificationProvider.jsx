@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 import io from 'socket.io-client';
 
 const NotificationProvider = ({ children, token, role, onNotificationReceived }) => {
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [userData, setUserData] = useState(null);
   const listeners = useRef(new Set());
+  const socketRef = useRef(null);
 
   // Function to notify all listeners of a new consultation-related notification
   const notifyListeners = (notification) => {
@@ -24,35 +24,48 @@ const NotificationProvider = ({ children, token, role, onNotificationReceived })
     }
   }, [onNotificationReceived]);
 
+  // Fetch user data to get role and ID
   useEffect(() => {
     if (!token) return;
 
-    // Перевірка ролі адміна
-    const verifyAdmin = async () => {
+    const fetchUserData = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/auth/check-admin', {
+        const res = await fetch('http://localhost:5000/api/auth/me', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setIsAdmin(res.ok);
+        if (res.ok) {
+          const data = await res.json();
+          setUserData(data); // { _id, role, firstName, lastName, email, ... }
+        } else {
+          console.error('Failed to fetch user data:', res.status, await res.json());
+          setUserData(null);
+        }
       } catch (err) {
-        console.error('Помилка перевірки адміна:', err);
-        setIsAdmin(false);
+        console.error('Error fetching user data:', err);
+        setUserData(null);
       }
     };
 
-    verifyAdmin();
+    fetchUserData();
   }, [token]);
 
+  // Set up WebSocket connection
   useEffect(() => {
-    if (!token) return;
+    if (!token || !userData) return;
 
     const socket = io('http://localhost:5000', {
       auth: { token: `Bearer ${token}` },
       transports: ['websocket'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
+    socketRef.current = socket;
+
     socket.on('connect', () => {
-      console.log('WebSocket connected');
+      console.log('WebSocket connected:', socket.id);
+      socket.emit('join', userData._id); // Join the user's room
     });
 
     socket.on('newNotification', (notification) => {
@@ -86,7 +99,7 @@ const NotificationProvider = ({ children, token, role, onNotificationReceived })
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-        className: role === 'admin' ? 'admin-toast' : 'user-toast',
+        className: userData.role === 'admin' ? 'admin-toast' : 'user-toast',
       };
 
       toast.info(
@@ -104,7 +117,7 @@ const NotificationProvider = ({ children, token, role, onNotificationReceived })
     socket.on('connect_error', (err) => {
       console.error('WebSocket error:', err.message);
       toast.error('Помилка підключення до сповіщень', {
-        className: role === 'admin' ? 'admin-toast' : 'user-toast',
+        className: userData?.role === 'admin' ? 'admin-toast' : 'user-toast',
       });
       if (err.message === 'Authentication error') {
         localStorage.removeItem('token');
@@ -112,22 +125,21 @@ const NotificationProvider = ({ children, token, role, onNotificationReceived })
       }
     });
 
+    socket.on('disconnect', (reason) => {
+      console.log('WebSocket disconnected:', reason);
+    });
+
     return () => {
       socket.disconnect();
       console.log('WebSocket disconnected');
+      socketRef.current = null;
     };
-  }, [token, role]);
+  }, [token, userData]);
 
-  // If children is a function (render prop), call it with onNotificationReceived
-  // Otherwise, render children directly
+  // Render children (support both render prop and direct children)
   const renderChildren = typeof children === 'function' ? children(onNotificationReceived) : children;
 
-  return (
-    <>
-      {renderChildren}
-      <ToastContainer />
-    </>
-  );
+  return <>{renderChildren}</>;
 };
 
-export default NotificationProvider;
+export default NotificationProvider;  

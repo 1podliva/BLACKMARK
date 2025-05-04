@@ -253,7 +253,7 @@ const Profile = () => {
           ? `http://localhost:5000/api/bookings/${id}/request-cancel`
           : `http://localhost:5000/api/bookings/consultations/${id}/request-cancel`;
       const res = await fetch(endpoint, {
-        method: 'POST',
+        method: 'PUT', // Changed from POST to PUT to match backend
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       });
       const data = await res.json();

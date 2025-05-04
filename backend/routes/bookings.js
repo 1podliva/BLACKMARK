@@ -10,7 +10,23 @@ const Consultation = require('../models/Consultation');
 const auth = require('../middleware/auth');
 const restrictToAdmin = require('../middleware/restrictToAdmin');
 
-// Отримати бронювання користувача
+// Status mapping for display
+const statusMap = {
+  booking: {
+    pending: 'На розгляді',
+    confirmed: 'Підтверджено',
+    cancelled: 'Скасовано',
+    completed: 'Завершено',
+  },
+  consultation: {
+    pending: 'На розгляді',
+    reviewed: 'Розглянуто',
+    cancelled: 'Скасовано',
+    completed: 'Завершено',
+  },
+};
+
+// Otримати бронювання користувача
 router.get('/', auth, async (req, res) => {
   try {
     const bookings = await Booking.find({ user: req.user.id })
@@ -23,7 +39,7 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// Отримати консультації користувача
+// Otримати консультації користувача
 router.get('/consultations', auth, async (req, res) => {
   try {
     const consultations = await Consultation.find({ user: req.user.id })
@@ -36,7 +52,7 @@ router.get('/consultations', auth, async (req, res) => {
   }
 });
 
-// Отримати всі бронювання (тільки адмін)
+// Otримати всі бронювання (тільки адмін)
 router.get('/all', auth, restrictToAdmin, async (req, res) => {
   try {
     const bookings = await Booking.find()
@@ -50,7 +66,7 @@ router.get('/all', auth, restrictToAdmin, async (req, res) => {
   }
 });
 
-// Отримати всі консультації (тільки адмін)
+// Otримати всі консультації (тільки адмін)
 router.get('/consultations/all', auth, restrictToAdmin, async (req, res) => {
   try {
     const consultations = await Consultation.find()
@@ -117,7 +133,7 @@ router.post('/', auth, restrictToAdmin, async (req, res) => {
     // Повідомлення для адмінів
     const adminNotification = {
       message: `Нове бронювання від ${clientName} для ${artistData.name} на ${new Date(date).toLocaleDateString('uk-UA')} о ${time}`,
-      details: `Дата: ${new Date(date).toLocaleDateString('uk-UA')}, Час: ${time}`,
+      details: `Дата: ${new Date(date).toLocaleDateString('uk-UA')}, Час: ${time}, Статус: ${statusMap.booking[booking.status]}`,
       user: admins[0]._id,
       booking: booking._id,
       read: false,
@@ -256,7 +272,7 @@ router.post('/consultations', auth, async (req, res) => {
     // Повідомлення для адмінів
     const adminNotification = {
       message: `Новий запит на консультацію від ${clientName} для ${artistData.name} на ${new Date(parsedDate).toLocaleDateString('uk-UA')} о ${time}`,
-      details: `Дата: ${new Date(parsedDate).toLocaleDateString('uk-UA')}, Час: ${time}`,
+      details: `Дата: ${new Date(parsedDate).toLocaleDateString('uk-UA')}, Час: ${time}, Статус: ${statusMap.consultation[consultation.status]}`,
       user: admins[0]._id,
       consultation: consultation._id,
       read: false,
@@ -389,7 +405,7 @@ router.put('/:id/cancel', auth, async (req, res) => {
     // Повідомлення для користувача
     const userNotification = {
       message: `Ваше бронювання з ${booking.artist.name} на ${new Date(booking.date).toLocaleDateString('uk-UA')} о ${booking.time} скасовано`,
-      details: `Дата: ${new Date(booking.date).toLocaleDateString('uk-UA')}, Час: ${booking.time}`,
+      details: `Дата: ${new Date(booking.date).toLocaleDateString('uk-UA')}, Час: ${booking.time}, Статус: ${statusMap.booking[booking.status]}`,
       user: booking.user._id,
       booking: booking._id,
       read: false,
@@ -407,7 +423,7 @@ router.put('/:id/cancel', auth, async (req, res) => {
     if (admins.length > 0) {
       const adminNotification = {
         message: `Користувач ${booking.user.firstName} ${booking.user.lastName} скасував бронювання з ${booking.artist.name} на ${new Date(booking.date).toLocaleDateString('uk-UA')} о ${booking.time}`,
-        details: `Дата: ${new Date(booking.date).toLocaleDateString('uk-UA')}, Час: ${booking.time}`,
+        details: `Дата: ${new Date(booking.date).toLocaleDateString('uk-UA')}, Час: ${booking.time}, Статус: ${statusMap.booking[booking.status]}`,
         user: admins[0]._id,
         booking: booking._id,
         read: false,
@@ -431,7 +447,7 @@ router.put('/:id/cancel', auth, async (req, res) => {
 });
 
 // Запит на скасування бронювання (користувач)
-router.post('/:id/request-cancel', auth, async (req, res) => {
+router.put('/:id/request-cancel', auth, async (req, res) => {
   const io = req.app.get('io');
   try {
     const booking = await Booking.findById(req.params.id)
@@ -456,7 +472,7 @@ router.post('/:id/request-cancel', auth, async (req, res) => {
 
     const adminNotification = {
       message: `Користувач ${booking.user.firstName} ${booking.user.lastName} просить скасувати бронювання з ${booking.artist.name} на ${new Date(booking.date).toLocaleDateString('uk-UA')} о ${booking.time}`,
-      details: `Дата: ${new Date(booking.date).toLocaleDateString('uk-UA')}, Час: ${booking.time}`,
+      details: `Дата: ${new Date(booking.date).toLocaleDateString('uk-UA')}, Час: ${booking.time}, Статус: ${statusMap.booking[booking.status]}`,
       user: admins[0]._id,
       booking: booking._id,
       read: false,
@@ -473,7 +489,7 @@ router.post('/:id/request-cancel', auth, async (req, res) => {
 
     res.json({ message: 'Запит на скасування надіслано' });
   } catch (err) {
-    console.error('POST /api/bookings/:id/request-cancel Error:', err.message, err.stack);
+    console.error('PUT /api/bookings/:id/request-cancel Error:', err.message, err.stack);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -505,7 +521,7 @@ router.put('/consultations/:id/cancel', auth, async (req, res) => {
     // Повідомлення для користувача
     const userNotification = {
       message: `Ваша консультація з ${consultation.artist.name} на ${new Date(consultation.preferredDate).toLocaleDateString('uk-UA')} о ${consultation.time} скасована`,
-      details: `Дата: ${new Date(consultation.preferredDate).toLocaleDateString('uk-UA')}, Час: ${consultation.time}`,
+      details: `Дата: ${new Date(consultation.preferredDate).toLocaleDateString('uk-UA')}, Час: ${consultation.time}, Статус: ${statusMap.consultation[consultation.status]}`,
       user: consultation.user._id,
       consultation: consultation._id,
       read: false,
@@ -523,7 +539,7 @@ router.put('/consultations/:id/cancel', auth, async (req, res) => {
     if (admins.length > 0) {
       const adminNotification = {
         message: `Користувач ${consultation.user.firstName} ${consultation.user.lastName} скасував консультацію з ${consultation.artist.name} на ${new Date(consultation.preferredDate).toLocaleDateString('uk-UA')} о ${consultation.time}`,
-        details: `Дата: ${new Date(consultation.preferredDate).toLocaleDateString('uk-UA')}, Час: ${consultation.time}`,
+        details: `Дата: ${new Date(consultation.preferredDate).toLocaleDateString('uk-UA')}, Час: ${consultation.time}, Статус: ${statusMap.consultation[consultation.status]}`,
         user: admins[0]._id,
         consultation: consultation._id,
         read: false,
@@ -547,7 +563,7 @@ router.put('/consultations/:id/cancel', auth, async (req, res) => {
 });
 
 // Запит на скасування консультації (користувач)
-router.post('/consultations/:id/request-cancel', auth, async (req, res) => {
+router.put('/consultations/:id/request-cancel', auth, async (req, res) => {
   const io = req.app.get('io');
   try {
     const consultation = await Consultation.findById(req.params.id)
@@ -572,7 +588,7 @@ router.post('/consultations/:id/request-cancel', auth, async (req, res) => {
 
     const adminNotification = {
       message: `Користувач ${consultation.user.firstName} ${consultation.user.lastName} просить скасувати консультацію з ${consultation.artist.name} на ${new Date(consultation.preferredDate).toLocaleDateString('uk-UA')} о ${consultation.time}`,
-      details: `Дата: ${new Date(consultation.preferredDate).toLocaleDateString('uk-UA')}, Час: ${consultation.time}`,
+      details: `Дата: ${new Date(consultation.preferredDate).toLocaleDateString('uk-UA')}, Час: ${consultation.time}, Статус: ${statusMap.consultation[consultation.status]}`,
       user: admins[0]._id,
       consultation: consultation._id,
       read: false,
@@ -589,13 +605,122 @@ router.post('/consultations/:id/request-cancel', auth, async (req, res) => {
 
     res.json({ message: 'Запит на скасування надіслано' });
   } catch (err) {
-    console.error('POST /api/bookings/consultations/:id/request-cancel Error:', err.message, err.stack);
+    console.error('PUT /api/bookings/consultations/:id/request-cancel Error:', err.message, err.stack);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Оновити бронювання (тільки адмін)
+router.put('/:id', auth, restrictToAdmin, async (req, res) => {
+  const io = req.app.get('io');
+  try {
+    const { user, artist, date, time, description } = req.body;
+
+    const booking = await Booking.findById(req.params.id)
+      .populate('user', 'firstName lastName')
+      .populate('artist', 'name');
+    if (!booking) return res.status(404).json({ message: 'Бронювання не знайдено' });
+
+    if (user && !mongoose.Types.ObjectId.isValid(user)) {
+      return res.status(400).json({ message: 'Невірний ID клієнта' });
+    }
+    if (artist && !mongoose.Types.ObjectId.isValid(artist)) {
+      return res.status(400).json({ message: 'Невірний ID майстра' });
+    }
+
+    const updatedFields = {};
+    if (user) {
+      const userExists = await User.findById(user);
+      if (!userExists) return res.status(404).json({ message: 'Клієнт не знайдений' });
+      updatedFields.user = user;
+    }
+    if (artist) {
+      const artistExists = await Artist.findById(artist);
+      if (!artistExists) return res.status(404).json({ message: 'Майстер не знайдений' });
+      updatedFields.artist = artist;
+    }
+    if (date) {
+      const parsedDate = new Date(date);
+      if (isNaN(parsedDate.getTime())) {
+        return res.status(400).json({ message: 'Невірний формат дати' });
+      }
+      const minDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      if (parsedDate < minDate) {
+        return res.status(400).json({ message: 'Дата має бути щонайменше за 24 години' });
+      }
+      updatedFields.date = parsedDate;
+    }
+    if (time) updatedFields.time = time;
+    if (description) updatedFields.description = description;
+
+    // Перевірка доступності, якщо змінюється дата або час
+    if (date || time) {
+      const targetDate = new Date(date || booking.date);
+      const checkTime = time || booking.time;
+      const startOfDayCheck = new Date(targetDate);
+      startOfDayCheck.setHours(0, 0, 0, 0);
+      const endOfDayCheck = new Date(targetDate);
+      endOfDayCheck.setHours(23, 59, 59, 999);
+
+      const checkArtist = artist || booking.artist._id;
+      const existingBookings = await Booking.find({
+        artist: checkArtist,
+        date: { $gte: startOfDayCheck, $lte: endOfDayCheck },
+        time: checkTime,
+        _id: { $ne: booking._id },
+        status: { $ne: 'cancelled' },
+      });
+
+      if (existingBookings.length > 0) {
+        return res.status(400).json({ message: 'Цей час уже заброньовано' });
+      }
+
+      const existingConsultations = await Consultation.find({
+        artist: checkArtist,
+        preferredDate: { $gte: startOfDayCheck, $lte: endOfDayCheck },
+        time: checkTime,
+        _id: { $ne: booking._id },
+        status: { $ne: 'cancelled' },
+      });
+
+      if (existingConsultations.length > 0) {
+        return res.status(400).json({ message: 'Цей час уже зайнято консультацією' });
+      }
+    }
+
+    Object.assign(booking, updatedFields);
+    await booking.save();
+
+    // Оновлюємо інформацію для повідомлення
+    const updatedBooking = await Booking.findById(req.params.id)
+      .populate('user', 'firstName lastName')
+      .populate('artist', 'name');
+
+    // Повідомлення для користувача
+    const userNotification = {
+      message: `Ваше бронювання з ${updatedBooking.artist.name} на ${new Date(updatedBooking.date).toLocaleDateString('uk-UA')} о ${updatedBooking.time} було оновлено`,
+      details: `Дата: ${new Date(updatedBooking.date).toLocaleDateString('uk-UA')}, Час: ${updatedBooking.time}, Статус: ${statusMap.booking[updatedBooking.status]}`,
+      user: updatedBooking.user._id,
+      booking: updatedBooking._id,
+      read: false,
+    };
+    const savedUserNotification = await new Notification(userNotification).save();
+
+    // Надсилаємо повідомлення лише користувачу
+    io.to(updatedBooking.user._id.toString()).emit('newNotification', {
+      ...savedUserNotification._doc,
+      booking: { ...updatedBooking._doc, artist: { name: updatedBooking.artist.name }, type: 'booking' },
+    });
+
+    res.json(updatedBooking);
+  } catch (err) {
+    console.error('PUT /api/bookings/:id Error:', err.message, err.stack);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // Оновити статус бронювання (тільки адмін)
-router.put('/:id', auth, restrictToAdmin, async (req, res) => {
+router.put('/:id/status', auth, restrictToAdmin, async (req, res) => {
   const io = req.app.get('io');
   try {
     const { status } = req.body;
@@ -613,7 +738,7 @@ router.put('/:id', auth, restrictToAdmin, async (req, res) => {
 
     // Повідомлення для користувача
     const userNotification = {
-      message: `Статус вашого бронювання з ${booking.artist.name} на ${new Date(booking.date).toLocaleDateString('uk-UA')} о ${booking.time} змінено на "${status}"`,
+      message: `Статус вашого бронювання з ${booking.artist.name} на ${new Date(booking.date).toLocaleDateString('uk-UA')} о ${booking.time} змінено на "${statusMap.booking[status]}"`,
       details: `Дата: ${new Date(booking.date).toLocaleDateString('uk-UA')}, Час: ${booking.time}`,
       user: booking.user._id,
       booking: booking._id,
@@ -629,7 +754,7 @@ router.put('/:id', auth, restrictToAdmin, async (req, res) => {
 
     res.json(booking);
   } catch (err) {
-    console.error('PUT /api/bookings/:id Error:', err.message, err.stack);
+    console.error('PUT /api/bookings/:id/status Error:', err.message, err.stack);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -639,7 +764,7 @@ router.put('/consultations/:id/status', auth, restrictToAdmin, async (req, res) 
   const io = req.app.get('io');
   try {
     const { status } = req.body;
-    if (!['pending', 'confirmed', 'cancelled', 'completed', 'reviewed'].includes(status)) {
+    if (!['pending', 'reviewed', 'cancelled', 'completed'].includes(status)) {
       return res.status(400).json({ message: 'Невірний статус' });
     }
 
@@ -653,7 +778,7 @@ router.put('/consultations/:id/status', auth, restrictToAdmin, async (req, res) 
 
     // Повідомлення для користувача
     const userNotification = {
-      message: `Статус вашої консультації з ${consultation.artist.name} на ${new Date(consultation.preferredDate).toLocaleDateString('uk-UA')} о ${consultation.time} змінено на "${status}"`,
+      message: `Статус вашої консультації з ${consultation.artist.name} на ${new Date(consultation.preferredDate).toLocaleDateString('uk-UA')} о ${consultation.time} змінено на "${statusMap.consultation[status]}"`,
       details: `Дата: ${new Date(consultation.preferredDate).toLocaleDateString('uk-UA')}, Час: ${consultation.time}`,
       user: consultation.user._id,
       consultation: consultation._id,
@@ -669,7 +794,75 @@ router.put('/consultations/:id/status', auth, restrictToAdmin, async (req, res) 
 
     res.json(consultation);
   } catch (err) {
-    console.error('PUT /api/bookings/consultations/:id Error:', err.message, err.stack);
+    console.error('PUT /api/bookings/consultations/:id/status Error:', err.message, err.stack);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Видалити бронювання (тільки адмін)
+router.delete('/:id', auth, restrictToAdmin, async (req, res) => {
+  const io = req.app.get('io');
+  try {
+    const booking = await Booking.findById(req.params.id)
+      .populate('user', 'firstName lastName')
+      .populate('artist', 'name');
+    if (!booking) return res.status(404).json({ message: 'Бронювання не знайдено' });
+
+    await booking.deleteOne();
+
+    // Повідомлення для користувача
+    const userNotification = {
+      message: `Ваше бронювання з ${booking.artist.name} на ${new Date(booking.date).toLocaleDateString('uk-UA')} о ${booking.time} було видалено адміністратором`,
+      details: `Дата: ${new Date(booking.date).toLocaleDateString('uk-UA')}, Час: ${booking.time}, Статус: ${statusMap.booking[booking.status]}`,
+      user: booking.user._id,
+      booking: booking._id,
+      read: false,
+    };
+    const savedUserNotification = await new Notification(userNotification).save();
+
+    // Надсилаємо повідомлення лише користувачу
+    io.to(booking.user._id.toString()).emit('newNotification', {
+      ...savedUserNotification._doc,
+      booking: { ...booking._doc, artist: { name: booking.artist.name }, type: 'booking' },
+    });
+
+    res.json({ message: 'Бронювання видалено' });
+  } catch (err) {
+    console.error('DELETE /api/bookings/:id Error:', err.message, err.stack);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Видалити консультацію (тільки адмін)
+router.delete('/consultations/:id', auth, restrictToAdmin, async (req, res) => {
+  const io = req.app.get('io');
+  try {
+    const consultation = await Consultation.findById(req.params.id)
+      .populate('user', 'firstName lastName')
+      .populate('artist', 'name');
+    if (!consultation) return res.status(404).json({ message: 'Консультацію не знайдено' });
+
+    await consultation.deleteOne();
+
+    // Повідомлення для користувача
+    const userNotification = {
+      message: `Вашу консультацію з ${consultation.artist.name} на ${new Date(consultation.preferredDate).toLocaleDateString('uk-UA')} о ${consultation.time} було видалено адміністратором`,
+      details: `Дата: ${new Date(consultation.preferredDate).toLocaleDateString('uk-UA')}, Час: ${consultation.time}, Статус: ${statusMap.consultation[consultation.status]}`,
+      user: consultation.user._id,
+      consultation: consultation._id,
+      read: false,
+    };
+    const savedUserNotification = await new Notification(userNotification).save();
+
+    // Надсилаємо повідомлення лише користувачу
+    io.to(consultation.user._id.toString()).emit('newNotification', {
+      ...savedUserNotification._doc,
+      consultation: { ...consultation._doc, artist: { name: consultation.artist.name }, type: 'consultation' },
+    });
+
+    res.json({ message: 'Консультацію видалено' });
+  } catch (err) {
+    console.error('DELETE /api/bookings/consultations/:id Error:', err.message, err.stack);
     res.status(500).json({ message: 'Server error' });
   }
 });
