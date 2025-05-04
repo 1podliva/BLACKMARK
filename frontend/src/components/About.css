@@ -8,18 +8,18 @@
   overflow: hidden;
 }
 
-.text-content {
-  max-width: 1200px; /* Increased to match other sections */
+.about-text-content {
+  max-width: 1200px;
   width: 100%;
   position: relative;
   z-index: 2;
 }
 
-.intro-block {
+.about-intro-block {
   margin-bottom: 60px;
 }
 
-.section-subtitle {
+.about-section-subtitle {
   font-size: 18px;
   color: var(--purple-accent);
   text-transform: uppercase;
@@ -27,56 +27,56 @@
   margin-bottom: 20px;
 }
 
-.main-title {
+.about-main-title {
   font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 700;
   line-height: 1.2;
   margin: 0;
 }
 
-.first-line {
+.about-first-line {
   display: block;
   color: var(--soft-white);
 }
 
-.second-line {
+.about-second-line {
   display: block;
   color: var(--purple-accent);
 }
 
-.divider {
+.about-divider {
   width: 80px;
   height: 4px;
   background: var(--purple-accent);
   margin: 30px 0;
 }
 
-.intro-text {
+.about-intro-text {
   font-size: 1.2rem;
   line-height: 1.8;
   color: var(--light-gray);
   max-width: 600px;
 }
 
-.features {
+.about-features {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 40px;
   margin: 60px 0;
 }
 
-.feature-item h3 {
+.about-feature-item h3 {
   color: var(--purple-accent);
   font-size: 1.5rem;
   margin-bottom: 15px;
 }
 
-.feature-item p {
+.about-feature-item p {
   color: var(--light-gray);
   line-height: 1.6;
 }
 
-.cta-block {
+.about-cta-block {
   margin: 80px 0;
   display: flex;
   flex-direction: column;
@@ -84,7 +84,7 @@
   justify-content: center;
 }
 
-.cta-text {
+.about-cta-text {
   font-size: 1.3rem;
   line-height: 1.8;
   color: var(--soft-white);
@@ -92,7 +92,7 @@
   font-style: italic;
 }
 
-.stats-container {
+.about-stats-container {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
@@ -100,17 +100,17 @@
   margin-top: 60px;
 }
 
-.stat-item {
+.about-stat-item {
   text-align: center;
 }
 
-.stat-item h2 {
+.about-stat-item h2 {
   font-size: 3rem;
   color: var(--purple-accent);
   margin: 0;
 }
 
-.stat-item p {
+.about-stat-item p {
   color: var(--muted-pink);
   margin-top: 10px;
   font-size: 1rem;
@@ -142,11 +142,11 @@
     padding: 80px 5%;
   }
 
-  .features {
+  .about-features {
     grid-template-columns: 1fr;
   }
 
-  .stats-container {
+  .about-stats-container {
     flex-direction: column;
     align-items: center;
   }

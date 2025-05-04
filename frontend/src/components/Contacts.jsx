@@ -112,10 +112,6 @@ const Contacts = () => {
             </MapContainer>
           </div>
         </div>
-
-        <div className="custom-attribution">
-          Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, © <a href="https://carto.com/attributions">CARTO</a>
-        </div>
       </div>
     </section>
   );
