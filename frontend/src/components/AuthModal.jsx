@@ -1,5 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './AuthModal.css';
 
 const AuthModal = ({ onClose }) => {
@@ -12,8 +14,6 @@ const AuthModal = ({ onClose }) => {
     password: '',
     confirmPassword: '',
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,130 +21,148 @@ const AuthModal = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (isLogin) {
-      const result = await login(formData.email, formData.password);
-      if (result.success) {
-        setSuccess('Вхід успішний!');
+    
+    try {
+      if (isLogin) {
+        await login(formData.email, formData.password);
+        toast.success('Вхід успішний!', { theme: 'colored' });
         setTimeout(onClose, 1000);
       } else {
-        setError(result.message);
-      }
-    } else {
-      if (formData.password !== formData.confirmPassword) {
-        setError('Паролі не співпадають');
-        return;
-      }
-      const result = await register(
-        formData.firstName,
-        formData.lastName,
-        formData.email,
-        formData.password
-      );
-      if (result.success) {
-        setSuccess('Реєстрація успішна!');
+        if (formData.password !== formData.confirmPassword) {
+          throw new Error('Паролі не співпадають');
+        }
+        await register(
+          formData.firstName,
+          formData.lastName,
+          formData.email,
+          formData.password
+        );
+        toast.success('Реєстрація успішна!', { theme: 'colored' });
         setTimeout(onClose, 1000);
-      } else {
-        setError(result.message);
       }
+    } catch (error) {
+      toast.error(error.message, { theme: 'colored' });
     }
   };
 
   return (
     <div className="auth-modal">
-      <div className="auth-modal-content">
-        <button className="close-btn" onClick={onClose}>×</button>
-        <h2>{isLogin ? 'Вхід' : 'Реєстрація'}</h2>
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        toastStyle={{
+          backgroundColor: '#1A1A1D',
+          color: '#F8F9FA',
+          borderRadius: '8px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
+        }}
+      />
+      <div className="auth-modal-content scale-in">
+        <button className="close-btn" onClick={onClose}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+        <div className="auth-header">
+          <h2>{isLogin ? 'Ласкаво просимо!' : 'Створіть акаунт!'}</h2>
+          <p>{isLogin ? 'Увійдіть у свій акаунт' : 'Зареєструйтесь, щоб продовжити'}</p>
+        </div>
+        
         <form onSubmit={handleSubmit}>
           {!isLogin && (
-            <>
-              <div className="form-group">
-                <label>Ім’я</label>
+            <div className="name-group">
+              <div className="auth-form-group">
                 <input
                   type="text"
                   name="firstName"
+                  placeholder="Ім'я"
                   value={formData.firstName}
                   onChange={handleChange}
                   required
                 />
               </div>
-              <div className="form-group">
-                <label>Прізвище</label>
+              <div className="auth-form-group">
                 <input
                   type="text"
                   name="lastName"
+                  placeholder="Прізвище"
                   value={formData.lastName}
                   onChange={handleChange}
                   required
                 />
               </div>
-            </>
+            </div>
           )}
-          <div className="form-group">
-            <label>Email</label>
+          
+          <div className="auth-form-group">
             <input
               type="email"
               name="email"
+              placeholder="Email"
               value={formData.email}
               onChange={handleChange}
               required
             />
           </div>
-          <div className="form-group">
-            <label>Пароль</label>
+          <div className="auth-form-group">
             <input
               type="password"
               name="password"
+              placeholder="Пароль"
               value={formData.password}
               onChange={handleChange}
               required
             />
           </div>
           {!isLogin && (
-            <div className="form-group">
-              <label>Підтвердження пароля</label>
+            <div className="auth-form-group">
               <input
                 type="password"
                 name="confirmPassword"
+                placeholder="Підтвердження пароля"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
               />
             </div>
           )}
-          {error && <p className="error-message">{error}</p>}
-          {success && <p className="success-message">{success}</p>}
           <button type="submit" className="submit-btn">
-            {isLogin ? 'Увійти' : 'Зареєструватися'}
+            {isLogin ? 'Увійти' : 'Зареєструватись'}
           </button>
         </form>
-        <p>
-          {isLogin ? 'Немає акаунта?' : 'Вже є акаунт?'}
-          <button
-            className="toggle-btn"
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setError('');
-              setSuccess('');
-              setFormData({
-                firstName: '',
-                lastName: '',
-                email: '',
-                password: '',
-                confirmPassword: '',
-              });
-            }}
-          >
-            {isLogin ? 'Зареєструватися' : 'Увійти'}
-          </button>
-        </p>
-        {isLogin && (
+
+        <div className="auth-footer">
           <p>
-            <a href="/forgot-password">Забули пароль?</a>
+            {isLogin ? 'Ще не з нами?' : 'Вже зареєстровані?'}
+            <button
+              className="toggle-btn"
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setFormData({
+                  firstName: '',
+                  lastName: '',
+                  email: '',
+                  password: '',
+                  confirmPassword: '',
+                });
+              }}
+            >
+              {isLogin ? 'Створити акаунт' : 'Увійти'}
+            </button>
           </p>
-        )}
+          {isLogin && (
+            <a href="/forgot-password" className="forgot-password">
+              Забули пароль?
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

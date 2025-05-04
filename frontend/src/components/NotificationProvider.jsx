@@ -47,7 +47,7 @@ const NotificationProvider = ({ children, token, role, onNotificationReceived })
     if (!token) return;
 
     const socket = io('http://localhost:5000', {
-      query: { token },
+      auth: { token: `Bearer ${token}` },
       transports: ['websocket'],
     });
 

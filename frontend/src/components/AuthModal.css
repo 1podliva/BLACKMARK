@@ -1,143 +1,180 @@
 :root {
-    --dark-bg: #0F0F10;
-    --navy-gray: #1A1A1D;
-    --purple-accent: #9B00FF;
-    --purple-hover: #7F00D4;
-    --soft-white: #F8F9FA;
-    --light-gray: #D1D5DB;
-    --muted-pink: #CBA6DD;
+  --dark-bg: #0F0F10;
+  --navy-gray: #1A1A1D;
+  --purple-accent: #9B00FF;
+  --purple-hover: #7F00D4;
+  --soft-white: #F8F9FA;
+  --light-gray: #D1D5DB;
+  --muted-pink: #CBA6DD;
+}
+
+.auth-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 15, 16, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+}
+
+.auth-modal-content {
+  background: var(--navy-gray);
+  padding: 2rem;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 440px;
+  position: relative;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
   }
-  
-  .auth-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(15, 15, 16, 0.8); /* Темний фон з прозорістю, на основі --dark-bg */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
-  
-  .auth-modal-content {
-    background: var(--navy-gray); /* Темний фон модального вікна */
-    padding: 24px;
-    border-radius: 12px;
-    max-width: 400px;
-    width: 90%;
-    position: relative;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Тінь для глибини */
-    color: var(--soft-white); /* Білий текст */
-  }
-  
-  .close-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: none;
-    border: none;
-    font-size: 20px;
-    color: var(--light-gray);
-    cursor: pointer;
-    transition: color 0.2s;
-  }
-  
-  .close-btn:hover {
-    color: var(--purple-accent); /* Фіолетовий при ховері */
-  }
-  
-  .auth-modal-content h2 {
-    font-size: 24px;
-    margin-bottom: 20px;
-    text-align: center;
-    color: var(--soft-white);
-  }
-  
-  .form-group {
-    margin-bottom: 20px;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 14px;
-    color: var(--light-gray); /* Сірий для міток */
-  }
-  
-  .form-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #262626;
-    border-radius: 8px;
-    background-color: #2C2C2C;
-    color: var(--soft-white);
-    font-size: 1rem;
-    transition: border-color 0.2s;
-  }
-  
-  .form-group input:focus {
-    outline: none;
-    border-color: var(--purple-accent); /* Фіолетовий при фокусі */
-  }
-  
-  .submit-btn {
-    width: 100%;
-    padding: 12px;
-    background: var(--purple-accent); /* Фіолетова кнопка */
-    color: var(--soft-white);
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.2s;
-    margin-bottom: 5px;
-  }
-  
-  .submit-btn:hover {
-    background: var(--purple-hover); /* Темніший фіолетовий при ховері */
-  }
-  
-  .error-message {
-    color: var(--muted-pink); /* Рожевий для помилок */
-    margin-bottom: 12px;
-    font-size: 14px;
-    text-align: center;
-  }
-  
-  .success-message {
-    color: var(--purple-accent); /* Фіолетовий для успіху */
-    margin-bottom: 12px;
-    font-size: 14px;
-    text-align: center;
-  }
-  
-  .toggle-btn {
-    background: none;
-    border: none;
-    color: var(--purple-accent);
-    cursor: pointer;
-    font-size: 18px;
-    margin-left: 5px;
-    transition: color 0.2s;
-  }
-  
-  .toggle-btn:hover {
-    color: var(--purple-hover);
-  }
-  
-  .auth-modal-content p {
-    text-align: center;
-    color: var(--light-gray);
-  }
-  
-  .auth-modal-content a {
-    color: var(--purple-accent);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-  
-  .auth-modal-content a:hover {
-    color: var(--purple-hover);
-  }
+}
+
+.close-btn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--light-gray);
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: var(--purple-accent);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-header h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  color: var(--soft-white);
+}
+
+.auth-header p {
+  color: var(--light-gray);
+  font-size: 0.9rem;
+}
+
+.auth-form-group {
+  margin-bottom: 1rem;
+}
+
+.auth-form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #2E2E32;
+  border-radius: 8px;
+  background: #232326;
+  color: var(--soft-white);
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.auth-form-group input:focus {
+  outline: none;
+  border-color: var(--purple-accent);
+  box-shadow: 0 0 0 2px rgba(155, 0, 255, 0.2);
+}
+
+.name-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--purple-accent);
+  color: var(--soft-white);
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 1rem;
+}
+
+.submit-btn:hover {
+  background: var(--purple-hover);
+  transform: translateY(-1px);
+}
+
+.auth-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.auth-footer p {
+  color: var(--light-gray);
+  font-size: 0.9rem;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  color: var(--purple-accent);
+  cursor: pointer;
+  font-weight: 500;
+  margin-left: 0.5rem;
+  transition: color 0.2s;
+}
+
+.toggle-btn:hover {
+  color: var(--purple-hover);
+}
+
+.forgot-password {
+  display: block;
+  margin-top: 1rem;
+  color: var(--purple-accent);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.forgot-password:hover {
+  color: var(--purple-hover);
+}
+/* Додати в AuthModal.css */
+.Toastify__toast {
+  font-family: inherit;
+  border-radius: 8px !important;
+  margin: 0.5rem !important;
+}
+
+.Toastify__toast-body {
+  padding: 0 12px !important;
+}
+
+.Toastify__close-button {
+  color: var(--soft-white) !important;
+  opacity: 0.7 !important;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1 !important;
+}

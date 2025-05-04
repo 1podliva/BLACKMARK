@@ -71,7 +71,7 @@ const Contacts = () => {
                 <input type="email" placeholder="Ваш Email" required />
                 <textarea placeholder="Ваше повідомлення" required></textarea>
                 <button type="submit">Відправити</button>
-                {formSubmitted && <p className="form-success">Повідомлення відправлено!</p>}
+                {formSubmitted && <p className="form-success">!</p>}
               </form>
             </div>
 

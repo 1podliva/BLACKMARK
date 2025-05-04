@@ -42,10 +42,10 @@ form {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background-color: var(--dark-bg);
+  /* background-color: var(--dark-bg); */
   padding: 12px;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  /* box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); */
   transition: transform 0.2s ease;
   width: 100%;
 }
