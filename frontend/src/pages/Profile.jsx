@@ -22,7 +22,7 @@ const Profile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user && !token) {
+    if (!user || !token) {
       navigate('/');
     }
   }, [user, token, navigate]);
@@ -37,7 +37,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (user) {
-      setProfileForm({ firstName: user.firstName, lastName: user.lastName, avatar: null });
+      setProfileForm({ firstName: user.firstName || '', lastName: user.lastName || '', avatar: null });
       fetchBookings();
       fetchArtists();
     }
@@ -66,13 +66,13 @@ const Profile = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const bookingsData = await bookingsRes.json();
-      if (!bookingsRes.ok) throw new Error(bookingsData.message);
+      if (!bookingsRes.ok) throw new Error(bookingsData.message || 'Failed to fetch bookings');
 
       const consultationsRes = await fetch('http://localhost:5000/api/bookings/consultations', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const consultationsData = await consultationsRes.json();
-      if (!consultationsRes.ok) throw new Error(consultationsData.message);
+      if (!consultationsRes.ok) throw new Error(consultationsData.message || 'Failed to fetch consultations');
 
       const combinedBookings = [
         ...bookingsData.map((b) => ({ ...b, type: 'booking' })),
@@ -93,7 +93,7 @@ const Profile = () => {
     try {
       const res = await fetch('http://localhost:5000/api/artists');
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      if (!res.ok) throw new Error(data.message || 'Failed to fetch artists');
       setArtists(data);
     } catch (err) {
       toast.error(err.message, { toastId: 'fetch-artists-error', className: 'user-toast', autoClose: 3000 });
@@ -106,7 +106,7 @@ const Profile = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Помилка сервера');
+      if (!res.ok) throw new Error(data.message || 'Server error');
       setArtistSchedules(data || []);
     } catch (err) {
       toast.error(err.message, { toastId: 'fetch-schedules-error', className: 'user-toast', autoClose: 3000 });
@@ -121,7 +121,7 @@ const Profile = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Помилка сервера');
+      if (!res.ok) throw new Error(data.message || 'Server error');
       setAvailableTimes(data.availableTimes || []);
       if (!data.availableTimes || data.availableTimes.length === 0) {
         toast.error('Немає доступних слотів на цю дату', { toastId: 'no-available-times', className: 'user-toast', autoClose: 3000 });
@@ -205,15 +205,14 @@ const Profile = () => {
         body: JSON.stringify(consultationForm),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Помилка сервера');
+      if (!res.ok) throw new Error(data.message || 'Server error');
       toast.success('Запит на консультацію відправлено!', { toastId: 'consultation-submit-success', className: 'user-toast', autoClose: 3000 });
-      const { artist, preferredDate } = consultationForm;
       setConsultationForm({ artist: '', preferredDate: '', time: '' });
       setAvailableTimes([]);
       setArtistSchedules([]);
       await fetchBookings();
-      if (artist && preferredDate) {
-        await fetchAvailableTimes(artist, preferredDate);
+      if (consultationForm.artist && consultationForm.preferredDate) {
+        await fetchAvailableTimes(consultationForm.artist, consultationForm.preferredDate);
       }
     } catch (err) {
       toast.error(err.message, { toastId: 'consultation-submit-error', className: 'user-toast', autoClose: 3000 });
@@ -232,7 +231,7 @@ const Profile = () => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Помилка сервера');
+      if (!res.ok) throw new Error(data.message || 'Server error');
       toast.success(`${type === 'booking' ? 'Бронювання' : 'Консультація'} скасовано!`, {
         toastId: `cancel-${id}`,
         className: 'user-toast',
@@ -256,7 +255,7 @@ const Profile = () => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Помилка сервера');
+      if (!res.ok) throw new Error(data.message || 'Server error');
       toast.success('Запит на скасування надіслано менеджеру!', {
         toastId: `request-cancel-${id}`,
         className: 'user-toast',
@@ -275,27 +274,17 @@ const Profile = () => {
     setConsultationForm({ ...consultationForm, preferredDate: formattedDate, time: '' });
   };
 
-  // Функція для визначення робочих дат з урахуванням локального часового поясу
   const isWorkingDay = (date) => {
     if (!artistSchedules.length) return false;
-
-    // Отримуємо рік, місяць і день з календаря
     const calendarYear = date.getFullYear();
-    const calendarMonth = date.getMonth(); // 0-11
+    const calendarMonth = date.getMonth();
     const calendarDay = date.getDate();
-
     return artistSchedules.some((schedule) => {
       const scheduleDate = new Date(schedule.date);
-      // Отримуємо рік, місяць і день з графіка
-      const scheduleYear = scheduleDate.getFullYear();
-      const scheduleMonth = scheduleDate.getMonth(); // 0-11
-      const scheduleDay = scheduleDate.getDate();
-
-      // Порівнюємо рік, місяць і день
       return (
-        scheduleYear === calendarYear &&
-        scheduleMonth === calendarMonth &&
-        scheduleDay === calendarDay
+        scheduleDate.getFullYear() === calendarYear &&
+        scheduleDate.getMonth() === calendarMonth &&
+        scheduleDate.getDate() === calendarDay
       );
     });
   };
@@ -308,7 +297,6 @@ const Profile = () => {
     tomorrow.setDate(today.getDate() + 1);
     const isPast = date < tomorrow;
     const isWorking = isWorkingDay(date);
-
     if (isPast) return 'react-calendar__tile--past';
     if (isWorking) return 'react-calendar__tile--working';
     return null;
@@ -365,7 +353,7 @@ const Profile = () => {
 
         {activeTab === 'dashboard' && (
           <div className="dashboard">
-            <h2 className="dashboard-welcome">Вітаємо, {user.firstName}!</h2>
+            <h2 className="dashboard-welcome">Вітаємо, {user.firstName || 'Користувач'}!</h2>
             <div className="dashboard-grid">
               <div className="dashboard-main">
                 <div className="profile-card">
@@ -377,13 +365,13 @@ const Profile = () => {
                         className="avatar"
                       />
                     ) : (
-                      <div className="avatar-placeholder">{user.firstName[0]}</div>
+                      <div className="avatar-placeholder">{(user.firstName || '')[0]}</div>
                     )}
-                    <h3 className="user-name">{`${user.firstName} ${user.lastName}`}</h3>
+                    <h3 className="user-name">{`${user.firstName || ''} ${user.lastName || ''}`.trim()}</h3>
                   </div>
                   <div className="contact-info">
                     <p>
-                      <i className="fas fa-envelope"></i> {user.email}
+                      <i className="fas fa-envelope"></i> {user.email || ''}
                     </p>
                   </div>
                   <button
@@ -414,8 +402,8 @@ const Profile = () => {
               {bookings.filter(
                 (item) =>
                   (item.status === 'pending' ||
-                   item.status === 'confirmed' ||
-                   (item.type === 'consultation' && item.status === 'reviewed')) &&
+                    item.status === 'confirmed' ||
+                    (item.type === 'consultation' && item.status === 'reviewed')) &&
                   new Date(item.date) > new Date()
               ).length > 0 ? (
                 <div className="booking-list">
@@ -423,8 +411,8 @@ const Profile = () => {
                     .filter(
                       (item) =>
                         (item.status === 'pending' ||
-                         item.status === 'confirmed' ||
-                         (item.type === 'consultation' && item.status === 'reviewed')) &&
+                          item.status === 'confirmed' ||
+                          (item.type === 'consultation' && item.status === 'reviewed')) &&
                         new Date(item.date) > new Date()
                     )
                     .sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -442,7 +430,7 @@ const Profile = () => {
                         </div>
                         {item.status !== 'cancelled' && item.status !== 'completed' && (
                           <div className="booking-actions">
-                            {item.status === 'pending' ? (
+                            {item.status === 'pending' && !item.createdByAdmin ? (
                               <button
                                 className="cancel-btn"
                                 onClick={() => handleCancelBooking(item._id, item.type)}
@@ -482,7 +470,7 @@ const Profile = () => {
                         item.status === 'cancelled' ||
                         new Date(item.date) <= new Date()
                     )
-                    .sort((a, b) => new Date(b.date) - new Date(b.date))
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .slice(0, 3)
                     .map((item) => (
                       <div key={item._id} className="booking-item">
@@ -540,7 +528,7 @@ const Profile = () => {
                   <label>Email</label>
                   <div className="input-wrapper">
                     <i className="fas fa-envelope"></i>
-                    <input type="email" value={user.email} disabled />
+                    <input type="email" value={user.email || ''} disabled />
                   </div>
                 </div>
                 <div className="form-group">

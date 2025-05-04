@@ -1,6 +1,6 @@
 .home-gallery-preview {
   display: flex;
-  justify-content: center;
+  justify-content: left;
   padding: 120px 10%;
   padding-bottom: 0;
   background-color: var(--dark-bg);

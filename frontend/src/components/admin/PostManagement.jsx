@@ -5,7 +5,6 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import './PostManagement.css';
 
-
 const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setError, setSuccess, fetchPosts }) => {
   const [postForm, setPostForm] = useState({
     id: '',
@@ -19,7 +18,6 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setEr
   });
   const [previewImage, setPreviewImage] = useState(null);
 
-  // Очищення форми при зміні режиму
   useEffect(() => {
     setPostForm({
       id: '',
@@ -40,27 +38,15 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setEr
     setSuccess('');
 
     if (!postForm.title.trim()) {
-      toast.error('Заголовок обов’язковий', {
-        className: 'admin-toast',
-        autoClose: 3000,
-        toastId: 'form-error-toast',
-      });
+      toast.error('Заголовок обов’язковий', { className: 'admin-toast', autoClose: 3000, toastId: 'form-error-toast' });
       return;
     }
     if (!postForm.content.trim()) {
-      toast.error('Контент обов’язковий', {
-        className: 'admin-toast',
-        autoClose: 3000,
-        toastId: 'form-error-toast',
-      });
+      toast.error('Контент обов’язковий', { className: 'admin-toast', autoClose: 3000, toastId: 'form-error-toast' });
       return;
     }
     if (!postForm.category) {
-      toast.error('Виберіть категорію', {
-        className: 'admin-toast',
-        autoClose: 3000,
-        toastId: 'form-error-toast',
-      });
+      toast.error('Виберіть категорію', { className: 'admin-toast', autoClose: 3000, toastId: 'form-error-toast' });
       return;
     }
 
@@ -72,24 +58,14 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setEr
       formData.append('category', selectedCategory ? selectedCategory.name : '');
       formData.append('status', postForm.status);
       formData.append('featured', postForm.featured);
-      if (postForm.image) {
-        formData.append('image', postForm.image);
-      } else if (postForm.existingImage) {
-        formData.append('image', postForm.existingImage);
-      }
+      if (postForm.image) formData.append('image', postForm.image);
+      else if (postForm.existingImage) formData.append('image', postForm.existingImage);
 
-      const url = postForm.id
-        ? `http://localhost:5000/api/posts/${postForm.id}`
-        : 'http://localhost:5000/api/posts';
+      const url = postForm.id ? `http://localhost:5000/api/posts/${postForm.id}` : 'http://localhost:5000/api/posts';
       const method = postForm.id ? 'PUT' : 'POST';
 
-      console.log('Submitting post:', { url, method, status: postForm.status, featured: postForm.featured, content: postForm.content });
       await handleSubmit(url, method, formData, true);
-      toast.success(postForm.id ? 'Пост оновлено!' : 'Пост створено!', {
-        className: 'admin-toast',
-        autoClose: 3000,
-        toastId: postForm.id ? 'update-post-toast' : 'create-post-toast',
-      });
+      toast.success(postForm.id ? 'Пост оновлено!' : 'Пост створено!', { className: 'admin-toast', autoClose: 3000, toastId: postForm.id ? 'update-post-toast' : 'create-post-toast' });
       setPostForm({
         id: '',
         title: '',
@@ -102,9 +78,7 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setEr
       });
       setPreviewImage(null);
       fetchPosts();
-    } catch (err) {
-      // Помилка встановлюється в handleSubmit
-    }
+    } catch (err) {}
   };
 
   const handlePostEdit = (post) => {
@@ -125,17 +99,10 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setEr
   const handlePostDelete = async (id) => {
     if (!window.confirm('Ви впевнені, що хочете видалити цей пост?')) return;
     try {
-      console.log('Deleting post ID:', id);
       await handleSubmit(`http://localhost:5000/api/posts/${id}`, 'DELETE');
-      toast.success('Пост видалено!', {
-        className: 'admin-toast',
-        autoClose: 3000,
-        toastId: 'delete-post-toast',
-      });
+      toast.success('Пост видалено!', { className: 'admin-toast', autoClose: 3000, toastId: 'delete-post-toast' });
       fetchPosts();
-    } catch (err) {
-      // Помилка встановлюється в handleSubmit
-    }
+    } catch (err) {}
   };
 
   const handleImageChange = (e) => {
@@ -181,19 +148,8 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setEr
                 setPostForm({ ...postForm, content: data });
               }}
               config={{
-                toolbar: [
-                  'heading', '|',
-                  'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
-                  'undo', 'redo'
-                ],
-                htmlSupport: {
-                  allow: [
-                    {
-                      name: /.*/,
-                      attributes: ['data-start', 'data-end'],
-                    },
-                  ],
-                },
+                toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
+                htmlSupport: { allow: [{ name: /.*/, attributes: ['data-start', 'data-end'] }] },
               }}
             />
           </div>
@@ -278,19 +234,8 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setEr
                   setPostForm({ ...postForm, content: data });
                 }}
                 config={{
-                  toolbar: [
-                    'heading', '|',
-                    'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
-                    'undo', 'redo'
-                  ],
-                  htmlSupport: {
-                    allow: [
-                      {
-                        name: /.*/,
-                        attributes: ['data-start', 'data-end'],
-                      },
-                    ],
-                  },
+                  toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
+                  htmlSupport: { allow: [{ name: /.*/, attributes: ['data-start', 'data-end'] }] },
                 }}
               />
             </div>
@@ -387,6 +332,9 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setEr
                       </span>
                       <span className="admin-post-featured">
                         {post.featured ? 'Рекомендований' : 'Звичайний'}
+                      </span>
+                      <span className="admin-post-stats">
+                        Likes: {post.likes.length}, Dislikes: {post.dislikes.length}, Comments: {post.comments.length}
                       </span>
                     </div>
                     <div className="admin-post-actions">

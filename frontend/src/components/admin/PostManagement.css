@@ -12,7 +12,7 @@
 
 .admin-post-management {
   background-color: var(--navy-gray);
-  padding: 24px;
+  padding: 30px;
   border-radius: 12px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
   color: var(--soft-white);
@@ -66,7 +66,7 @@
 }
 
 .admin-form-group textarea {
-  min-height: 120px;
+  min-height: 200px;
   resize: vertical;
 }
 
@@ -216,7 +216,9 @@
 }
 
 .admin-post-category,
-.admin-post-status {
+.admin-post-status,
+.admin-post-featured,
+.admin-post-stats {
   color: var(--muted-pink);
   font-size: 14px;
   font-weight: 400;
@@ -303,7 +305,9 @@
   }
 
   .admin-post-category,
-  .admin-post-status {
+  .admin-post-status,
+  .admin-post-featured,
+  .admin-post-stats {
     font-size: 13px;
   }
 
@@ -316,11 +320,17 @@
     max-width: 150px;
   }
 }
+
 .admin-post-featured {
-  color: #FFD700; /* Золотий колір для "Рекомендований" */
+  color: #FFD700;
   font-size: 14px;
   font-weight: 400;
 }
+
+.admin-post-stats {
+  color: #FFD700;
+}
+
 .ck-editor__editable {
   min-height: 200px;
   background-color: #1A1A1D !important;
@@ -336,15 +346,15 @@
 }
 
 .ck-button {
-  color: #F8F9FA !important; /* Повністю білий для видимості */
+  color: #F8F9FA !important;
 }
 
 .ck-button:hover {
-  background-color: #9B00FF !important; /* Фіолетовий при наведенні */
+  background-color: #9B00FF !important;
   color: #F8F9FA !important;
 }
 
 .ck-button.ck-on {
-  background-color: #9B00FF !important; /* Фіолетовий для активного стану */
-  color: #F8F9FA !important; /* Білий для іконок */
+  background-color: #9B00FF !important;
+  color: #F8F9FA !important;
 }

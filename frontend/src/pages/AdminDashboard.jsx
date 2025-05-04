@@ -203,15 +203,11 @@ const AdminDashboard = ({ onNotificationReceived }) => {
     [token, navigate]
   );
 
-  // Handle notifications from NotificationProvider
   const handleNotification = useCallback(
     (notification) => {
-      if (notification.consultation) {
-        fetchBookings(); // Refetch bookings if the notification is about a consultation
-        fetchNotifications(); // Refetch notifications to update the list
-      } else if (notification.booking) {
-        fetchBookings(); // Refetch bookings for booking-related notifications
-        fetchNotifications(); // Refetch notifications to update the list
+      if (notification.consultation || notification.booking) {
+        fetchBookings();
+        fetchNotifications();
       }
     },
     [fetchBookings, fetchNotifications]
