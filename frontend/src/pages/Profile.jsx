@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
+import { FiUser, FiLock, FiCalendar, FiEdit, FiUpload, FiMail, FiScissors, FiClock, FiLogOut } from 'react-icons/fi';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import 'react-toastify/dist/ReactToastify.css';
 import './Profile.css';
 
 const Profile = () => {
   const { user, token, logout } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [profileForm, setProfileForm] = useState({ firstName: '', lastName: '', avatar: null });
+  const [profileForm, setProfileForm] = useState({ firstName: '', lastName: '', avatar: null, isEditing: false });
   const [passwordForm, setPasswordForm] = useState({ oldPassword: '', newPassword: '', confirmNewPassword: '' });
   const [consultationForm, setConsultationForm] = useState({ artist: '', preferredDate: '', time: '' });
   const [bookings, setBookings] = useState([]);
@@ -37,7 +39,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (user) {
-      setProfileForm({ firstName: user.firstName || '', lastName: user.lastName || '', avatar: null });
+      setProfileForm({ firstName: user.firstName || '', lastName: user.lastName || '', avatar: null, isEditing: false });
       fetchBookings();
       fetchArtists();
     }
@@ -85,7 +87,7 @@ const Profile = () => {
       ];
       setBookings(combinedBookings);
     } catch (err) {
-      toast.error(err.message, { toastId: 'fetch-bookings-error', className: 'user-toast', autoClose: 3000 });
+      toast.error(`😢 ${err.message}`, { toastId: 'fetch-bookings-error', className: 'error-toast', autoClose: 3000 });
     }
   };
 
@@ -96,7 +98,7 @@ const Profile = () => {
       if (!res.ok) throw new Error(data.message || 'Failed to fetch artists');
       setArtists(data);
     } catch (err) {
-      toast.error(err.message, { toastId: 'fetch-artists-error', className: 'user-toast', autoClose: 3000 });
+      toast.error(`😢 ${err.message}`, { toastId: 'fetch-artists-error', className: 'error-toast', autoClose: 3000 });
     }
   };
 
@@ -109,7 +111,7 @@ const Profile = () => {
       if (!res.ok) throw new Error(data.message || 'Server error');
       setArtistSchedules(data || []);
     } catch (err) {
-      toast.error(err.message, { toastId: 'fetch-schedules-error', className: 'user-toast', autoClose: 3000 });
+      toast.error(`😢 ${err.message}`, { toastId: 'fetch-schedules-error', className: 'error-toast', autoClose: 3000 });
       setArtistSchedules([]);
     }
   };
@@ -124,10 +126,10 @@ const Profile = () => {
       if (!res.ok) throw new Error(data.message || 'Server error');
       setAvailableTimes(data.availableTimes || []);
       if (!data.availableTimes || data.availableTimes.length === 0) {
-        toast.error('Немає доступних слотів на цю дату', { toastId: 'no-available-times', className: 'user-toast', autoClose: 3000 });
+        toast.error('Немає доступних слотів на цю дату', { toastId: 'no-available-times', className: 'error-toast', autoClose: 3000 });
       }
     } catch (err) {
-      toast.error(err.message, { toastId: 'fetch-available-times-error', className: 'user-toast', autoClose: 3000 });
+      toast.error(`😢 ${err.message}`, { toastId: 'fetch-available-times-error', className: 'error-toast', autoClose: 3000 });
       setAvailableTimes([]);
     }
   };
@@ -153,9 +155,10 @@ const Profile = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      toast.success('Профіль оновлено!', { toastId: 'profile-update-success', className: 'user-toast', autoClose: 3000 });
+      toast.success('🦄 Профіль оновлено!', { className: 'success-toast', autoClose: 3000 });
+      setProfileForm((prev) => ({ ...prev, isEditing: false }));
     } catch (err) {
-      toast.error(err.message, { toastId: 'profile-update-error', className: 'user-toast', autoClose: 3000 });
+      toast.error(`😢 ${err.message}`, { className: 'error-toast', autoClose: 3000 });
     }
   };
 
@@ -182,10 +185,10 @@ const Profile = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      toast.success('Пароль оновлено!', { toastId: 'password-update-success', className: 'user-toast', autoClose: 3000 });
+      toast.success('🦄 Пароль оновлено!', { className: 'success-toast', autoClose: 3000 });
       setPasswordForm({ oldPassword: '', newPassword: '', confirmNewPassword: '' });
     } catch (err) {
-      toast.error(err.message, { toastId: 'password-update-error', className: 'user-toast', autoClose: 3000 });
+      toast.error(`😢 ${err.message}`, { className: 'error-toast', autoClose: 3000 });
     }
   };
 
@@ -206,7 +209,7 @@ const Profile = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Server error');
-      toast.success('Запит на консультацію відправлено!', { toastId: 'consultation-submit-success', className: 'user-toast', autoClose: 3000 });
+      toast.success('🦄 Запит на консультацію відправлено!', { className: 'success-toast', autoClose: 3000 });
       setConsultationForm({ artist: '', preferredDate: '', time: '' });
       setAvailableTimes([]);
       setArtistSchedules([]);
@@ -215,7 +218,7 @@ const Profile = () => {
         await fetchAvailableTimes(consultationForm.artist, consultationForm.preferredDate);
       }
     } catch (err) {
-      toast.error(err.message, { toastId: 'consultation-submit-error', className: 'user-toast', autoClose: 3000 });
+      toast.error(`😢 ${err.message}`, { className: 'error-toast', autoClose: 3000 });
     }
   };
 
@@ -232,14 +235,13 @@ const Profile = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Server error');
-      toast.success(`${type === 'booking' ? 'Бронювання' : 'Консультація'} скасовано!`, {
-        toastId: `cancel-${id}`,
-        className: 'user-toast',
+      toast.success(`🦄 ${type === 'booking' ? 'Бронювання' : 'Консультація'} скасовано!`, {
+        className: 'success-toast',
         autoClose: 3000,
       });
       await fetchBookings();
     } catch (err) {
-      toast.error(err.message, { toastId: `cancel-error-${id}`, className: 'user-toast', autoClose: 3000 });
+      toast.error(`😢 ${err.message}`, { className: 'error-toast', autoClose: 3000 });
     }
   };
 
@@ -256,13 +258,12 @@ const Profile = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Server error');
-      toast.success('Запит на скасування надіслано менеджеру!', {
-        toastId: `request-cancel-${id}`,
-        className: 'user-toast',
+      toast.success('🦄 Запит на скасування надіслано менеджеру!', {
+        className: 'success-toast',
         autoClose: 3000,
       });
     } catch (err) {
-      toast.error(err.message, { toastId: `request-cancel-error-${id}`, className: 'user-toast', autoClose: 3000 });
+      toast.error(`😢 ${err.message}`, { className: 'error-toast', autoClose: 3000 });
     }
   };
 
@@ -306,367 +307,343 @@ const Profile = () => {
     logout();
   };
 
+  const renderDashboard = () => (
+    <div className="dashboard">
+      <h2 className="dashboard-welcome">
+        <span className="welcome-accent">Вітаємо,</span> {profileForm.firstName || 'Користувач'}! 👋
+      </h2>
+
+      <div className="dashboard-grid">
+        <div className="profile-card solid-card">
+          <div className="avatar-container" onClick={() => document.getElementById('avatarInput').click()}>
+            {user.avatar ? (
+              <img
+                src={`http://localhost:5000${user.avatar}`}
+                alt="Avatar"
+                className="avatar"
+              />
+            ) : (
+              <div className="avatar-placeholder gradient-bg">
+                {(profileForm.firstName || '')[0]}
+              </div>
+            )}
+            <input
+              id="avatarInput"
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={(e) => setProfileForm({ ...profileForm, avatar: e.target.files[0] })}
+            />
+          </div>
+          <div className="name-container">
+            <div className={`name-field ${profileForm.isEditing ? 'editing' : ''}`}>
+              <label><FiUser className="label-icon" /> Ім’я</label>
+              <input
+                type="text"
+                value={profileForm.firstName}
+                onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })}
+                disabled={!profileForm.isEditing}
+              />
+              <button
+                className="edit-btn"
+                onClick={() => setProfileForm((prev) => ({ ...prev, isEditing: !prev.isEditing }))}
+              >
+                <FiEdit size={16} />
+              </button>
+            </div>
+            {profileErrors.firstName && <p className="error-message">{profileErrors.firstName}</p>}
+            <div className={`name-field ${profileForm.isEditing ? 'editing' : ''}`}>
+              <label><FiUser className="label-icon" /> Прізвище</label>
+              <input
+                type="text"
+                value={profileForm.lastName}
+                onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
+                disabled={!profileForm.isEditing}
+              />
+              <button
+                className="edit-btn"
+                onClick={() => setProfileForm((prev) => ({ ...prev, isEditing: !prev.isEditing }))}
+              >
+                <FiEdit size={16} />
+              </button>
+            </div>
+            {profileErrors.lastName && <p className="error-message">{profileErrors.lastName}</p>}
+            {profileForm.isEditing && (
+              <button className="submit-btn" onClick={handleProfileSubmit}>Зберегти</button>
+            )}
+          </div>
+          <div className="user-stats">
+            <div className="stat-item">
+              <FiCalendar className="stat-icon" />
+              <span>{bookings.length} записів</span>
+            </div>
+            <div className="stat-item">
+              <FiScissors className="stat-icon" />
+              <span>{artists.length} майстрів</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="activity-card solid-card">
+          <h3><FiUser className="section-icon" /> Останні дії</h3>
+          <div className="activity-list">
+            {bookings.slice(0, 3).map((item) => (
+              <div key={item._id} className="activity-item">
+                <p>
+                  {item.type === 'booking' ? 'Бронювання' : 'Консультація'} створено
+                </p>
+                <span>{new Date(item.date).toLocaleDateString('uk-UA')}</span>
+              </div>
+            ))}
+            {bookings.length === 0 && <p>Дій немає</p>}
+          </div>
+        </div>
+      </div>
+
+      <div className="upcoming-section solid-card">
+        <h3><FiClock className="section-icon" /> Найближчі сеанси</h3>
+        {bookings.filter(
+          (item) =>
+            (item.status === 'pending' ||
+              item.status === 'confirmed' ||
+              (item.type === 'consultation' && item.status === 'reviewed')) &&
+            new Date(item.date) > new Date()
+        ).length > 0 ? (
+          <div className="booking-list">
+            {bookings
+              .filter(
+                (item) =>
+                  (item.status === 'pending' ||
+                    item.status === 'confirmed' ||
+                    (item.type === 'consultation' && item.status === 'reviewed')) &&
+                  new Date(item.date) > new Date()
+              )
+              .sort((a, b) => new Date(a.date) - new Date(b.date))
+              .slice(0, 3)
+              .map((item) => (
+                <div key={item._id} className="booking-item">
+                  <div className="booking-details">
+                    <p>
+                      <strong>{item.type === 'booking' ? 'Бронювання' : 'Консультація'}</strong>
+                    </p>
+                    <p>Майстер: {item.artist?.name || 'Невідомий'}</p>
+                    <p>Дата: {new Date(item.date).toLocaleDateString('uk-UA')}</p>
+                    <p>Час: {item.time}</p>
+                    <p>Статус: {statusTranslations[item.status] || item.status}</p>
+                  </div>
+                  {item.status !== 'cancelled' && item.status !== 'completed' && (
+                    <div className="booking-actions">
+                      {item.status === 'pending' && !item.createdByAdmin ? (
+                        <button
+                          className="cancel-btn"
+                          onClick={() => handleCancelBooking(item._id, item.type)}
+                        >
+                          Скасувати
+                        </button>
+                      ) : (
+                        <button
+                          className="request-cancel-btn"
+                          onClick={() => handleRequestCancellation(item._id, item.type)}
+                        >
+                          Звернутися до менеджера
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+          </div>
+        ) : (
+          <p>Майбутніх сеансів немає</p>
+        )}
+      </div>
+
+      <div className="dashboard-bookings solid-card">
+        <h3><FiClock className="section-icon" /> Останні записи</h3>
+        {bookings.filter(
+          (item) =>
+            item.status === 'completed' ||
+            item.status === 'cancelled' ||
+            new Date(item.date) <= new Date()
+        ).length > 0 ? (
+          <div className="booking-list">
+            {bookings
+              .filter(
+                (item) =>
+                  item.status === 'completed' ||
+                  item.status === 'cancelled' ||
+                  new Date(item.date) <= new Date()
+              )
+              .sort((a, b) => new Date(b.date) - new Date(a.date))
+              .slice(0, 3)
+              .map((item) => (
+                <div key={item._id} className="booking-item">
+                  <div className="booking-details">
+                    <p>
+                      <strong>{item.type === 'booking' ? 'Бронювання' : 'Консультація'}</strong>
+                    </p>
+                    <p>Майстер: {item.artist?.name || 'Невідомий'}</p>
+                    <p>Дата: {new Date(item.date).toLocaleDateString('uk-UA')}</p>
+                    <p>Час: {item.time}</p>
+                    <p>Статус: {statusTranslations[item.status] || item.status}</p>
+                  </div>
+                </div>
+              ))}
+          </div>
+        ) : (
+          <p>Записів немає</p>
+        )}
+      </div>
+    </div>
+  );
+
   if (user === null) {
     return <div className="loading">Завантаження...</div>;
   }
 
   return (
     <section className="profile-section" id="profile">
-      <div className="profile-content">
-        <div className="profile-tabs">
-          <button
-            className={`tab ${activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dashboard')}
-          >
-            Дашборд
-          </button>
-          <button
-            className={`tab ${activeTab === 'personal' ? 'active' : ''}`}
-            onClick={() => setActiveTab('personal')}
-          >
-            Особисті дані
-          </button>
-          <button
-            className={`tab ${activeTab === 'security' ? 'active' : ''}`}
-            onClick={() => setActiveTab('security')}
-          >
-            Безпека
-          </button>
-          <button
-            className={`tab ${activeTab === 'bookings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('bookings')}
-          >
-            Консультація
-          </button>
-          {user?.role === 'admin' && (
-            <button
-              className={`tab ${activeTab === 'admin' ? 'active' : ''}`}
-              onClick={() => navigate('/admin')}
-            >
-              Адмін-панель
-            </button>
-          )}
-          <button className="tab logout" onClick={handleLogout}>
-            Вийти
-          </button>
-        </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
 
-        {activeTab === 'dashboard' && (
-          <div className="dashboard">
-            <h2 className="dashboard-welcome">Вітаємо, {user.firstName || 'Користувач'}!</h2>
-            <div className="dashboard-grid">
-              <div className="dashboard-main">
-                <div className="profile-card">
-                  <div className="avatar-container">
-                    {user.avatar ? (
-                      <img
-                        src={`http://localhost:5000${user.avatar}`}
-                        alt="Avatar"
-                        className="avatar"
-                      />
-                    ) : (
-                      <div className="avatar-placeholder">{(user.firstName || '')[0]}</div>
-                    )}
-                    <h3 className="user-name">{`${user.firstName || ''} ${user.lastName || ''}`.trim()}</h3>
-                  </div>
-                  <div className="contact-info">
-                    <p>
-                      <i className="fas fa-envelope"></i> {user.email || ''}
-                    </p>
-                  </div>
-                  <button
-                    className="edit-profile-btn"
-                    onClick={() => setActiveTab('personal')}
-                  >
-                    Редагувати профіль
-                  </button>
-                </div>
-              </div>
-              <div className="dashboard-activity">
-                <h3>Останні дії</h3>
-                <div className="activity-list">
-                  {bookings.slice(0, 3).map((item) => (
-                    <div key={item._id} className="activity-item">
-                      <p>
-                        {item.type === 'booking' ? 'Бронювання' : 'Консультація'} створено
-                      </p>
-                      <span>{new Date(item.date).toLocaleDateString('uk-UA')}</span>
-                    </div>
-                  ))}
-                  {bookings.length === 0 && <p>Дій немає</p>}
-                </div>
-              </div>
-            </div>
-            <div className="dashboard-upcoming">
-              <h3>Сеанси попереду</h3>
-              {bookings.filter(
-                (item) =>
-                  (item.status === 'pending' ||
-                    item.status === 'confirmed' ||
-                    (item.type === 'consultation' && item.status === 'reviewed')) &&
-                  new Date(item.date) > new Date()
-              ).length > 0 ? (
-                <div className="booking-list">
-                  {bookings
-                    .filter(
-                      (item) =>
-                        (item.status === 'pending' ||
-                          item.status === 'confirmed' ||
-                          (item.type === 'consultation' && item.status === 'reviewed')) &&
-                        new Date(item.date) > new Date()
-                    )
-                    .sort((a, b) => new Date(a.date) - new Date(b.date))
-                    .slice(0, 3)
-                    .map((item) => (
-                      <div key={item._id} className="booking-item">
-                        <div className="booking-details">
-                          <p>
-                            <strong>{item.type === 'booking' ? 'Бронювання' : 'Консультація'}</strong>
-                          </p>
-                          <p>Майстер: {item.artist?.name || 'Невідомий'}</p>
-                          <p>Дата: {new Date(item.date).toLocaleDateString('uk-UA')}</p>
-                          <p>Час: {item.time}</p>
-                          <p>Статус: {statusTranslations[item.status] || item.status}</p>
-                        </div>
-                        {item.status !== 'cancelled' && item.status !== 'completed' && (
-                          <div className="booking-actions">
-                            {item.status === 'pending' && !item.createdByAdmin ? (
-                              <button
-                                className="cancel-btn"
-                                onClick={() => handleCancelBooking(item._id, item.type)}
-                              >
-                                Скасувати
-                              </button>
-                            ) : (
-                              <button
-                                className="request-cancel-btn"
-                                onClick={() => handleRequestCancellation(item._id, item.type)}
-                              >
-                                Звернутися до менеджера
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                </div>
-              ) : (
-                <p>Майбутніх сеансів немає</p>
-              )}
-            </div>
-            <div className="dashboard-bookings">
-              <h3>Останні записи</h3>
-              {bookings.filter(
-                (item) =>
-                  item.status === 'completed' ||
-                  item.status === 'cancelled' ||
-                  new Date(item.date) <= new Date()
-              ).length > 0 ? (
-                <div className="booking-list">
-                  {bookings
-                    .filter(
-                      (item) =>
-                        item.status === 'completed' ||
-                        item.status === 'cancelled' ||
-                        new Date(item.date) <= new Date()
-                    )
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .slice(0, 3)
-                    .map((item) => (
-                      <div key={item._id} className="booking-item">
-                        <div className="booking-details">
-                          <p>
-                            <strong>{item.type === 'booking' ? 'Бронювання' : 'Консультація'}</strong>
-                          </p>
-                          <p>Майстер: {item.artist?.name || 'Невідомий'}</p>
-                          <p>Дата: {new Date(item.date).toLocaleDateString('uk-UA')}</p>
-                          <p>Час: {item.time}</p>
-                          <p>Статус: {statusTranslations[item.status] || item.status}</p>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              ) : (
-                <p>Записів немає</p>
-              )}
-            </div>
-          </div>
+      <div className="profile-tabs">
+        {['dashboard', 'security', 'bookings'].map((tab) => (
+          <button
+            key={tab}
+            className={`tab ${activeTab === tab ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab)}
+          >
+            {{
+              dashboard: 'Дашборд',
+              security: 'Безпека',
+              bookings: 'Запит на консультацію'
+            }[tab]}
+          </button>
+        ))}
+        {user?.role === 'admin' && (
+          <button
+            className={`tab ${activeTab === 'admin' ? 'active' : ''}`}
+            onClick={() => navigate('/admin')}
+          >
+            Адмін-панель
+          </button>
         )}
-
-        {activeTab === 'personal' && (
-          <div className="profile-details">
-            <div className="form-card">
-              <h3>Особисті дані</h3>
-              <form onSubmit={handleProfileSubmit}>
-                <div className={`form-group ${profileErrors.firstName ? 'has-error' : ''}`}>
-                  <label>Ім’я</label>
-                  <div className="input-wrapper">
-                    <i className="fas fa-user"></i>
-                    <input
-                      type="text"
-                      value={profileForm.firstName}
-                      onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })}
-                      required
-                    />
-                  </div>
-                  {profileErrors.firstName && <p className="error-message">{profileErrors.firstName}</p>}
-                </div>
-                <div className={`form-group ${profileErrors.lastName ? 'has-error' : ''}`}>
-                  <label>Прізвище</label>
-                  <div className="input-wrapper">
-                    <i className="fas fa-user"></i>
-                    <input
-                      type="text"
-                      value={profileForm.lastName}
-                      onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
-                      required
-                    />
-                  </div>
-                  {profileErrors.lastName && <p className="error-message">{profileErrors.lastName}</p>}
-                </div>
-                <div className="form-group">
-                  <label>Email</label>
-                  <div className="input-wrapper">
-                    <i className="fas fa-envelope"></i>
-                    <input type="email" value={user.email || ''} disabled />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label>Аватарка</label>
-                  <div className="input-wrapper">
-                    <i className="fas fa-image"></i>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setProfileForm({ ...profileForm, avatar: e.target.files[0] })}
-                    />
-                  </div>
-                </div>
-                <button type="submit" className="submit-btn">Зберегти</button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'security' && (
-          <div className="profile-details">
-            <div className="form-card">
-              <h3>Безпека</h3>
-              <form onSubmit={handlePasswordSubmit}>
-                <div className={`form-group ${passwordErrors.oldPassword ? 'has-error' : ''}`}>
-                  <label>Старий пароль</label>
-                  <div className="input-wrapper">
-                    <i className="fas fa-lock"></i>
-                    <input
-                      type="password"
-                      value={passwordForm.oldPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
-                      required
-                    />
-                  </div>
-                  {passwordErrors.oldPassword && <p className="error-message">{passwordErrors.oldPassword}</p>}
-                </div>
-                <div className={`form-group ${passwordErrors.newPassword ? 'has-error' : ''}`}>
-                  <label>Новий пароль</label>
-                  <div className="input-wrapper">
-                    <i className="fas fa-lock"></i>
-                    <input
-                      type="password"
-                      value={passwordForm.newPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                      required
-                    />
-                  </div>
-                  {passwordErrors.newPassword && <p className="error-message">{passwordErrors.newPassword}</p>}
-                </div>
-                <div className={`form-group ${passwordErrors.confirmNewPassword ? 'has-error' : ''}`}>
-                  <label>Підтвердження нового пароля</label>
-                  <div className="input-wrapper">
-                    <i className="fas fa-lock"></i>
-                    <input
-                      type="password"
-                      value={passwordForm.confirmNewPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, confirmNewPassword: e.target.value })}
-                      required
-                    />
-                  </div>
-                  {passwordErrors.confirmNewPassword && <p className="error-message">{passwordErrors.confirmNewPassword}</p>}
-                </div>
-                <button type="submit" className="submit-btn">Змінити пароль</button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'bookings' && (
-          <div className="profile-details">
-            <div className="form-card">
-              <h3>Запит на консультацію</h3>
-              <form onSubmit={handleConsultationSubmit}>
-                <div className={`form-group ${consultationErrors.artist ? 'has-error' : ''}`}>
-                  <label>Майстер</label>
-                  <div className="input-wrapper">
-                    <i className="fas fa-user-tie"></i>
-                    <select
-                      value={consultationForm.artist}
-                      onChange={(e) => setConsultationForm({ ...consultationForm, artist: e.target.value, time: '' })}
-                      required
-                    >
-                      <option value="">Виберіть майстра</option>
-                      {artists.map((artist) => (
-                        <option key={artist._id} value={artist._id}>{artist.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  {consultationErrors.artist && <p className="error-message">{consultationErrors.artist}</p>}
-                </div>
-                <div className={`form-group ${consultationErrors.preferredDate ? 'has-error' : ''}`}>
-                  <label>Бажана дата</label>
-                  <Calendar
-                    onChange={handleDateChange}
-                    value={consultationForm.preferredDate ? new Date(consultationForm.preferredDate) : new Date()}
-                    minDate={new Date(Date.now() + 24 * 60 * 60 * 1000)}
-                    locale="uk-UA"
-                    formatShortWeekday={(locale, date) =>
-                      ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][date.getDay()]
-                    }
-                    formatMonthYear={(locale, date) =>
-                      date.toLocaleString('uk-UA', { month: 'long', year: 'numeric' })
-                    }
-                    tileClassName={tileClassName}
-                  />
-                  {consultationErrors.preferredDate && <p className="error-message">{consultationErrors.preferredDate}</p>}
-                </div>
-                <div className={`form-group ${consultationErrors.time ? 'has-error' : ''}`}>
-                  <label>Час</label>
-                  <div className="input-wrapper">
-                    <i className="fas fa-clock"></i>
-                    <select
-                      value={consultationForm.time}
-                      onChange={(e) => setConsultationForm({ ...consultationForm, time: e.target.value })}
-                      required
-                      disabled={!consultationForm.artist || !consultationForm.preferredDate || availableTimes.length === 0}
-                    >
-                      <option value="">Виберіть час</option>
-                      {availableTimes.map((time) => (
-                        <option key={time} value={time}>{time}</option>
-                      ))}
-                    </select>
-                  </div>
-                  {consultationErrors.time && <p className="error-message">{consultationErrors.time}</p>}
-                </div>
-                <button
-                  type="submit"
-                  className="submit-btn"
-                  disabled={!consultationForm.artist || !consultationForm.preferredDate || !consultationForm.time}
-                >
-                  Відправити запит
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
+        <button className="tab logout" onClick={handleLogout}>
+          <FiLogOut /> Вийти
+        </button>
       </div>
+
+      {activeTab === 'dashboard' && renderDashboard()}
+
+      {activeTab === 'security' && (
+        <div className="form-card solid-card">
+          <h3><FiLock className="section-icon" /> Безпека</h3>
+          <form onSubmit={handlePasswordSubmit}>
+            <div className={`form-group ${passwordErrors.oldPassword ? 'has-error' : ''}`}>
+              <label><FiLock className="label-icon" /> Старий пароль</label>
+              <input
+                type="password"
+                value={passwordForm.oldPassword}
+                onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                required
+              />
+              {passwordErrors.oldPassword && <p className="error-message">{passwordErrors.oldPassword}</p>}
+            </div>
+            <div className={`form-group ${passwordErrors.newPassword ? 'has-error' : ''}`}>
+              <label><FiLock className="label-icon" /> Новий пароль</label>
+              <input
+                type="password"
+                value={passwordForm.newPassword}
+                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                required
+              />
+              {passwordErrors.newPassword && <p className="error-message">{passwordErrors.newPassword}</p>}
+            </div>
+            <div className={`form-group ${passwordErrors.confirmNewPassword ? 'has-error' : ''}`}>
+              <label><FiLock className="label-icon" /> Підтвердження нового пароля</label>
+              <input
+                type="password"
+                value={passwordForm.confirmNewPassword}
+                onChange={(e) => setPasswordForm({ ...passwordForm, confirmNewPassword: e.target.value })}
+                required
+              />
+              {passwordErrors.confirmNewPassword && <p className="error-message">{passwordErrors.confirmNewPassword}</p>}
+            </div>
+            <button type="submit" className="submit-btn">Змінити пароль</button>
+          </form>
+        </div>
+      )}
+
+      {activeTab === 'bookings' && (
+        <div className="form-card solid-card">
+          <h3><FiCalendar className="section-icon" /> Запит на консультацію</h3>
+          <form onSubmit={handleConsultationSubmit}>
+            <div className={`form-group ${consultationErrors.artist ? 'has-error' : ''}`}>
+              <label><FiUser className="label-icon" /> Майстер</label>
+              <select
+                value={consultationForm.artist}
+                onChange={(e) => setConsultationForm({ ...consultationForm, artist: e.target.value, time: '' })}
+                required
+              >
+                <option value="">Виберіть майстра</option>
+                {artists.map((artist) => (
+                  <option key={artist._id} value={artist._id}>{artist.name}</option>
+                ))}
+              </select>
+              {consultationErrors.artist && <p className="error-message">{consultationErrors.artist}</p>}
+            </div>
+            <div className={`form-group ${consultationErrors.preferredDate ? 'has-error' : ''}`}>
+              <label><FiCalendar className="label-icon" /> Бажана дата</label>
+              <Calendar
+                onChange={handleDateChange}
+                value={consultationForm.preferredDate ? new Date(consultationForm.preferredDate) : new Date()}
+                minDate={new Date(Date.now() + 24 * 60 * 60 * 1000)}
+                locale="uk-UA"
+                formatShortWeekday={(locale, date) =>
+                  ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][date.getDay()]
+                }
+                formatMonthYear={(locale, date) =>
+                  date.toLocaleString('uk-UA', { month: 'long', year: 'numeric' })
+                }
+                tileClassName={tileClassName}
+              />
+              {consultationErrors.preferredDate && <p className="error-message">{consultationErrors.preferredDate}</p>}
+            </div>
+            <div className={`form-group ${consultationErrors.time ? 'has-error' : ''}`}>
+              <label><FiClock className="label-icon" /> Час</label>
+              <select
+                value={consultationForm.time}
+                onChange={(e) => setConsultationForm({ ...consultationForm, time: e.target.value })}
+                required
+                disabled={!consultationForm.artist || !consultationForm.preferredDate || availableTimes.length === 0}
+              >
+                <option value="">Виберіть час</option>
+                {availableTimes.map((time) => (
+                  <option key={time} value={time}>{time}</option>
+                ))}
+              </select>
+              {consultationErrors.time && <p className="error-message">{consultationErrors.time}</p>}
+            </div>
+            <button
+              type="submit"
+              className="submit-btn"
+              disabled={!consultationForm.artist || !consultationForm.preferredDate || !consultationForm.time}
+            >
+              Відправити запит
+            </button>
+          </form>
+        </div>
+      )}
     </section>
   );
 };

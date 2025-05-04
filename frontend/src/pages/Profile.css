@@ -1,217 +1,256 @@
-.profile-section {
-  background-color: var(--navy-gray);
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+:root {
+  --dark-bg: #0F0F10;
+  --navy-gray: #1A1A1D;
+  --purple-accent: #9B00FF;
+  --purple-hover: #7F00D4;
+  --soft-white: #F8F9FA;
+  --light-gray: #D1D5DB;
+  --muted-pink: #CBA6DD;
+  --error-red: #FF4D4F;
+  --gradient-purple: linear-gradient(135deg, #9B00FF 0%, #7F00D4 100%);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--dark-bg);
   color: var(--soft-white);
   font-family: 'Urbanist', sans-serif;
-  animation: fadeIn 0.5s ease-in-out;
-  max-width: 1000px;
-  margin: 0 auto;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.profile-section {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border-radius: 16px;
 }
 
-.profile-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.solid-card {
+  background: var(--navy-gray);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  padding: 2rem;
 }
 
 .profile-tabs {
   display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 20px;
 }
 
 .tab {
-  padding: 8px 16px;
-  background-color: var(--dark-bg);
-  border: 1px solid var(--light-gray);
-  border-radius: 4px;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--light-gray);
-  font-size: 14px;
-  font-weight: 500;
+  background: none;
   cursor: pointer;
-  transition: all 0.2s ease;
-  text-transform: uppercase;
-  font-family: 'Urbanist', sans-serif;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
 }
 
 .tab:hover {
-  background-color: var(--purple-hover);
+  border-color: var(--purple-accent);
   color: var(--soft-white);
 }
 
 .tab.active {
-  background-color: var(--purple-accent);
+  background: var(--gradient-purple);
+  border-color: transparent;
   color: var(--soft-white);
-  border-color: var(--purple-accent);
+  box-shadow: 0 4px 12px rgba(155, 0, 255, 0.3);
 }
 
 .tab.logout {
-  background-color: var(--error-red);
-  border-color: var(--error-red);
+  background: var(--error-red);
+  border-color: transparent;
 }
 
 .tab.logout:hover {
-  background-color: #E63946;
+  background: #E63946;
 }
 
-/* Дашборд */
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 2rem;
 }
 
 .dashboard-welcome {
-  font-size: 24px;
+  font-size: 2rem;
   font-weight: 700;
-  color: var(--purple-accent);
   text-align: center;
-  font-family: 'Urbanist', sans-serif;
+}
+
+.welcome-accent {
+  background: var(--gradient-purple);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-@media (max-width: 768px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.dashboard-main {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
 }
 
 .profile-card {
-  background-color: var(--dark-bg);
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   text-align: center;
-  transition: transform 0.2s ease;
-}
-
-.profile-card:hover {
-  transform: translateY(-2px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .avatar-container {
-  margin-bottom: 15px;
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+  cursor: pointer;
 }
 
 .avatar {
-  width: 80px;
-  height: 80px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--purple-accent);
+  transition: transform 0.2s ease;
+}
+
+.avatar-container:hover .avatar {
+  transform: scale(1.05);
 }
 
 .avatar-placeholder {
-  width: 80px;
-  height: 80px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  background-color: var(--light-gray);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--navy-gray);
-  border: 2px solid var(--purple-accent);
-  margin: 0 auto;
+  font-size: 2.5rem;
+  font-weight: bold;
+  background: var(--gradient-purple);
+  transition: transform 0.2s ease;
 }
 
-.user-name {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--soft-white);
-  margin: 10px 0;
-  font-family: 'Urbanist', sans-serif;
+.avatar-container:hover .avatar-placeholder {
+  transform: scale(1.05);
 }
 
-.contact-info {
-  margin-bottom: 15px;
+.name-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.contact-info p {
-  font-size: 14px;
-  color: var(--light-gray);
-  margin: 5px 0;
-  font-family: 'Urbanist', sans-serif;
+.name-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.contact-info i {
-  margin-right: 8px;
-  color: var(--purple-accent);
-}
-
-.edit-profile-btn {
-  padding: 8px 16px;
-  background-color: var(--purple-accent);
-  color: var(--soft-white);
-  border: none;
+.name-field.editing input {
+  background: var(--dark-bg);
+  border: 1px solid var(--light-gray);
+  padding: 0.5rem;
   border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
+}
+
+.name-field label {
+  font-size: 0.9rem;
+  color: var(--purple-accent);
+  margin-right: 0.5rem;
+}
+
+.name-field input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--soft-white);
+  font-size: 1rem;
+  text-align: left;
+  padding: 0.2rem;
+}
+
+.name-field .edit-btn {
+  background: none;
+  border: none;
+  color: var(--purple-accent);
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: 'Urbanist', sans-serif;
-  text-transform: uppercase;
+  transition: color 0.3s ease;
 }
 
-.edit-profile-btn:hover {
-  background-color: var(--purple-hover);
-  box-shadow: 0 2px 6px rgba(155, 0, 255, 0.2);
-  transform: scale(1.02);
+.name-field .edit-btn:hover {
+  color: var(--purple-hover);
 }
 
-.dashboard-activity {
-  background-color: var(--dark-bg);
-  padding: 15px;
+.user-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
 }
 
-.dashboard-activity h3 {
-  font-size: 16px;
+.stat-icon {
+  color: var(--purple-accent);
+  flex-shrink: 0;
+}
+
+.activity-card,
+.upcoming-section,
+.dashboard-bookings {
+  padding: 2rem;
+}
+
+h3 {
+  font-size: 1.25rem;
   font-weight: 600;
   color: var(--purple-accent);
-  margin-bottom: 10px;
-  text-align: center;
-  font-family: 'Urbanist', sans-serif;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-icon,
+.label-icon {
+  color: var(--purple-accent);
 }
 
 .activity-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 1rem;
 }
 
 .activity-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
-  background-color: var(--navy-gray);
-  border-radius: 4px;
-  font-size: 14px;
-  color: var(--light-gray);
-  font-family: 'Urbanist', sans-serif;
+  padding: 0.8rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  font-size: 0.9rem;
 }
 
 .activity-item p {
@@ -222,46 +261,26 @@
   color: var(--muted-pink);
 }
 
-.dashboard-upcoming,
-.dashboard-bookings {
-  background-color: var(--dark-bg);
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.dashboard-upcoming h3,
-.dashboard-bookings h3 {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--purple-accent);
-  margin-bottom: 10px;
-  text-align: center;
-  font-family: 'Urbanist', sans-serif;
-}
-
 .booking-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 1rem;
 }
 
 .booking-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  background-color: var(--navy-gray);
-  border-radius: 4px;
-  font-size: 14px;
-  color: var(--light-gray);
-  font-family: 'Urbanist', sans-serif;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  font-size: 0.9rem;
 }
 
 .booking-details {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 0.5rem;
 }
 
 .booking-details p {
@@ -275,183 +294,111 @@
 .booking-actions {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 0.5rem;
 }
 
 .cancel-btn,
 .request-cancel-btn {
-  padding: 6px 12px;
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: 'Urbanist', sans-serif;
-  text-transform: uppercase;
+  transition: all 0.3s ease;
 }
 
 .cancel-btn {
-  background-color: var(--error-red);
+  background: var(--error-red);
   color: var(--soft-white);
 }
 
 .cancel-btn:hover {
-  background-color: #E63946;
-  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.2);
-  transform: scale(1.02);
+  background: #E63946;
+  transform: translateY(-2px);
 }
 
 .request-cancel-btn {
-  background-color: var(--purple-accent);
+  background: var(--gradient-purple);
   color: var(--soft-white);
 }
 
 .request-cancel-btn:hover {
-  background-color: var(--purple-hover);
-  box-shadow: 0 2px 6px rgba(155, 0, 255, 0.2);
-  transform: scale(1.02);
-}
-
-/* Форми */
-.profile-details {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(155, 0, 255, 0.3);
 }
 
 .form-card {
-  background-color: var(--dark-bg);
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease;
-}
-
-.form-card:hover {
-  transform: translateY(-2px);
-}
-
-.form-card h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--purple-accent);
-  margin-bottom: 15px;
-  text-align: center;
-  font-family: 'Urbanist', sans-serif;
+  padding: 2rem;
+  margin-top: 2rem;
 }
 
 form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 0.5rem;
 }
 
 .form-group label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--light-gray);
-  text-transform: uppercase;
-  font-family: 'Urbanist', sans-serif;
-}
-
-.input-wrapper {
-  position: relative;
+  font-size: 0.9rem;
+  color: var(--purple-accent);
   display: flex;
   align-items: center;
+  gap: 0.5rem;
 }
 
-.input-wrapper i {
-  position: absolute;
-  left: 10px;
-  color: var(--purple-accent);
-}
-
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 8px 8px 8px 30px;
-  background-color: var(--navy-gray);
+input,
+select {
+  padding: 0.6rem;
+  background: var(--dark-bg);
   border: 1px solid var(--light-gray);
   border-radius: 4px;
   color: var(--soft-white);
-  font-size: 14px;
-  font-family: 'Urbanist', sans-serif;
-  transition: all 0.2s ease;
+  font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+input:focus,
+select:focus {
   border-color: var(--purple-accent);
   outline: none;
-  box-shadow: 0 0 4px rgba(155, 0, 255, 0.2);
 }
 
-.form-group input[type="file"] {
-  padding: 8px;
-}
-
-.form-group select {
-  padding-right: 20px;
-}
-
-.error-message {
-  font-size: 12px;
-  color: var(--error-red);
-  font-family: 'Urbanist', sans-serif;
-}
-
-.info-message {
-  font-size: 12px;
-  color: var(--muted-pink);
-  font-family: 'Urbanist', sans-serif;
-}
-
-.form-group.has-error input,
-.form-group.has-error select {
-  border-color: var(--error-red);
-}
-
-.submit-btn {
-  padding: 8px 16px;
-  background-color: var(--purple-accent);
+button[type="submit"] {
+  background: var(--gradient-purple);
   color: var(--soft-white);
+  padding: 0.8rem;
   border: none;
   border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: 'Urbanist', sans-serif;
-  text-transform: uppercase;
+  font-weight: 600;
+  transition: transform 0.2s ease;
 }
 
-.submit-btn:hover {
-  background-color: var(--purple-hover);
-  box-shadow: 0 2px 6px rgba(155, 0, 255, 0.2);
-  transform: scale(1.02);
+button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(155, 0, 255, 0.3);
 }
 
-.submit-btn:disabled {
-  background-color: var(--light-gray);
+button[type="submit"]:disabled {
+  background: var(--light-gray);
   cursor: not-allowed;
 }
 
-/* Календар */
+/* Стилі для календаря */
 .react-calendar {
-  background-color: var(--dark-bg);
-  border: 1px solid var(--light-gray);
-  border-radius: 8px;
-  color: var(--soft-white);
-  font-family: 'Urbanist', sans-serif;
-  margin: 0 auto;
-  max-width: 350px;
+  width: 100% !important;
+  background: var(--navy-gray) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  padding: 0.5rem !important;
 }
 
 .react-calendar__tile {
@@ -460,25 +407,25 @@ form {
 
 .react-calendar__tile--active,
 .react-calendar__tile--active:hover {
-  background-color: var(--purple-accent) !important;
+  background: var(--gradient-purple) !important;
   color: var(--soft-white) !important;
 }
 
 .react-calendar__tile--now {
-  background-color: var(--muted-pink);
+  background: var(--muted-pink);
 }
 
 .react-calendar__tile--now:hover {
-  background-color: var(--purple-hover);
+  background: var(--purple-hover);
 }
 
 .react-calendar__navigation button {
   color: var(--soft-white);
-  background-color: var(--navy-gray);
+  background: var(--navy-gray);
 }
 
 .react-calendar__navigation button:hover {
-  background-color: var(--purple-hover);
+  background: var(--purple-hover);
 }
 
 .react-calendar__month-view__weekdays__weekday {
@@ -486,187 +433,85 @@ form {
   font-weight: 500;
 }
 
-/* Стилі для робочих і минулих дат */
 .react-calendar__tile--working {
-  background-color: rgba(155, 0, 255, 0.2); /* Легка підсвітка для робочих дат */
+  background: rgba(155, 0, 255, 0.2);
   color: var(--soft-white);
 }
 
 .react-calendar__tile--working:hover {
-  background-color: var(--purple-hover);
+  background: var(--purple-hover);
 }
 
 .react-calendar__tile--past {
-  background-color: var(--dark-bg);
+  background: var(--dark-bg);
   color: var(--light-gray);
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 .react-calendar__tile--past:hover {
-  background-color: var(--dark-bg);
+  background: var(--dark-bg);
 }
 
-.loading {
-  color: var(--light-gray);
-  text-align: center;
-  padding: 20px;
-  font-size: 16px;
-  font-family: 'Urbanist', sans-serif;
-  animation: pulse 1.5s infinite;
+.error-message {
+  font-size: 0.8rem;
+  color: var(--error-red);
 }
 
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
-}
-
+/* Адаптивність */
 @media (max-width: 768px) {
   .profile-section {
-    padding: 15px;
-    max-width: 100%;
+    padding: 1rem;
+    margin: 1rem;
   }
-
+  
   .dashboard-welcome {
-    font-size: 20px;
+    font-size: 1.5rem;
   }
-
-  .profile-tabs {
-    gap: 8px;
-  }
-
-  .tab {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-
-  .profile-card {
-    padding: 15px;
-  }
-
-  .avatar,
-  .avatar-placeholder {
-    width: 60px;
-    height: 60px;
-  }
-
-  .user-name {
-    font-size: 16px;
-  }
-
-  .contact-info p {
-    font-size: 12px;
-  }
-
-  .edit-profile-btn {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-
-  .dashboard-activity,
-  .dashboard-upcoming,
-  .dashboard-bookings {
-    padding: 10px;
-  }
-
-  .dashboard-activity h3,
-  .dashboard-upcoming h3,
-  .dashboard-bookings h3 {
-    font-size: 14px;
+  
+  .avatar-container {
+    width: 100px;
+    height: 100px;
   }
 
   .activity-item,
   .booking-item {
-    font-size: 12px;
-    padding: 8px;
+    font-size: 0.8rem;
+    padding: 0.6rem;
   }
 
-  .cancel-btn,
-  .request-cancel-btn {
-    padding: 5px 10px;
-    font-size: 11px;
+  h3 {
+    font-size: 1.1rem;
   }
 
-  .form-card {
-    padding: 15px;
+  input,
+  select {
+    padding: 0.5rem;
+    font-size: 0.9rem;
   }
 
-  .form-card h3 {
-    font-size: 16px;
+  button[type="submit"] {
+    padding: 0.6rem;
+    font-size: 0.9rem;
   }
 
-  .form-group input,
-  .form-group select {
-    font-size: 12px;
-    padding: 6px 6px 6px 25px;
-  }
-
-  .submit-btn {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-
-  .react-calendar {
-    max-width: 100%;
+  .user-stats {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
   }
 }
 
 @media (max-width: 480px) {
-  .profile-section {
-    padding: 10px;
-  }
-
-  .dashboard-welcome {
-    font-size: 18px;
-  }
-
-  .profile-tabs {
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .tab {
-    padding: 5px 10px;
-    font-size: 11px;
-  }
-
-  .profile-card {
-    padding: 10px;
-  }
-
-  .avatar,
-  .avatar-placeholder {
-    width: 50px;
-    height: 50px;
-  }
-
-  .user-name {
-    font-size: 14px;
-  }
-
-  .contact-info p {
-    font-size: 11px;
-  }
-
-  .edit-profile-btn {
-    padding: 5px 10px;
-    font-size: 11px;
-  }
-
-  .dashboard-activity h3,
-  .dashboard-upcoming h3,
-  .dashboard-bookings h3 {
-    font-size: 13px;
+  .avatar-container {
+    width: 80px;
+    height: 80px;
   }
 
   .activity-item,
   .booking-item {
-    font-size: 11px;
-    padding: 6px;
     flex-direction: column;
     align-items: flex-start;
-    gap: 5px;
+    gap: 0.3rem;
   }
 
   .booking-actions {
@@ -677,35 +522,31 @@ form {
   .cancel-btn,
   .request-cancel-btn {
     width: 100%;
-    padding: 4px 8px;
-    font-size: 10px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.7rem;
   }
 
-  .form-card {
-    padding: 10px;
+  .dashboard-welcome {
+    font-size: 1.2rem;
   }
+}
 
-  .form-card h3 {
-    font-size: 14px;
-  }
+.loading {
+  color: var(--light-gray);
+  text-align: center;
+  padding: 2rem;
+  font-size: 1rem;
+}
 
-  .form-group label {
-    font-size: 11px;
-  }
+.Toastify__toast {
+  border-radius: 12px !important;
+  margin: 0.5rem !important;
+}
 
-  .form-group input,
-  .form-group select {
-    font-size: 11px;
-    padding: 5px 5px 5px 20px;
-  }
+.Toastify__toast--success {
+  background: var(--gradient-purple) !important;
+}
 
-  .input-wrapper i {
-    left: 5px;
-    font-size: 14px;
-  }
-
-  .submit-btn {
-    padding: 5px 10px;
-    font-size: 11px;
-  }
+.Toastify__toast--error {
+  background: var(--error-red) !important;
 }

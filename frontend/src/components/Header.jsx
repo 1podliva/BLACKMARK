@@ -207,7 +207,7 @@ const Header = () => {
                     setIsMobileMenuOpen(false);
                   }}
                 >
-                  Вхід / Реєстрація
+                  Вхід
                 </button>
               )}
             </li>

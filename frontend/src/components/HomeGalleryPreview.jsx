@@ -30,40 +30,45 @@ const images = [
 
 export default function HomeGalleryPreview() {
   return (
-<>
-<section className="home-gallery-preview">
-  <div className="gallery-content">
-    <h2 className="section-subtitle">Наші роботи</h2>
-    <h1 className="main-title">
-      <span className="first-line">Мистецтво</span>
-      <span className="second-line">На твоїй шкірі</span>
-    </h1>
-    <div className="divider"></div>
-    <p className="intro-text">
-      Ознайомтеся з нашою колекцією унікальних татуювань, створених з душею.
-    </p>
-  </div>
-</section>
+    <section className="hp-gallery-section" id="hp-gallery">
+      <div className="hp-gallery-container">
+        <div className="hp-gallery-header">
+          <span className="hp-gallery-subtitle">Наші роботи</span>
+          <h2 className="hp-gallery-title">
+            <span className="hp-gallery-title-line">Мистецтво</span>
+            <span className="hp-gallery-title-accent">На твоїй шкірі</span>
+          </h2>
+          <div className="hp-gallery-divider"></div>
+        </div>
 
-<div className="gallery-fullwidth">
-  <div className="gallery-preview-grid">
-    {images.map((img, index) => (
-      <div className={`preview-item item-${index + 1}`} key={index}>
-        <img src={img.src} alt={img.alt} />
-        <div className="preview-info">
-          <h3>{img.title}</h3>
-          <p>{img.description}</p>
+        <div className="hp-gallery-grid">
+          {images.map((img, index) => (
+            <div className="hp-gallery-card" key={index}>
+              <div className="hp-gallery-card-image">
+                <img 
+                  src={img.src} 
+                  alt={img.alt} 
+                  loading="lazy"
+                  className="hp-gallery-img"
+                />
+                <div className="hp-gallery-card-overlay"></div>
+              </div>
+              <div className="hp-gallery-card-content">
+                <h3 className="hp-gallery-card-title">{img.title}</h3>
+                <p className="hp-gallery-card-description">{img.description}</p>
+                <div className="hp-gallery-card-divider"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="hp-gallery-cta">
+          <a href="/gallery" className="hp-gallery-cta-btn">
+            Переглянути галерею
+            <span className="hp-gallery-btn-arrow"></span>
+          </a>
         </div>
       </div>
-    ))}
-  </div>
-
-  <div className="gallery-btn-wrapper">
-    <a href="/gallery" className="gallery-btn">Переглянути більше</a>
-  </div>
-</div>
-
-</>
-
+    </section>
   );
-}  
+}

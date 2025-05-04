@@ -41,6 +41,9 @@
 
 #home .first {
   color: var(--soft-white);
+  /* background: linear-gradient(180deg, #fff 10%, var(--purple-accent) 100%); */
+  /* background-clip: text; */
+  /* color: transparent; */
 }
 
 #home .second {

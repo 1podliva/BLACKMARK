@@ -30,10 +30,10 @@ const Main = () => {
           </p>
           <div className="actions">
             <div className="button">
-              <a href="#booking" className="button-link">Забронювати сеанс</a>
+              <a href="#consultation" className="button-link">Забронювати сеанс</a>
               <img src="images/buttonvector1.svg" alt="icon" className="button-icon" />
             </div>
-            <a href="#works" className="link-text">Наші роботи</a>
+            <a href="#gallerypreview" className="link-text">Наші роботи</a>
           </div>
         </div>
         <div className="right-side">
