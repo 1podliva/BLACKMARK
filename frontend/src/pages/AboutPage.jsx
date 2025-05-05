@@ -1,33 +1,80 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './AboutPage.css';
 
 const AboutPage = () => {
+  const [masters, setMasters] = useState([]);
+  const navigate = useNavigate();
+  const backendBaseUrl = 'http://localhost:5000'; // Базовий URL вашого бекенду
+
+  useEffect(() => {
+    const fetchMasters = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/artists');
+        if (!res.ok) throw new Error('Не вдалося завантажити майстрів');
+        const data = await res.json();
+        setMasters(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchMasters();
+  }, []);
+
+  const handleContactClick = () => {
+    navigate('/');
+    setTimeout(() => {
+      const consultationSection = document.getElementById('consultation');
+      if (consultationSection) {
+        consultationSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100); // Затримка для забезпечення завантаження сторінки
+  };
+
   return (
     <section className="about-section">
-      <div className="about-hero">
-        <h1 className="hero-title">Про Нас</h1>
-        <p className="hero-subtitle">Дізнайтесь про нашу історію, майстрів та пристрасть до досконалості</p>
-        <div className="hero-overlay"></div>
-        <svg className="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-          <path fill="var(--navy-gray)" fillOpacity="1" d="M0,160L48,170.7C96,181,192,203,288,192C384,181,480,139,576,122.7C672,107,768,117,864,133.3C960,149,1056,171,1152,165.3C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-        </svg>
-      </div>
-
       <div className="about-content">
-        <section className="history-section">
-          <h2 className="section-title">Наша Історія</h2>
-          <div className="timeline">
-            <div className="timeline-item">
+        <div className="about-intro-block">
+          <span className="about-section-subtitle">Наша історія</span>
+          <h1 className="about-main-title">
+            <span className="about-first-line">Дізнайтесь більше</span>
+            <span className="about-second-line">про BLACKMARK</span>
+          </h1>
+          <div className="about-divider"></div>
+          <p className="about-intro-text">
+            Ми — студія татуювань, де мистецтво і пристрасть об'єднуються для створення унікальних історій на вашому тілі. Заснована в 2015 році, наша команда прагне до досконалості в кожному штриху.
+          </p>
+        </div>
+
+        <div className="about-stats-container">
+          <div className="about-stat-item">
+            <h2>10+</h2>
+            <p>Років досвіду</p>
+          </div>
+          <div className="about-stat-item">
+            <h2>50+</h2>
+            <p>Майстрів у команді</p>
+          </div>
+          <div className="about-stat-item">
+            <h2>1000+</h2>
+            <p>Задоволених клієнтів</p>
+          </div>
+        </div>
+
+        <section className="about-features">
+          <h2 className="section-title">Наш шлях</h2>
+          <div className="feature-grid">
+            <div className="about-feature-item">
               <h3>2015</h3>
-              <p>Заснування компанії з мрією створювати унікальні вироби.</p>
+              <p>Початок нашого шляху у світі татуювань із мрією створювати унікальні дизайни.</p>
             </div>
-            <div className="timeline-item">
+            <div className="about-feature-item">
               <h3>2018</h3>
-              <p>Розширення команди та запуск першого міжнародного проєкту.</p>
+              <p>Перший міжнародний проєкт та визнання у тату-спільноті.</p>
             </div>
-            <div className="timeline-item">
+            <div className="about-feature-item">
               <h3>2023</h3>
-              <p>Відкриття нової студії та нагорода за інновації в дизайні.</p>
+              <p>Відкриття нової студії та нагорода за інноваційний дизайн.</p>
             </div>
           </div>
         </section>
@@ -35,21 +82,27 @@ const AboutPage = () => {
         <section className="masters-section">
           <h2 className="section-title">Наші Майстри</h2>
           <div className="masters-grid">
-            <div className="master-card">
-              <img src="https://via.placeholder.com/300x400" alt="Master 1" className="master-image" />
-              <h3>Олександр Іванов</h3>
-              <p>Експерт з дерев’яних виробів, 10 років досвіду.</p>
-            </div>
-            <div className="master-card">
-              <img src="https://via.placeholder.com/300x400" alt="Master 2" className="master-image" />
-              <h3>Марія Петрова</h3>
-              <p>Спеціаліст з текстильного дизайну, 8 років майстерності.</p>
-            </div>
-            <div className="master-card">
-              <img src="https://via.placeholder.com/300x400" alt="Master 3" className="master-image" />
-              <h3>Ігор Сидоров</h3>
-              <p>Майстер металевих конструкцій, 12 років стажу.</p>
-            </div>
+            {masters.map((master) => (
+              <div key={master._id} className="master-card">
+                <img
+                  src={
+                    master.photo_url
+                      ? `${backendBaseUrl}/artists${master.photo_url.replace('/public/artists', '')}`
+                      : 'https://placehold.co/300x400?text=Майстер&font=roboto'
+                  }
+                  alt={master.name}
+                  className="master-image"
+                  onError={(e) => {
+                    e.target.src = 'https://placehold.co/300x400?text=Майстер&font=roboto';
+                    console.log('Image load error for:', master.photo_url);
+                  }}
+                />
+                <h3>{master.name}</h3>
+                <p>{master.description || 'Опис відсутній'}</p>
+                <p>Вік: {master.age || 'Невідомо'}</p>
+                <p>Стаж: {master.experience || 'Невідомо'}</p>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -57,27 +110,29 @@ const AboutPage = () => {
           <h2 className="section-title">Наші Цінності</h2>
           <div className="values-grid">
             <div className="value-card">
-              <i className="fas fa-leaf"></i>
+              <i className="fas fa-leaf benefit-icon"></i>
               <h3>Екологічність</h3>
-              <p>Використовуємо лише природні матеріали.</p>
+              <p>Лише безпечні та натуральні матеріали для татуювань.</p>
             </div>
             <div className="value-card">
-              <i className="fas fa-hands-helping"></i>
+              <i className="fas fa-hands-helping benefit-icon"></i>
               <h3>Співпраця</h3>
-              <p>Працюємо разом для кращих результатів.</p>
+              <p>Командна робота для найкращих результатів.</p>
             </div>
             <div className="value-card">
-              <i className="fas fa-star"></i>
+              <i className="fas fa-star benefit-icon"></i>
               <h3>Якість</h3>
-              <p>Кожен виріб — шедевр.</p>
+              <p>Кожен татуювання — витвір мистецтва.</p>
             </div>
           </div>
         </section>
 
-        <footer className="about-footer">
-          <p>Приєднуйтесь до нас у подорожі до досконалості!</p>
-          <button className="contact-btn">Зв’язатися</button>
-        </footer>
+        <div className="about-cta-block">
+          <p className="about-cta-text">Готові до трансформації? Долучайтесь до нас!</p>
+          <button className="about-btn" onClick={handleContactClick}>
+            Зв’язатися
+          </button>
+        </div>
       </div>
     </section>
   );

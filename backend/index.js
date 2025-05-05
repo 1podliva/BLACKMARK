@@ -27,7 +27,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: 'http://localhost:3000',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow all necessary methods
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   },
 });
@@ -39,7 +39,8 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
+app.use('/images', express.static(path.join(__dirname, 'public/images'))); // Існуюче сервірування
+app.use('/artists', express.static(path.join(__dirname, 'public/artists'))); // Додаємо сервірування для artists
 
 // WebSocket authentication
 io.use((socket, next) => {
