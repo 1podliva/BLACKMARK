@@ -1,0 +1,196 @@
+/* Додаткові кольорові змінні */
+:root {
+  --accent-gradient: linear-gradient(135deg, #9B00FF 0%, #7F00D4 100%);
+  --glass-bg: rgba(26, 26, 29, 0.95);
+  --neon-effect: 0 0 10px rgba(155, 0, 255, 0.3); /* Зменшена інтенсивність */
+}
+
+/* Глобальні стилі */
+.about-section {
+  background: var(--dark-bg);
+  color: var(--soft-white);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Герой-секція з ефектом частинок */
+.about-hero {
+  position: relative;
+  height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, 
+    rgba(15,15,16,0.6) 0%, /* Зменшена непрозорість */
+    rgba(15,15,16,0.8) 100%);
+  z-index: 1;
+}
+
+.hero-title {
+  font-size: clamp(3rem, 6vw, 5rem);
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  z-index: 2;
+  animation: textFloat 3s ease-in-out infinite alternate;
+}
+
+@keyframes textFloat {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-10px); }
+}
+
+/* Таймлайн з спрощеним ефектом */
+.timeline {
+  position: relative;
+  padding: 40px 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--accent-gradient);
+  transform: translateX(-50%);
+}
+
+.timeline-item {
+  width: calc(50% - 40px);
+  padding: 20px;
+  background: var(--glass-bg);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  margin: 20px;
+  position: relative;
+  transition: transform 0.3s ease; /* Спрощений перехід */
+}
+
+.timeline-item:hover {
+  transform: scale(1.05); /* Заміна 3D на масштабування */
+}
+
+.timeline-item:nth-child(odd) {
+  margin-left: auto;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: var(--accent-gradient);
+  border-radius: 50%;
+  top: 30px;
+  right: -48px;
+  box-shadow: var(--neon-effect);
+}
+
+.timeline-item:nth-child(odd)::before {
+  left: -48px;
+  right: auto;
+}
+
+/* Картки майстрів з спрощеним ефектом */
+.masters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.master-card {
+  position: relative;
+  transition: transform 0.3s ease; /* Спрощений перехід */
+  cursor: pointer;
+}
+
+.master-card:hover {
+  transform: scale(1.1); /* Заміна 3D на масштабування */
+}
+
+.master-card::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: var(--accent-gradient);
+  opacity: 0.1;
+  z-index: -1;
+  filter: blur(30px);
+}
+
+/* Секція цінностей з анімацією */
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+}
+
+.value-card {
+  padding: 2rem;
+  background: var(--glass-bg);
+  border-radius: 16px;
+  border: 1px solid rgba(155,0,255,0.2);
+  transition: transform 0.3s ease; /* Без тіні */
+}
+
+.value-card:hover {
+  transform: translateY(-10px); /* Лише підняття */
+}
+
+.value-card i {
+  font-size: 2.5rem;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Футер зі статичним градієнтом */
+.about-footer {
+  position: relative;
+  padding: 4rem 0;
+  background: linear-gradient(135deg, #1a1a1d, #2a2a2e); /* Статичний фон */
+}
+
+/* Кнопка контакту зі спрощеним ефектом */
+.contact-btn {
+  position: relative;
+  padding: 1rem 2rem;
+  background: var(--accent-gradient);
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  transition: background 0.5s ease; /* Спрощений перехід */
+}
+
+.contact-btn:hover {
+  background: linear-gradient(135deg, #7F00D4, #9B00FF); /* Зміна кольору */
+}
+
+/* Адаптивність */
+@media (max-width: 768px) {
+  .timeline-item {
+    width: 100%;
+    margin: 20px 0;
+  }
+
+  .timeline::before {
+    left: 20px;
+  }
+
+  .timeline-item::before {
+    left: -28px !important;
+    right: auto !important;
+  }
+}

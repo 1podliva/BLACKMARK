@@ -40,7 +40,7 @@
       <div className="notification-management">
         <h3>Сповіщення</h3>
         {notifications.length > 0 ? (
-          <ul>
+          <ul className='blog-ul'>
             {notifications.map((notification) => (
               <li
                 key={notification._id}

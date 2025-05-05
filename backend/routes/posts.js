@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const Post = require('../models/Post');
 const auth = require('../middleware/auth');
+const restrictToAdmin = require('../middleware/restrictToAdmin');
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
@@ -29,7 +30,7 @@ router.get('/', async (req, res) => {
   try {
     const isAdmin = req.headers.authorization;
     const query = isAdmin ? {} : { status: 'published' };
-    const posts = await Post.find(query).populate('comments.user', 'firstName lastName'); // Updated to populate firstName and lastName
+    const posts = await Post.find(query).populate('comments.user', 'firstName lastName');
     res.json(posts);
   } catch (err) {
     console.error('GET /api/posts Error:', err);
@@ -40,7 +41,7 @@ router.get('/', async (req, res) => {
 // Get single post by ID
 router.get('/:id', async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id).populate('comments.user', 'firstName lastName'); // Updated to populate firstName and lastName
+    const post = await Post.findById(req.params.id).populate('comments.user', 'firstName lastName');
     if (!post) return res.status(404).json({ message: 'Post not found' });
     const isAdmin = req.headers.authorization;
     if (!isAdmin && post.status !== 'published') {
@@ -125,11 +126,62 @@ router.post('/:id/comments', auth, async (req, res) => {
 
     post.comments.push({ user: req.user._id, text });
     await post.save();
-    const updatedPost = await Post.findById(req.params.id).populate('comments.user', 'firstName lastName'); // Updated to populate firstName and lastName
+    const updatedPost = await Post.findById(req.params.id).populate('comments.user', 'firstName lastName');
     res.status(201).json(updatedPost);
   } catch (err) {
     console.error('POST /api/posts/:id/comments Error:', err);
     res.status(500).json({ message: err.message });
+  }
+});
+
+// Edit comment
+router.put('/:id/comments/:commentId', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    const comment = post.comments.id(req.params.commentId);
+    if (!comment) return res.status(404).json({ message: 'Comment not found' });
+
+    if (comment.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'You can only edit your own comments' });
+    }
+
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ message: 'Comment text is required' });
+
+    comment.text = text;
+    comment.isEdited = true; // Mark the comment as edited
+    await post.save();
+    const updatedPost = await Post.findById(req.params.id).populate('comments.user', 'firstName lastName');
+    res.json(updatedPost);
+  } catch (err) {
+    console.error('PUT /api/posts/:id/comments/:commentId Error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Delete comment
+router.delete('/:id/comments/:commentId', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    const comment = post.comments.id(req.params.commentId);
+    if (!comment) return res.status(404).json({ message: 'Comment not found' });
+
+    // Allow deletion if the user is the comment author OR an admin
+    if (comment.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You can only delete your own comments unless you are an admin' });
+    }
+
+    post.comments.pull({ _id: req.params.commentId });
+    await post.save();
+    const updatedPost = await Post.findById(req.params.id).populate('comments.user', 'firstName lastName');
+    res.json(updatedPost);
+  } catch (err) {
+    console.error('DELETE /api/posts/:id/comments/:commentId Error:', err);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -161,6 +213,39 @@ router.post('/:id/dislike', auth, async (req, res) => {
   } catch (err) {
     console.error('POST /api/posts/:id/dislike Error:', err);
     res.status(500).json({ message: err.message });
+  }
+});
+
+// Get post statistics
+router.get('/:id/stats', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    const stats = {
+      comments: post.comments.length,
+      likes: post.likes.length,
+      dislikes: post.dislikes.length,
+    };
+    res.json(stats);
+  } catch (err) {
+    console.error('GET /api/posts/:id/stats Error:', err.message, err.stack);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get users who liked a post (Admin only)
+router.get('/:id/likes', auth, restrictToAdmin, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id).populate('likes', 'firstName lastName email');
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    res.json(post.likes);
+  } catch (err) {
+    console.error('GET /api/posts/:id/likes Error:', err.message, err.stack);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

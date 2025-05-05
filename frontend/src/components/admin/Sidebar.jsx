@@ -6,7 +6,7 @@ const Sidebar = ({ activeSection, setActiveSection, isSidebarOpen, setSidebarOpe
   const navigate = useNavigate();
 
   const handleExitAdmin = () => {
-    localStorage.removeItem('token');
+    // localStorage.removeItem('token');
     setSidebarOpen(false);
     navigate('/');
   };

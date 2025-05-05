@@ -16,6 +16,7 @@ import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import NotificationProvider from './components/NotificationProvider';
 import { AuthProvider } from './context/AuthContext';
+import AboutPage from './pages/AboutPage';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -61,7 +62,7 @@ function App() {
           element={
             <>
               <Header />
-              <About />
+              <AboutPage />
               <Footer />
             </>
           }

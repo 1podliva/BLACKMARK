@@ -4,6 +4,7 @@ const commentSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   text: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
+  isEdited: { type: Boolean, default: false }, // New field to track if comment was edited
 });
 
 const postSchema = new mongoose.Schema({
