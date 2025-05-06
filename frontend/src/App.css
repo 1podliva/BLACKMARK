@@ -32,6 +32,13 @@ a {
   color: #9CA3AF;
 }
 
+button {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+
 /* section {
   /* margin: 0 120px; */
   /* height: 100vh; */

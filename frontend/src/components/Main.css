@@ -73,20 +73,22 @@
   margin-top: 40px;
 }
 
-#home .button {
-  background-color: var(--purple-accent);
-  color: var(--soft-white);
-  font-weight: 400;
-  letter-spacing: 1px;
-  padding: 10px 16px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(155, 0, 255, 0.4);
-  display: flex;
-  align-items: center;
-  transition: all 0.3s ease;
+.button-link {
+    background-color: var(--purple-accent);
+    color: var(--soft-white);
+    font-weight: 400;
+    letter-spacing: 1px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(155, 0, 255, 0.4);
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    border: 0;
+    cursor: pointer;
 }
 
-#home .button:hover {
+.button-link:hover {
   background-color: var(--purple-hover);
   transform: scale(1.05);
 }

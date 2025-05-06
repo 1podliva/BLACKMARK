@@ -18,6 +18,20 @@ const Main = () => {
     }
   }, [location, navigate]);
 
+  const handleScrollToConsultation = () => {
+    const consultationSection = document.getElementById('consultation');
+    if (consultationSection) {
+      consultationSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleScrollToGallery = () => {
+    const gallerySection = document.getElementById('hp-gallery');
+    if (gallerySection) {
+      gallerySection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section id="home">
       <div className="home-content">
@@ -29,12 +43,14 @@ const Main = () => {
             розповідає унікальну історію.
           </p>
           <div className="actions">
-            <div className="button">
-              <a href="#consultation" className="button-link">Забронювати сеанс</a>
-              <img src="images/buttonvector1.svg" alt="icon" className="button-icon" />
-            </div>
-            <a href="#gallerypreview" className="link-text">Наші роботи</a>
-          </div>
+  <button className="button-link" onClick={handleScrollToConsultation}>
+    Забронювати сеанс
+    <img src="images/buttonvector1.svg" alt="icon" className="button-icon" />
+  </button>
+  <button className="link-text" onClick={handleScrollToGallery}>
+    Наші роботи
+  </button>
+</div>
         </div>
         <div className="right-side">
           <img src="images/gallery/mainphoto.jpg" alt="Tattoo" className="main-image" />
