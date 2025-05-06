@@ -5,7 +5,7 @@ import './GalleryManagement.css';
 
 Modal.setAppElement('#root');
 
-const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setError, setSuccess, fetchGalleryImages, galleryCategories, mode }) => {
+const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, toast, fetchGalleryImages, galleryCategories, mode }) => {
   const [imageForm, setImageForm] = useState({
     id: '',
     alt: '',
@@ -18,7 +18,7 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
   const [imagePreview, setImagePreview] = useState('');
   const [activeStyle, setActiveStyle] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const prevImageRef = useRef(null); // Для очищення URL.createObjectURL
+  const prevImageRef = useRef(null);
 
   useEffect(() => {
     console.log('Gallery images:', galleryImages);
@@ -27,7 +27,6 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
   }, [galleryImages, galleryCategories, mode]);
 
   useEffect(() => {
-    // Очищення URL.createObjectURL при зміні imagePreview
     return () => {
       if (prevImageRef.current) {
         URL.revokeObjectURL(prevImageRef.current);
@@ -138,10 +137,13 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImageForm({ ...imageForm, image: file });
+  
     if (file) {
+      // Видаляємо попередню URL, якщо є
       if (prevImageRef.current) {
         URL.revokeObjectURL(prevImageRef.current);
       }
+  
       const previewUrl = URL.createObjectURL(file);
       prevImageRef.current = previewUrl;
       setImagePreview(previewUrl);
@@ -149,6 +151,7 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
       setImagePreview(imageForm.imageUrl ? `http://localhost:5000${imageForm.imageUrl}` : '');
     }
   };
+  
 
   const handleImageClear = () => {
     if (prevImageRef.current) {
@@ -174,7 +177,6 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
     setImagePreview('');
   };
 
-  // Компонент форми для повторного використання
   const ImageForm = ({ isModal = false }) => (
     <form className="admin-form" onSubmit={handleImageSubmit}>
       <div className="form-group">
@@ -183,7 +185,7 @@ const GalleryManagement = ({ galleryImages, setGalleryImages, handleSubmit, setE
           type="file"
           accept="image/*"
           onChange={handleImageChange}
-          required={!imageForm.id} // Файл не потрібен для редагування, якщо зображення не змінюється
+          required={!imageForm.id}
         />
         {imagePreview && (
           <div className="image-preview-container">

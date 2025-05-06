@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import './GalleryCategoryManagement.css';
 
-const GalleryCategoryManagement = ({ galleryCategories, setGalleryCategories, handleSubmit, setError, setSuccess, fetchGalleryCategories }) => {
+const GalleryCategoryManagement = ({ galleryCategories, setGalleryCategories, handleSubmit, toast, fetchGalleryCategories }) => {
   const [categoryForm, setCategoryForm] = useState({ id: '', name: '' });
 
   const handleCategorySubmit = async (e) => {

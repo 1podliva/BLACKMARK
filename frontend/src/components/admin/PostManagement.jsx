@@ -5,7 +5,7 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import './PostManagement.css';
 
-const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setError, setSuccess, fetchPosts }) => {
+const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, toast, fetchPosts }) => {
   const [postForm, setPostForm] = useState({
     id: '',
     title: '',
@@ -34,8 +34,6 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setEr
 
   const handlePostSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
 
     if (!postForm.title.trim()) {
       toast.error('Заголовок обов’язковий', { className: 'admin-toast', autoClose: 3000, toastId: 'form-error-toast' });
@@ -78,7 +76,9 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setEr
       });
       setPreviewImage(null);
       fetchPosts();
-    } catch (err) {}
+    } catch (err) {
+      toast.error(err.message || 'Помилка при обробці поста', { className: 'admin-toast', autoClose: 3000 });
+    }
   };
 
   const handlePostEdit = (post) => {
@@ -102,7 +102,9 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setEr
       await handleSubmit(`http://localhost:5000/api/posts/${id}`, 'DELETE');
       toast.success('Пост видалено!', { className: 'admin-toast', autoClose: 3000, toastId: 'delete-post-toast' });
       fetchPosts();
-    } catch (err) {}
+    } catch (err) {
+      toast.error(err.message || 'Помилка при видаленні поста', { className: 'admin-toast', autoClose: 3000 });
+    }
   };
 
   const handleImageChange = (e) => {
@@ -260,7 +262,7 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setEr
               {previewImage && (
                 <div className="admin-image-preview-container">
                   <img src={previewImage} alt="Preview" className="admin-image-preview" />
-                  <button type="button" className="admin-remove-image-btn" onClick={handleRemoveImage}>
+                  <button type="button" className="admin-remove-image-btn" onClick={handleImageChange}>
                     <FaTimes />
                   </button>
                 </div>
@@ -326,10 +328,10 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, setEr
                     </div>
                     <div className="admin-post-info">
                       <span className="admin-post-title">{post.title}</span>
-                      <span className="admin-post-category">{getCategoryName(post.category)}</span>
                       <span className="admin-post-status">
                         {post.status === 'draft' ? 'Чернетка' : 'Опубліковано'}
                       </span>
+                      <span className="admin-post-category">{getCategoryName(post.category)}</span>
                       <span className="admin-post-featured">
                         {post.featured ? 'Рекомендований' : 'Звичайний'}
                       </span>

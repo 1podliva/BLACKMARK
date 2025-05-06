@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaBars } from 'react-icons/fa';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from '../components/admin/Sidebar';
 import GalleryManagement from '../components/admin/GalleryManagement';
 import PostManagement from '../components/admin/PostManagement';
@@ -15,8 +17,6 @@ import './AdminDashboard.css';
 const AdminDashboard = ({ onNotificationReceived }) => {
   const [activeSection, setActiveSection] = useState({ category: 'notifications', subcategory: null });
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(true);
   const [galleryImages, setGalleryImages] = useState([]);
   const [posts, setPosts] = useState([]);
@@ -68,7 +68,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
           fetchNotifications(),
         ]);
       } catch (err) {
-        setError(err.message);
+        toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
         localStorage.removeItem('token');
         setTimeout(() => navigate('/'), 3000);
       } finally {
@@ -88,7 +88,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
       const data = await res.json();
       setNotifications(data);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   }, [token]);
 
@@ -101,7 +101,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
       const data = await res.json();
       setGalleryImages(data);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   }, [token]);
 
@@ -114,7 +114,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
       const data = await res.json();
       setPosts(data);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   }, [token]);
 
@@ -125,7 +125,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
       const data = await res.json();
       setCategories(data);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   }, []);
 
@@ -138,7 +138,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
       const data = await res.json();
       setGalleryCategories(data);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   }, [token]);
 
@@ -151,7 +151,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
       const data = await res.json();
       setBookings(data);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   }, [token]);
 
@@ -166,14 +166,13 @@ const AdminDashboard = ({ onNotificationReceived }) => {
       setArtists(artistsData);
       return artistsData;
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
       return [];
     }
   }, [token]);
 
   const handleSubmit = useCallback(
     async (url, method, payload, isFormData = false) => {
-      setError('');
       try {
         const headers = { Authorization: `Bearer ${token}` };
         if (!isFormData) headers['Content-Type'] = 'application/json';
@@ -190,13 +189,11 @@ const AdminDashboard = ({ onNotificationReceived }) => {
         }
         const responseData = await res.json();
         if (method !== 'GET') {
-          setSuccess('Операція успішна!');
-          setTimeout(() => setSuccess(''), 3000);
+          toast.success('Операція успішна!', { className: 'admin-toast', autoClose: 3000 });
         }
         return responseData;
       } catch (err) {
-        setError(err.message || 'Помилка запиту');
-        setTimeout(() => setError(''), 3000);
+        toast.error(err.message || 'Помилка запиту', { className: 'admin-toast', autoClose: 3000 });
         throw err;
       }
     },
@@ -225,6 +222,18 @@ const AdminDashboard = ({ onNotificationReceived }) => {
 
   return (
     <>
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        className="admin-toast-container"
+      />
       <img src="/images/Banner.svg" id="banner" alt="Banner" />
       <div className="admin-dashboard">
         <Sidebar
@@ -237,8 +246,6 @@ const AdminDashboard = ({ onNotificationReceived }) => {
           <button className="sidebar-toggle mobile" onClick={() => setSidebarOpen(!sidebarOpen)}>
             <FaBars />
           </button>
-          {error && <p className="error-message">{error}</p>}
-          {success && <p className="success-message">{success}</p>}
           {activeSection.category !== 'notifications' &&
             activeSection.category !== 'artists' &&
             activeSection.category !== 'schedules' && (
@@ -257,8 +264,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
           {activeSection.category === 'notifications' && (
             <NotificationManagement
               token={token}
-              setError={setError}
-              setSuccess={setSuccess}
+              toast={toast}
               notifications={notifications}
               fetchNotifications={fetchNotifications}
               onNotificationReceived={onNotificationReceived}
@@ -272,8 +278,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
                   galleryImages={galleryImages}
                   setGalleryImages={setGalleryImages}
                   handleSubmit={handleSubmit}
-                  setError={setError}
-                  setSuccess={setSuccess}
+                  toast={toast}
                   fetchGalleryImages={fetchGalleryImages}
                   galleryCategories={galleryCategories}
                 />
@@ -284,8 +289,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
                   galleryImages={galleryImages}
                   setGalleryImages={setGalleryImages}
                   handleSubmit={handleSubmit}
-                  setError={setError}
-                  setSuccess={setSuccess}
+                  toast={toast}
                   fetchGalleryImages={fetchGalleryImages}
                   galleryCategories={galleryCategories}
                 />
@@ -295,8 +299,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
                   galleryCategories={galleryCategories}
                   setGalleryCategories={setGalleryCategories}
                   handleSubmit={handleSubmit}
-                  setError={setError}
-                  setSuccess={setSuccess}
+                  toast={toast}
                   fetchGalleryCategories={fetchGalleryCategories}
                 />
               )}
@@ -304,15 +307,16 @@ const AdminDashboard = ({ onNotificationReceived }) => {
           )}
           {activeSection.category === 'posts' && (
             <>
-              {activeSection.subcategory === 'add-post' && (
+              {activeSection.subcategory ===
+
+ 'add-post' && (
                 <PostManagement
                   mode="add"
                   posts={posts}
                   categories={categories}
                   setPosts={setPosts}
                   handleSubmit={handleSubmit}
-                  setError={setError}
-                  setSuccess={setSuccess}
+                  toast={toast}
                   fetchPosts={fetchPosts}
                 />
               )}
@@ -323,8 +327,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
                   categories={categories}
                   setPosts={setPosts}
                   handleSubmit={handleSubmit}
-                  setError={setError}
-                  setSuccess={setSuccess}
+                  toast={toast}
                   fetchPosts={fetchPosts}
                 />
               )}
@@ -333,8 +336,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
                   categories={categories}
                   setCategories={setCategories}
                   handleSubmit={handleSubmit}
-                  setError={setError}
-                  setSuccess={setSuccess}
+                  toast={toast}
                   fetchCategories={fetchCategories}
                 />
               )}
@@ -348,8 +350,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
                   bookings={bookings}
                   setBookings={setBookings}
                   handleSubmit={handleSubmit}
-                  setError={setError}
-                  setSuccess={setSuccess}
+                  toast={toast}
                   fetchBookings={fetchBookings}
                   onNotificationReceived={onNotificationReceived}
                 />
@@ -361,16 +362,14 @@ const AdminDashboard = ({ onNotificationReceived }) => {
               artists={artists}
               setArtists={setArtists}
               handleSubmit={handleSubmit}
-              setError={setError}
-              setSuccess={setSuccess}
+              toast={toast}
               fetchArtists={fetchArtists}
             />
           )}
           {activeSection.category === 'schedules' && (
             <ScheduleManagement
               token={token}
-              setError={setError}
-              setSuccess={setSuccess}
+              toast={toast}
               handleSubmit={handleSubmit}
               fetchArtists={fetchArtists}
             />

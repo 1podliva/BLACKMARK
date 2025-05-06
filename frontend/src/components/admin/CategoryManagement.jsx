@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './CategoryManagement.css';
 
-const CategoryManagement = ({ categories, setCategories, handleSubmit, setError, setSuccess, fetchCategories }) => {
+const CategoryManagement = ({ categories, setCategories, handleSubmit, toast, fetchCategories }) => {
   const [categoryForm, setCategoryForm] = useState({
     id: '',
     name: '',
@@ -9,10 +9,8 @@ const CategoryManagement = ({ categories, setCategories, handleSubmit, setError,
 
   const handleCategorySubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     if (!categoryForm.name.trim()) {
-      setError('Назва категорії обов’язкова');
+      toast.error('Назва категорії обов’язкова', { className: 'admin-toast', autoClose: 3000 });
       return;
     }
 
@@ -24,11 +22,14 @@ const CategoryManagement = ({ categories, setCategories, handleSubmit, setError,
       const payload = { name: categoryForm.name };
       console.log('Submitting category:', { url, method, payload });
       await handleSubmit(url, method, payload);
-      setSuccess(categoryForm.id ? 'Категорію оновлено!' : 'Категорію створено!');
+      toast.success(categoryForm.id ? 'Категорію оновлено!' : 'Категорію створено!', {
+        className: 'admin-toast',
+        autoClose: 3000,
+      });
       setCategoryForm({ id: '', name: '' });
       fetchCategories();
     } catch (err) {
-      // Помилка встановлюється в handleSubmit
+      // Помилка обробляється в handleSubmit
     }
   };
 
@@ -44,10 +45,10 @@ const CategoryManagement = ({ categories, setCategories, handleSubmit, setError,
     try {
       console.log('Deleting category ID:', id);
       await handleSubmit(`http://localhost:5000/api/categories/${id}`, 'DELETE');
-      setSuccess('Категорію видалено!');
+      toast.success('Категорію видалено!', { className: 'admin-toast', autoClose: 3000 });
       fetchCategories();
     } catch (err) {
-      // Помилка встановлюється в handleSubmit
+      // Помилка обробляється в handleSubmit
     }
   };
 

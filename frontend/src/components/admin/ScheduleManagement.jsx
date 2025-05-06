@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ScheduleManagement.css';
 
-const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchArtists }) => {
+const ScheduleManagement = ({ token, toast, handleSubmit, fetchArtists }) => {
   const [schedules, setSchedules] = useState([]);
   const [artists, setArtists] = useState([]);
   const [form, setForm] = useState({
@@ -13,14 +13,13 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
   const [editId, setEditId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Палітра кольорів для майстрів
   const artistColors = [
-    '#9B00FF', // --purple-accent
-    '#FF6B6B', // Червоний
-    '#4ECDC4', // Бірюзовий
-    '#FFD93D', // Жовтий
-    '#6B7280', // Сірий
-    '#FF9F43', // Помаранчевий
+    '#9B00FF',
+    '#FF6B6B',
+    '#4ECDC4',
+    '#FFD93D',
+    '#6B7280',
+    '#FF9F43',
   ];
 
   useEffect(() => {
@@ -39,7 +38,7 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
         }
       } catch (err) {
         if (isMounted) {
-          setError(err.message);
+          toast.error(err.message || 'Помилка при завантаженні даних', { className: 'admin-toast', autoClose: 3000 });
         }
       } finally {
         if (isMounted) {
@@ -52,7 +51,7 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
     return () => {
       isMounted = false;
     };
-  }, [handleSubmit, fetchArtists]);
+  }, [handleSubmit, fetchArtists, toast]);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -62,13 +61,13 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
         : 'http://localhost:5000/api/artist-schedules';
       const method = editId ? 'PUT' : 'POST';
       await handleSubmit(url, method, form);
-      setSuccess(editId ? 'Графік оновлено!' : 'Графік створено!');
+      toast.success(editId ? 'Графік оновлено!' : 'Графік створено!', { className: 'admin-toast', autoClose: 3000 });
       setForm({ artist: '', date: '', startTime: '', endTime: '' });
       setEditId(null);
       const data = await handleSubmit('http://localhost:5000/api/artist-schedules', 'GET');
       setSchedules(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message || 'Помилка при збереженні графіку', { className: 'admin-toast', autoClose: 3000 });
     }
   };
 
@@ -86,15 +85,14 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
     if (!window.confirm('Ви впевнені, що хочете видалити цей графік?')) return;
     try {
       await handleSubmit(`http://localhost:5000/api/artist-schedules/${id}`, 'DELETE');
-      setSuccess('Графік видалено!');
+      toast.success('Графік видалено!', { className: 'admin-toast', autoClose: 3000 });
       const data = await handleSubmit('http://localhost:5000/api/artist-schedules', 'GET');
       setSchedules(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message || 'Помилка при видаленні графіку', { className: 'admin-toast', autoClose: 3000 });
     }
   };
 
-  // Форматування дати
   const formatDate = (schedule) => {
     if (schedule.date) {
       return new Date(schedule.date).toLocaleDateString('uk-UA', {
@@ -114,7 +112,6 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
     <div className="schedule-management">
       <h2>Керування графіками майстрів</h2>
 
-      {/* Форма */}
       <h3>{editId ? 'Редагувати графік' : 'Додати графік'}</h3>
       <form onSubmit={handleFormSubmit}>
         <div className="form-group">
@@ -183,7 +180,6 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
         </div>
       </form>
 
-      {/* Список карток */}
       <h3>Графіки майстрів</h3>
       {Array.isArray(schedules) && schedules.length > 0 ? (
         <div className="schedule-cards">
@@ -213,7 +209,6 @@ const ScheduleManagement = ({ token, setError, setSuccess, handleSubmit, fetchAr
         <p>Графіків немає</p>
       )}
 
-      {/* Таблиця */}
       <h3>Таблиця графіків</h3>
       {Array.isArray(schedules) && schedules.length > 0 ? (
         <table className="schedules-table">

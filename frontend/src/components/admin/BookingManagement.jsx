@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { format, startOfDay, addDays, parse } from 'date-fns';
-import { toast } from 'react-toastify';
 import { FaEdit, FaCheck, FaTimes, FaTrash } from 'react-icons/fa';
 
-const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError, setSuccess, fetchBookings, onNotificationReceived }) => {
+const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, toast, fetchBookings, onNotificationReceived }) => {
   const [users, setUsers] = useState([]);
   const [artists, setArtists] = useState([]);
   const [consultations, setConsultations] = useState([]);
@@ -19,11 +18,8 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
   const [editingBooking, setEditingBooking] = useState(null);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [availableDates, setAvailableDates] = useState([]);
-  const [formError, setFormError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const hasShownDateToast = useRef(false);
 
-  // Мапінг статусів
   const bookingStatusMap = {
     pending: { label: 'Очікує', color: '#F59E0B' },
     confirmed: { label: 'Підтверджено', color: '#2ECC71' },
@@ -51,29 +47,23 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
     } else {
       setAvailableDates([]);
       setAvailableTimes([]);
-      setFormError('');
     }
   }, [bookingForm.artist]);
 
   useEffect(() => {
-    console.log('useEffect triggered:', { artist: bookingForm.artist, date: bookingForm.date, hasShownDateToast: hasShownDateToast.current });
     if (bookingForm.artist && bookingForm.date) {
       fetchAvailableTimes(bookingForm.artist, bookingForm.date);
-      hasShownDateToast.current = false; // Скидаємо, якщо дата вибрана
     } else {
       setAvailableTimes([]);
-      setFormError('');
     }
   }, [bookingForm.date, bookingForm.artist]);
 
-  // Callback to handle notifications from NotificationProvider
   const handleNotification = (notification) => {
     if (notification.consultation) {
-      fetchConsultations(); // Refetch consultations to update the list
+      fetchConsultations();
     }
   };
 
-  // Register the callback with NotificationProvider
   useEffect(() => {
     if (onNotificationReceived) {
       onNotificationReceived(handleNotification);
@@ -95,7 +85,7 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
       }
       setUsers(data);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   };
 
@@ -114,7 +104,7 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
       }
       setArtists(data);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   };
 
@@ -133,7 +123,7 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
       }
       setConsultations(data);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { className: 'admin-toast', autoClose: 3000 });
     }
   };
 
@@ -156,19 +146,16 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
       const times = data.availableTimes || [];
       setAvailableTimes(times);
       if (times.length === 0) {
-        console.log('Showing toast: Немає доступних слотів');
         toast.error('Немає доступних слотів', { className: 'admin-toast', autoClose: 3000 });
       }
     } catch (err) {
-      setFormError(`Помилка при отриманні часу: ${err.message}`);
-      setTimeout(() => setFormError(''), 5000);
+      toast.error(`Помилка при отриманні часу: ${err.message}`, { className: 'admin-toast', autoClose: 3000 });
       setAvailableTimes([]);
     }
   };
 
   const fetchAvailableDates = async (artistId) => {
     setIsLoading(true);
-    setFormError('');
     try {
       const today = startOfDay(new Date());
       const endDate = addDays(today, 30);
@@ -194,10 +181,8 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
         }
       }
       setAvailableDates(dates);
-      setFormError('');
     } catch (err) {
-      setFormError(`Помилка при отриманні дат: ${err.message}`);
-      setTimeout(() => setFormError(''), 5000);
+      toast.error(`Помилка при отриманні дат: ${err.message}`, { className: 'admin-toast', autoClose: 3000 });
     } finally {
       setIsLoading(false);
     }
@@ -205,15 +190,10 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
-    setFormError('');
-    setError('');
-    setSuccess('');
-
     const selectedDateTime = new Date(`${bookingForm.date}T${bookingForm.time}`);
     const minBookingTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
     if (selectedDateTime < minBookingTime) {
-      setFormError('Бронювання можливе щонайменше за 24 години');
-      setTimeout(() => setFormError(''), 5000);
+      toast.error('Бронювання можливе щонайменше за 24 години', { className: 'admin-toast', autoClose: 3000 });
       return;
     }
 
@@ -231,10 +211,6 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
 
   const handleEditBookingSubmit = async (e) => {
     e.preventDefault();
-    setFormError('');
-    setError('');
-    setSuccess('');
-
     try {
       await handleSubmit(`http://localhost:5000/api/bookings/${editingBooking._id}`, 'PUT', bookingForm);
       toast.success('Бронювання оновлено!', { className: 'admin-toast', autoClose: 3000 });
@@ -331,7 +307,6 @@ const BookingManagement = ({ mode, bookings, setBookings, handleSubmit, setError
     return (
       <div className="booking-management">
         <h3>{editingBooking ? 'Редагувати бронювання' : 'Додати бронювання'}</h3>
-        {formError && <p className="error-message">{formError}</p>}
         {isLoading && <p className="info-message">Завантаження доступних дат...</p>}
         <form onSubmit={editingBooking ? handleEditBookingSubmit : handleBookingSubmit} className="booking-form">
           <div className="form-grid">
