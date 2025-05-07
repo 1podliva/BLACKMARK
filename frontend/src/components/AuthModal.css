@@ -24,7 +24,7 @@
 
 .auth-modal-content {
   background: var(--navy-gray);
-  padding: 2rem;
+  padding: 1rem;
   border-radius: 16px;
   width: 100%;
   max-width: 440px;
@@ -32,7 +32,6 @@
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
   animation: scaleIn 0.3s ease-out;
 }
-
 
 @keyframes scaleIn {
   from {
@@ -100,7 +99,7 @@
 
 .name-group {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
   margin-bottom: 1rem;
 }
@@ -160,7 +159,7 @@
 .forgot-password:hover {
   color: var(--purple-hover);
 }
-/* Додати в AuthModal.css */
+
 .Toastify__toast {
   font-family: inherit;
   border-radius: 8px !important;
@@ -178,4 +177,19 @@
 
 .Toastify__close-button:hover {
   opacity: 1 !important;
+}
+
+@media (min-width: 769px) {
+  .auth-modal-content {
+    padding: 1.5rem;
+  }
+  .name-group {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1201px) {
+  .auth-modal-content {
+    padding: 2rem;
+  }
 }

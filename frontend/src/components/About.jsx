@@ -12,14 +12,14 @@ export default function About() {
   return (
     <section id="about">
   <div className="about-text-content">
-    <div className="about-intro-block">
+    <div className="gabout-intro-block">
       <h2 className="about-section-subtitle">Чому саме ми?</h2>
       <h1 className="about-main-title">
         <span className="about-first-line">Втілюємо ваше бачення</span>
         <span className="about-second-line">В реальність</span>
       </h1>
-      <div className="about-divider"></div>
-      <p className="about-intro-text">
+      <div className="gabout-divider"></div>
+      <p className="gabout-intro-text">
         BLACKMARK - це не просто студія татуювань. Це простір, де ваша ідея 
         перетворюється на мистецтво за допомогою:
       </p>

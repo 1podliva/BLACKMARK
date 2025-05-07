@@ -15,7 +15,7 @@
 .blog-post-section {
   display: flex;
   justify-content: center;
-  padding: 80px 2%;
+  padding: 60px 3%;
   background: linear-gradient(135deg, var(--dark-bg) 60%, #1a1a2e 100%);
   color: var(--soft-white);
   position: relative;
@@ -24,12 +24,12 @@
 }
 
 .blog-post-content {
-  max-width: 900px;
+  max-width: 1200px;
   width: 100%;
   position: relative;
   z-index: 2;
   background: rgba(26, 26, 29, 0.9);
-  padding: 15px;
+  padding: 30px;
   border-radius: 12px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
@@ -48,7 +48,7 @@
 }
 
 .main-title {
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 700;
   line-height: 1.2;
   margin: 0;
@@ -201,7 +201,7 @@
 
 .comment {
   background-color: var(--navy-gray);
-  padding: 10px;
+  padding: 20px;
   border-radius: 6px;
   margin-bottom: 10px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -360,7 +360,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 12px;
+  padding: 10px 16px;
   background-color: var(--purple-accent);
   color: var(--soft-white);
   border: none;
@@ -368,206 +368,51 @@
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 500;
-  align-self: center;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(155, 0, 255, 0.2);
+  width: fit-content;
 }
 
 .comment-submit-btn:hover {
   background-color: var(--purple-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(155, 0, 255, 0.3);
 }
 
-.comment-submit-btn i {
-  font-size: 1rem;
-}
-
-.admin-section {
-  margin-top: 30px;
-  padding: 20px;
-  background: var(--admin-bg);
-  border-radius: 8px;
-  border: 2px solid var(--admin-border);
-  box-shadow: 0 0 15px rgba(255, 204, 0, 0.3);
-  position: relative;
-  z-index: 3;
-}
-
-.admin-section h3 {
-  font-size: 1.3rem;
-  color: var(--admin-border);
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.admin-stats h4,
-.admin-likes h4 {
-  font-size: 1.1rem;
-  color: var(--soft-white);
-  margin-bottom: 10px;
-}
-
-.admin-stats p {
-  font-size: 0.9rem;
-  color: var(--light-gray);
-  margin: 5px 0;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.admin-stats p i {
-  color: var(--purple-accent);
-}
-
-.admin-btn {
-  padding: 6px 12px;
-  background-color: var(--purple-accent);
-  color: var(--soft-white);
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-}
-
-.admin-btn:hover {
-  background-color: var(--purple-hover);
-}
-
-.liked-users-list {
-  margin-top: 10px;
-  padding-left: 20px;
-  list-style-type: disc;
-}
-
-.liked-users-list li {
-  font-size: 0.9rem;
-  color: var(--light-gray);
-  margin-bottom: 5px;
-}
-
-@media (max-width: 768px) {
+@media (min-width: 769px) {
   .blog-post-section {
-    padding: 60px 1%;
+    padding: 80px 5%;
   }
-
   .blog-post-content {
-    padding: 10px;
+    padding: 25px;
   }
-
-  .intro-block {
-    margin-bottom: 20px;
-  }
-
-  .section-subtitle {
-    font-size: 12px;
-  }
-
   .main-title {
-    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-size: clamp(2rem, 4vw, 2.5rem);
   }
-
-  .post-image-container {
-    max-height: 400px;
-  }
-
-  .post-content {
-    font-size: 0.9rem;
-  }
-
-  .post-content h2,
-  .post-content h3 {
-    font-size: 1.2rem;
-  }
-
   .interactions-bar {
-    flex-direction: column;
-    gap: 10px;
-    padding: 8px;
+    flex-direction: row;
+    gap: 20px;
   }
-
-  .interaction-btn,
-  .comments-link {
-    width: 100%;
-    text-align: center;
-  }
-
-  .comments-section h3 {
-    font-size: 1rem;
-  }
-
   .comment {
-    padding: 8px;
+    padding: 25px;
   }
+}
 
-  .comment p {
-    font-size: 0.8rem;
+@media (min-width: 1201px) {
+  .blog-post-section {
+    padding: 120px 10%;
   }
-
-  .comment-date {
-    font-size: 0.6rem;
+  .blog-post-content {
+    padding: 30px;
   }
-
-  .comment-actions {
-    gap: 3px;
+  .main-title {
+    font-size: clamp(2.5rem, 5vw, 3rem);
   }
+}
 
-  .edit-comment-btn,
-  .delete-comment-btn {
-    padding: 3px;
+@media (max-width: 480px) {
+  .blog-post-content {
+    padding: 20px;
   }
-
-  .edit-comment-btn i,
-  .delete-comment-btn i {
-    font-size: 0.8rem;
-  }
-
-  .edit-comment-form textarea {
-    font-size: 0.8rem;
-    min-height: 50px;
-  }
-
-  .save-comment-btn,
-  .cancel-comment-btn {
-    font-size: 0.7rem;
-    padding: 3px 6px;
-  }
-
-  .comment-form textarea {
-    font-size: 0.8rem;
-    min-height: 60px;
-  }
-
-  .comment-submit-btn {
-    font-size: 0.8rem;
-  }
-
-  .admin-section {
-    padding: 15px;
-  }
-
-  .admin-section h3 {
-    font-size: 1.1rem;
-  }
-
-  .admin-stats h4,
-  .admin-likes h4 {
-    font-size: 0.9rem;
-  }
-
-  .admin-stats p {
-    font-size: 0.8rem;
-  }
-
-  .admin-btn {
-    font-size: 0.8rem;
-  }
-
-  .liked-users-list li {
-    font-size: 0.8rem;
+  .comment {
+    padding: 20px;
   }
 }

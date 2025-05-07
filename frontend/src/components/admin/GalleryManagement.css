@@ -222,7 +222,7 @@
 .gallery-tab-btn {
   background: var(--dark-bg);
   color: var(--light-gray);
-  border: 2px solid var(--light-gray);
+  border: 2px solid #262626;
   padding: 12px 24px;
   border-radius: 10px;
   cursor: pointer;
