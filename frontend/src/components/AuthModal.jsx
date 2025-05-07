@@ -1,12 +1,12 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './AuthModal.css';
 
-const AuthModal = ({ onClose }) => {
+const AuthModal = ({ onClose, initialTab = 'login' }) => {
   const { login, register } = useContext(AuthContext);
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(initialTab === 'login');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -14,6 +14,17 @@ const AuthModal = ({ onClose }) => {
     password: '',
     confirmPassword: '',
   });
+
+  useEffect(() => {
+    setIsLogin(initialTab === 'login');
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    });
+  }, [initialTab]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

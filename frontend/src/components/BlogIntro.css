@@ -1,6 +1,16 @@
+:root {
+  --dark-bg: #0F0F10;
+  --navy-gray: #1A1A1D;
+  --purple-accent: #9B00FF;
+  --purple-hover: #8A00E6;
+  --soft-white: #F8F9FA;
+  --light-gray: #D1D5DB;
+  --muted-pink: #CBA6DD;
+}
+
 .blog-intro-section {
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: center;
   padding: 120px 10%;
   background-color: var(--dark-bg);
@@ -10,15 +20,18 @@
 }
 
 .blog-intro-content {
-  max-width: 1200px;
+  max-width: 1000px;
   width: 100%;
   position: relative;
   z-index: 1;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
 }
 
 .intro-block {
-  margin-bottom: 60px;
+  max-width: 600px;
 }
 
 .section-subtitle {
@@ -32,7 +45,7 @@
 }
 
 .main-title {
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
   font-weight: 700;
   line-height: 1.2;
   margin: 0;
@@ -58,11 +71,10 @@
 }
 
 .intro-text {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   line-height: 1.8;
   color: var(--light-gray);
-  max-width: 600px;
-  margin-bottom: 60px;
+  max-width: 500px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -70,13 +82,13 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  max-width: 400px;
 }
 
 .blog-description {
   font-size: 1rem;
   line-height: 1.6;
   color: var(--light-gray);
-  max-width: 400px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -105,10 +117,10 @@
 .background-macbook-container {
   position: absolute;
   top: 50%;
-  right: 10%;
-  width: 50%;
-  max-width: 800px;
-  height: 80%;
+  right: 5%;
+  width: 40%;
+  max-width: 600px;
+  height: 70%;
   transform: translateY(-50%);
   z-index: 0;
 }
@@ -125,50 +137,58 @@
   transform: translateY(-5px);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1440px) {
   .blog-intro-section {
-    padding: 80px 5%;
+    padding: 100px 5%;
   }
 
   .blog-intro-content {
-    max-width: 800px;
+    max-width: 900px;
   }
 
   .background-macbook-container {
-    width: 45%;
-    max-width: 600px;
-    height: 75%;
+    width: 35%;
+    max-width: 500px;
+    right: 2%;
+  }
+}
+
+@media (max-width: 1200px) {
+  .blog-intro-section {
+    flex-direction: column;
+    padding: 80px 5%;
+    align-items: flex-start;
+  }
+
+  .blog-intro-content {
+    max-width: 700px;
+    align-items: flex-start;
+  }
+
+  .background-macbook-container {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 70%;
+    max-width: 500px;
+    height: auto;
+    margin: 40px auto 0;
+    transform: none;
+  }
+
+  .intro-block,
+  .blog-text-block {
+    max-width: 100%;
   }
 }
 
 @media (max-width: 768px) {
   .blog-intro-section {
-    flex-direction: column;
     padding: 60px 5%;
-    min-height: auto;
   }
 
   .blog-intro-content {
     max-width: 100%;
-    text-align: left;
-  }
-
-  .blog-text-block {
-    align-items: flex-start;
-  }
-
-  .blog-description {
-    max-width: 100%;
-    font-size: 0.9rem;
-  }
-
-  .blog-btn {
-    font-size: 0.9rem;
-  }
-
-  .intro-text {
-    font-size: 1rem;
-    margin-bottom: 40px;
   }
 
   .section-subtitle {
@@ -176,22 +196,43 @@
   }
 
   .main-title {
-    font-size: clamp(2rem, 4vw, 3rem);
+    font-size: clamp(2rem, 4vw, 2.8rem);
+  }
+
+  .intro-text {
+    font-size: 1rem;
+  }
+
+  .blog-description {
+    font-size: 0.9rem;
+  }
+
+  .blog-btn {
+    font-size: 0.9rem;
+    padding: 12px 25px;
   }
 
   .background-macbook-container {
-    position: relative;
-    top: auto;
-    right: auto;
     width: 80%;
-    max-width: 600px;
-    height: auto;
-    margin: 40px auto 0;
-    transform: none;
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-title {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
   }
 
-  .macbook-image {
-    width: 100%;
-    height: auto;
+  .intro-text {
+    font-size: 0.9rem;
+  }
+
+  .blog-description {
+    font-size: 0.85rem;
+  }
+
+  .blog-btn {
+    font-size: 0.85rem;
+    padding: 10px 20px;
   }
 }

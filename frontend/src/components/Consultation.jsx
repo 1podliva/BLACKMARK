@@ -6,7 +6,24 @@ const Consultation = () => {
   const navigate = useNavigate();
 
   const handleRegisterClick = () => {
-    navigate('/register');
+    // Scroll to the header
+    const header = document.querySelector('.navbar');
+    if (header) {
+      header.scrollIntoView({ behavior: 'smooth' });
+    }
+    // Set URL hash to trigger registration modal
+    navigate('/#register');
+  };
+
+  const handleLoginClick = (e) => {
+    e.preventDefault();
+    // Scroll to the header
+    const header = document.querySelector('.navbar');
+    if (header) {
+      header.scrollIntoView({ behavior: 'smooth' });
+    }
+    // Set URL hash to trigger login modal
+    navigate('/#login');
   };
 
   return (
@@ -68,7 +85,7 @@ const Consultation = () => {
                 Зареєструватися за 30 секунд
               </button>
               <p className="login-text">
-                Вже маєте акаунт? <a href="/login">Увійти</a>
+                Вже маєте акаунт? <a href="#login" onClick={handleLoginClick}>Увійти</a>
               </p>
             </div>
           </div>

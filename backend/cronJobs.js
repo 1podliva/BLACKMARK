@@ -13,12 +13,7 @@ const updateStatuses = async (io) => {
     // Update Bookings
     const bookingsToUpdate = await Booking.find({
       status: { $in: ['pending', 'confirmed'] },
-      $expr: {
-        $lt: [
-          new Date('$date'),
-          now
-        ]
-      }
+      date: { $lte: now },
     }).populate('user', 'firstName lastName').populate('artist', 'name');
 
     for (const booking of bookingsToUpdate) {
@@ -76,12 +71,7 @@ const updateStatuses = async (io) => {
     // Update Consultations
     const consultationsToUpdate = await Consultation.find({
       status: { $in: ['pending', 'reviewed'] },
-      $expr: {
-        $lt: [
-          new Date('$preferredDate'),
-          now
-        ]
-      }
+      preferredDate: { $lte: now },
     }).populate('user', 'firstName lastName').populate('artist', 'name');
 
     for (const consultation of consultationsToUpdate) {

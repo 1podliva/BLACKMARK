@@ -1,8 +1,17 @@
-/* Consultation.css */
+:root {
+  --dark-bg: #0F0F10;
+  --navy-gray: #1A1A1D;
+  --purple-accent: #9B00FF;
+  --purple-hover: #8A00E6;
+  --soft-white: #F8F9FA;
+  --light-gray: #D1D5DB;
+  --muted-pink: #CBA6DD;
+}
+
 .consultation-section {
   display: flex;
   justify-content: center;
-  padding: 120px 10%;
+  padding: 100px 5%;
   background-color: var(--dark-bg);
   color: var(--soft-white);
   position: relative;
@@ -10,28 +19,82 @@
 }
 
 .consultation-content {
-  max-width: 1200px;
+  max-width: 1100px;
   width: 100%;
   position: relative;
   z-index: 2;
 }
 
+.intro-block {
+  max-width: 600px;
+}
+
+.section-subtitle {
+  font-size: 18px;
+  color: var(--purple-accent);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-align: left;
+}
+
+.main-title {
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.first-line {
+  display: block;
+  color: var(--soft-white);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-align: left;
+}
+
+.second-line {
+  display: block;
+  color: var(--purple-accent);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-align: left;
+}
+
+.divider {
+  width: 80px;
+  height: 4px;
+  background: var(--purple-accent);
+  margin: 30px 0;
+}
+
+.intro-text {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--light-gray);
+  max-width: 500px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-align: left;
+}
+
 .registration-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 40px;
   margin-top: 60px;
+  justify-content: space-between;
 }
 
 .registration-benefits {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  flex: 1;
+  min-width: 0;
 }
 
 .benefit-card {
   background: var(--navy-gray);
-  padding: 30px;
+  padding: 25px;
   border-radius: 12px;
   border: 1px solid rgba(155, 0, 255, 0.1);
   transition: all 0.3s ease;
@@ -50,33 +113,35 @@
 .benefit-card h3 {
   color: var(--purple-accent);
   margin: 15px 0;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
 }
 
 .benefit-card p {
   color: var(--light-gray);
   line-height: 1.6;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .registration-cta {
-  position: relative;
+  flex: 1;
+  min-width: 300px;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .cta-card {
   background: var(--navy-gray);
-  padding: 40px;
+  padding: 30px;
   border-radius: 12px;
   width: 100%;
-  max-width: 500px;
+  max-width: 400px;
   text-align: center;
   border: 2px solid var(--purple-accent);
 }
 
 .cta-card h3 {
-  font-size: 2rem;
+  font-size: 1.8rem;
   margin-bottom: 20px;
   color: var(--purple-accent);
 }
@@ -84,56 +149,32 @@
 .benefits-list {
   list-style: none;
   padding: 0;
-  margin: 25px 0;
+  margin: 20px 0;
   text-align: left;
 }
 
 .benefits-list li {
-  padding: 10px 0;
+  padding: 8px 0;
   color: var(--light-gray);
   display: flex;
   align-items: center;
   gap: 10px;
+  font-size: 0.95rem;
 }
 
 .cta-button {
   background: var(--purple-accent);
   color: var(--soft-white);
-  padding: 16px 40px;
+  padding: 14px 30px;
   border: none;
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
   width: 100%;
-  margin-top: 20px;
-}
-.intro-text {
-  font-size: 1.2rem;
-  line-height: 1.8;
-  color: var(--light-gray);
-  max-width: 600px;
-  text-align: left;
-}
-.first-line {
-  display: block;
-  color: var(--soft-white);
-  text-align: left;
-
+  margin-top: 15px;
 }
 
-.second-line {
-  display: block;
-  color: var(--purple-accent);
-  text-align: left;
-}
-
-.divider {
-  width: 80px;
-  height: 4px;
-  background: var(--purple-accent);
-  margin: 30px 0;
-}
 .cta-button:hover {
   background: var(--purple-hover);
   transform: translateY(-2px);
@@ -141,8 +182,9 @@
 }
 
 .login-text {
-  margin-top: 20px;
+  margin-top: 15px;
   color: var(--light-gray);
+  font-size: 0.9rem;
 }
 
 .login-text a {
@@ -156,29 +198,107 @@
   text-decoration: underline;
 }
 
+@media (max-width: 1440px) {
+  .consultation-section {
+    padding: 80px 5%;
+  }
+
+  .consultation-content {
+    max-width: 900px;
+  }
+
+  .registration-grid {
+    gap: 30px;
+  }
+}
+
 @media (max-width: 1200px) {
   .registration-grid {
-    grid-template-columns: 1fr;
-    max-width: 800px;
-    margin: 0 auto;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .registration-benefits {
+    width: 100%;
+  }
+
+  .registration-cta {
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .cta-card {
+    max-width: 100%;
+    padding: 25px;
   }
 }
 
 @media (max-width: 768px) {
   .consultation-section {
-    padding: 80px 5%;
+    padding: 60px 5%;
   }
 
-  .cta-card {
-    padding: 25px;
+  .section-subtitle {
+    font-size: 16px;
+  }
+
+  .main-title {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+  }
+
+  .intro-text {
+    font-size: 1rem;
   }
 
   .benefit-card {
-    padding: 25px;
+    padding: 20px;
+  }
+
+  .benefit-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .benefit-card p {
+    font-size: 0.85rem;
+  }
+
+  .cta-card {
+    padding: 20px;
+  }
+
+  .cta-card h3 {
+    font-size: 1.6rem;
   }
 
   .cta-button {
-    font-size: 1rem;
-    padding: 14px 20px;
+    font-size: 0.95rem;
+    padding: 12px 25px;
+  }
+
+  .benefits-list li {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .registration-benefits {
+    grid-template-columns: 1fr;
+  }
+
+  .registration-cta {
+    min-width: 100%;
+  }
+
+  .cta-card {
+    padding: 15px;
+  }
+
+  .cta-card h3 {
+    font-size: 1.4rem;
+  }
+
+  .cta-button {
+    font-size: 0.9rem;
+    padding: 10px 20px;
   }
 }

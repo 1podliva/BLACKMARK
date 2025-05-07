@@ -7,6 +7,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './Profile.css';
+import io from 'socket.io-client';
 
 const Profile = () => {
   const { user, token, logout, loading } = useContext(AuthContext);
@@ -22,12 +23,37 @@ const Profile = () => {
   const [passwordErrors, setPasswordErrors] = useState({});
   const [consultationErrors, setConsultationErrors] = useState({});
   const navigate = useNavigate();
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    if (loading) return; // Wait for auth verification to complete
+    if (loading) return;
 
     if (!user || !token) {
       navigate('/');
+    } else {
+      // Initialize Socket.IO
+      const newSocket = io('http://localhost:5000', {
+        auth: { token: `Bearer ${token}` },
+      });
+      setSocket(newSocket);
+
+      newSocket.on('connect', () => {
+        console.log('Connected to Socket.IO server');
+        newSocket.emit('join', user._id);
+      });
+
+      newSocket.on('newNotification', (notification) => {
+        toast.info(notification.message, { className: 'info-toast', autoClose: 3000 });
+        fetchBookings(); // Refresh bookings when a notification is received
+      });
+
+      newSocket.on('connect_error', (err) => {
+        console.error('Socket.IO connection error:', err.message);
+      });
+
+      return () => {
+        newSocket.disconnect();
+      };
     }
   }, [user, token, loading, navigate]);
 
@@ -307,7 +333,7 @@ const Profile = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/'); // Explicitly navigate to homepage after logout
+    navigate('/');
   };
 
   const renderDashboard = () => (
@@ -432,6 +458,7 @@ const Profile = () => {
                     <p>Майстер: {item.artist?.name || 'Невідомий'}</p>
                     <p>Дата: {new Date(item.date).toLocaleDateString('uk-UA')}</p>
                     <p>Час: {item.time}</p>
+                    <p>Опис: {item.description || 'Опис відсутній'}</p>
                     <p>Статус: {statusTranslations[item.status] || item.status}</p>
                   </div>
                   {item.status !== 'cancelled' && item.status !== 'completed' && (
@@ -488,6 +515,7 @@ const Profile = () => {
                     <p>Майстер: {item.artist?.name || 'Невідомий'}</p>
                     <p>Дата: {new Date(item.date).toLocaleDateString('uk-UA')}</p>
                     <p>Час: {item.time}</p>
+                    <p>Опис: {item.description || 'Опис відсутній'}</p>
                     <p>Статус: {statusTranslations[item.status] || item.status}</p>
                   </div>
                 </div>
@@ -505,7 +533,7 @@ const Profile = () => {
   }
 
   if (!user) {
-    return null; // Redirect will happen via useEffect
+    return null;
   }
 
   return (

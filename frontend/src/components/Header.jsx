@@ -9,6 +9,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { user, token, logout } = useContext(AuthContext);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authTab, setAuthTab] = useState('login');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [nextBooking, setNextBooking] = useState(null);
@@ -56,6 +57,17 @@ const Header = () => {
     fetchNextBooking();
   }, [user, token]);
 
+  useEffect(() => {
+    // Check URL hash to open auth modal
+    const hash = location.hash;
+    if (hash === '#login' || hash === '#register') {
+      setIsAuthModalOpen(true);
+      setAuthTab(hash === '#login' ? 'login' : 'register');
+      // Clear hash after opening modal to avoid repeated triggers
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.hash, navigate]);
+
   const handleContactsClick = (e) => {
     e.preventDefault();
     if (location.pathname !== '/') {
@@ -73,6 +85,18 @@ const Header = () => {
       }
     }
     setIsMobileMenuOpen(false);
+  };
+
+  const handleAuthClick = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsAuthModalOpen(true);
+    setAuthTab('login');
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleAuthModalClose = () => {
+    setIsAuthModalOpen(false);
+    setAuthTab('login'); // Reset to login tab
   };
 
   const getActiveClass = (path) => {
@@ -204,10 +228,8 @@ const Header = () => {
               ) : (
                 <button
                   id="auth-btn"
-                  onClick={() => {
-                    setIsAuthModalOpen(true);
-                    setIsMobileMenuOpen(false);
-                  }}
+                  className="highlighted"
+                  onClick={handleAuthClick}
                 >
                   Вхід
                 </button>
@@ -217,7 +239,7 @@ const Header = () => {
         </div>
 
         {isAuthModalOpen && (
-          <AuthModal onClose={() => setIsAuthModalOpen(false)} />
+          <AuthModal onClose={handleAuthModalClose} initialTab={authTab} />
         )}
       </nav>
     </>
