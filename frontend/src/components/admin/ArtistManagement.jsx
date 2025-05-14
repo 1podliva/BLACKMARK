@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import './ArtistManagement.css';
 
-const ArtistManagement = ({ artists, setArtists, handleSubmit, setError, setSuccess, fetchArtists }) => {
+const ArtistManagement = ({ artists, setArtists, handleSubmit, setError, setSuccess }) => {
   const [form, setForm] = useState({ name: '', description: '', age: '', experience: '', photo: null });
   const [editingId, setEditingId] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
@@ -74,16 +74,6 @@ const ArtistManagement = ({ artists, setArtists, handleSubmit, setError, setSucc
     }
   };
 
-  const handleRefresh = () => {
-    fetchArtists();
-  };
-
-  const handleAddNewMaster = () => {
-    setForm({ name: '', description: '', age: '', experience: '', photo: null });
-    setPhotoPreview(null);
-    setEditingId(null);
-  };
-
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -108,14 +98,6 @@ const ArtistManagement = ({ artists, setArtists, handleSubmit, setError, setSucc
   return (
     <div className="artist-management-panel">
       <h2>Панель керування майстрами</h2>
-      <div className="controls">
-        <button className="refresh-btn" onClick={handleRefresh}>
-          Оновити список
-        </button>
-        <button className="add-btn" onClick={handleAddNewMaster}>
-          Додати майстра
-        </button>
-      </div>
 
       <div className="form-container">
         <h3>{editingId ? 'Редагувати майстра' : 'Додати нового майстра'}</h3>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { toast } from 'react-toastify';
 import './Contacts.css';
 
 // Component to handle map re-rendering and marker debugging
@@ -9,13 +10,8 @@ const MapEffect = ({ markerPosition }) => {
   const map = useMap();
 
   useEffect(() => {
-    // Log to confirm the marker is being created
     console.log('Marker position:', markerPosition);
-
-    // Force map to re-render by invalidating its size
     map.invalidateSize();
-
-    // Optionally, fly to the marker position to ensure it's visible
     map.flyTo(markerPosition, 15, { duration: 1 });
   }, [map, markerPosition]);
 
@@ -23,28 +19,47 @@ const MapEffect = ({ markerPosition }) => {
 };
 
 const Contacts = () => {
-  const [formSubmitted, setFormSubmitted] = useState(false);
-
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    setFormSubmitted(true);
+
+    // Collect form data
+    const formData = {
+      name: e.target[0].value,
+      email: e.target[1].value,
+      message: e.target[2].value,
+    };
+
+    try {
+      const response = await fetch('http://localhost:5000/api/notifications/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit the form');
+      }
+
+      toast.success('Повідомлення успішно відправлено!');
+      e.target.reset(); // Clear the form after successful submission
+    } catch (error) {
+      console.error('Form submission error:', error);
+      toast.error('Не вдалося відправити повідомлення. Спробуйте ще раз.');
+    }
   };
 
-  // Center of the map (coordinates for Технічний коледж, Lviv)
   const center = [49.8097432, 24.0765274];
-
-  // Position for the marker (same as the center)
   const markerPosition = [49.8097432, 24.0765274];
 
-  // Create a custom marker icon with a fallback to the default Leaflet icon
   const customIcon = L.icon({
-    iconUrl: '/images/gps.svg', // Path to the location icon
-    iconSize: [32, 32], // Size of the icon
-    iconAnchor: [16, 32], // Anchor point (center bottom of the icon)
-    popupAnchor: [0, -32], // Popup anchor (if you add a popup later)
-    // Fallback to default Leaflet icon if custom icon fails
+    iconUrl: '/images/gps.svg',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
     iconRetinaUrl: '/images/gps.svg',
-    shadowUrl: null, // Disable shadow
+    shadowUrl: null,
   });
 
   return (
@@ -71,7 +86,6 @@ const Contacts = () => {
                 <input type="email" placeholder="Ваш Email" required />
                 <textarea placeholder="Ваше повідомлення" required></textarea>
                 <button type="submit">Відправити</button>
-                {formSubmitted && <p className="form-success">!</p>}
               </form>
             </div>
 

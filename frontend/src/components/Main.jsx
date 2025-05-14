@@ -53,7 +53,7 @@ const Main = () => {
 </div>
         </div>
         <div className="right-side">
-          <img src="images/gallery/mainphoto.jpg" alt="Tattoo" className="main-image" />
+          <img src="images/mainphoto5.jpg" alt="Tattoo" className="main-image" />
         </div>
       </div>
     </section>
