@@ -3,8 +3,8 @@ import './Gallery.css';
 
 const Gallery = () => {
   const [images, setImages] = useState([]);
-  const [categories, setCategories] = useState(['All']);
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [categories, setCategories] = useState(['Усі']);
+  const [activeCategory, setActiveCategory] = useState('Усі');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -25,7 +25,7 @@ const Gallery = () => {
         if (!res.ok) throw new Error('Failed to fetch gallery categories');
         const data = await res.json();
         console.log('Gallery categories:', data);
-        setCategories(['All', ...data.map(cat => cat.name)]);
+        setCategories(['Усі', ...data.map(cat => cat.name)]);
       } catch (err) {
         setError(err.message);
       }
@@ -37,7 +37,7 @@ const Gallery = () => {
   const filteredImages = images.filter(img => {
     const styles = Array.isArray(img.styles) ? img.styles.map(s => s.trim()) : (img.style ? [img.style.trim()] : []);
     console.log(`Filtering image: ${img.title}, styles: ${styles}, activeCategory: ${activeCategory}`);
-    return activeCategory === 'All' || styles.includes(activeCategory.trim());
+    return activeCategory === 'Усі' || styles.includes(activeCategory.trim());
   });
 
   return (

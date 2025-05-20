@@ -47,13 +47,13 @@ const NotificationManagement = ({ token, toast, notifications, fetchNotification
                     {notification.booking.time}
                   </p>
                 )}
-                {notification.consultation && (
+                {/* {notification.consultation && (
                   <p>
                     Консультація: {notification.consultation.artist?.name || 'Невідомий'},{' '}
                     {new Date(notification.consultation.preferredDate).toLocaleDateString('uk-UA')},{' '}
                     {notification.consultation.time}
                   </p>
-                )}
+                )} */}
               </div>
               {!notification.read && (
                 <button

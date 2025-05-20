@@ -246,7 +246,7 @@ const Profile = () => {
         await fetchAvailableTimes(consultationForm.artist, consultationForm.preferredDate);
       }
     } catch (err) {
-      toast.error(`😢 ${err.message}`, { className: 'error-toast', autoClose: 3000 });
+      toast.error(`${err.message}`, { className: 'error-toast', autoClose: 3000 });
     }
   };
 

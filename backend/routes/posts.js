@@ -170,9 +170,8 @@ router.delete('/:id/comments/:commentId', auth, async (req, res) => {
     const comment = post.comments.id(req.params.commentId);
     if (!comment) return res.status(404).json({ message: 'Comment not found' });
 
-    // Allow deletion if the user is the comment author OR an admin
     if (comment.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'You can only delete your own comments unless you are an admin' });
+      return res.status(403).json({ message: 'Ви можете видаляти лише власні коментарі, якщо ви не адміністратор' });
     }
 
     post.comments.pull({ _id: req.params.commentId });
@@ -235,7 +234,6 @@ router.get('/:id/stats', async (req, res) => {
   }
 });
 
-// Get users who liked a post (Admin only)
 router.get('/:id/likes', auth, restrictToAdmin, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id).populate('likes', 'firstName lastName email');

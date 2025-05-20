@@ -98,7 +98,7 @@
 }
 
 #auth-btn.highlighted {
-  background: linear-gradient(90deg, var(--purple-accent), var(--muted-pink));
+  /* background: linear-gradient(90deg, var(--purple-accent), var(--muted-pink)); */
   transform: scale(1.05);
   box-shadow: 0px 6px 16px rgba(155, 0, 255, 0.6);
 }

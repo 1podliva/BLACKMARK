@@ -17,12 +17,10 @@ const Consultation = () => {
 
   const handleLoginClick = (e) => {
     e.preventDefault();
-    // Scroll to the header
     const header = document.querySelector('.navbar');
     if (header) {
       header.scrollIntoView({ behavior: 'smooth' });
     }
-    // Set URL hash to trigger login modal
     navigate('/#login');
   };
 
