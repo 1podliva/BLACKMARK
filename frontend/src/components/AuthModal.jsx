@@ -52,6 +52,7 @@ const AuthModal = ({ onClose, initialTab = 'login' }) => {
         setTimeout(onClose, 1000);
       }
     } catch (error) {
+      console.log('Auth error:', error.message); // Дебагінг
       toast.error(error.message || 'Щось пішло не так', { theme: 'colored' });
     }
   };
@@ -68,11 +69,12 @@ const AuthModal = ({ onClose, initialTab = 'login' }) => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
+        theme="colored"
         toastStyle={{
           backgroundColor: '#1A1A1D',
           color: '#F8F9FA',
           borderRadius: '8px',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
         }}
       />
       <div className="auth-modal-content scale-in">
@@ -168,11 +170,6 @@ const AuthModal = ({ onClose, initialTab = 'login' }) => {
               {isLogin ? 'Створити акаунт' : 'Увійти'}
             </button>
           </p>
-          {isLogin && (
-            <a href="/forgot-password" className="forgot-password">
-              Забули пароль?
-            </a>
-          )}
         </div>
       </div>
     </div>

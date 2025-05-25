@@ -6,7 +6,7 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
         setToken(null);
         setUser(null);
       } finally {
-        setLoading(false); // Set loading to false after verification completes
+        setLoading(false);
       }
     };
     verifyToken();
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      if (!res.ok) throw new Error(data.message || 'Помилка входу');
       localStorage.setItem('token', data.token);
       setToken(data.token);
       const userRes = await fetch('http://localhost:5000/api/users/profile', {
@@ -58,9 +58,8 @@ export const AuthProvider = ({ children }) => {
       const userData = await userRes.json();
       if (!userRes.ok) throw new Error(userData.message || 'Failed to fetch user profile');
       setUser(userData);
-      return { success: true };
     } catch (err) {
-      return { success: false, message: err.message };
+      throw new Error(err.message || 'Помилка входу');
     }
   };
 
@@ -72,7 +71,7 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ firstName, lastName, email, password }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      if (!res.ok) throw new Error(data.message || 'Помилка реєстрації');
       localStorage.setItem('token', data.token);
       setToken(data.token);
       const userRes = await fetch('http://localhost:5000/api/users/profile', {
@@ -81,9 +80,8 @@ export const AuthProvider = ({ children }) => {
       const userData = await userRes.json();
       if (!userRes.ok) throw new Error(userData.message || 'Failed to fetch user profile');
       setUser(userData);
-      return { success: true };
     } catch (err) {
-      return { success: false, message: err.message };
+      throw new Error(err.message || 'Помилка реєстрації');
     }
   };
 

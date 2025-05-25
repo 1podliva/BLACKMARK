@@ -142,19 +142,21 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, toast
           </div>
           <div className="admin-form-group">
             <label>Контент</label>
-            <CKEditor
-              editor={ClassicEditor}
-              data={postForm.content}
-              onChange={(event, editor) => {
-                const data = editor.getData();
-                setPostForm({ ...postForm, content: data });
-              }}
-              config={{
-                toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
-                htmlSupport: { allow: [{ name: /.*/, attributes: ['data-start', 'data-end'] }] },
-              }}
-            />
-          </div>
+            <div id="post-editor">
+    <CKEditor
+      editor={ClassicEditor}
+      data={postForm.content}
+      onChange={(event, editor) => {
+        const data = editor.getData();
+        setPostForm({ ...postForm, content: data });
+      }}
+      config={{
+        toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
+        htmlSupport: { allow: [{ name: /.*/, attributes: ['data-start', 'data-end'] }] },
+      }}
+    />
+  </div>
+</div>
           <div className="admin-form-group">
             <label>Категорія</label>
             <select
@@ -228,19 +230,21 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, toast
             </div>
             <div className="admin-form-group">
               <label>Контент</label>
-              <CKEditor
-                editor={ClassicEditor}
-                data={postForm.content}
-                onChange={(event, editor) => {
-                  const data = editor.getData();
-                  setPostForm({ ...postForm, content: data });
-                }}
-                config={{
-                  toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
-                  htmlSupport: { allow: [{ name: /.*/, attributes: ['data-start', 'data-end'] }] },
-                }}
-              />
-            </div>
+              <div id="post-editor">
+    <CKEditor
+      editor={ClassicEditor}
+      data={postForm.content}
+      onChange={(event, editor) => {
+        const data = editor.getData();
+        setPostForm({ ...postForm, content: data });
+      }}
+      config={{
+        toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
+        htmlSupport: { allow: [{ name: /.*/, attributes: ['data-start', 'data-end'] }] },
+      }}
+    />
+  </div>
+</div>
             <div className="admin-form-group">
               <label>Категорія</label>
               <select
@@ -336,7 +340,7 @@ const PostManagement = ({ mode, posts, categories, setPosts, handleSubmit, toast
                         {post.featured ? 'Рекомендований' : 'Звичайний'}
                       </span>
                       <span className="admin-post-stats">
-                        Likes: {post.likes.length}, Dislikes: {post.dislikes.length}, Comments: {post.comments.length}
+                        Лайків: {post.likes.length}, Дизлайків: {post.dislikes.length}, Коментарів: {post.comments.length}
                       </span>
                     </div>
                     <div className="admin-post-actions">

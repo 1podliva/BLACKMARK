@@ -231,7 +231,19 @@ const getPostLikes = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
+// Отримати список дизлайків (тільки для адмінів)
+const getPostDislikes = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id).populate('dislikes', 'firstName lastName email');
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    res.json(post.dislikes);
+  } catch (err) {
+    console.error('GET /api/posts/:id/dislikes Error:', err.message, err.stack);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 module.exports = {
   getAllPosts,
   getPostById,
@@ -245,5 +257,6 @@ module.exports = {
   dislikePost,
   getPostStats,
   getPostLikes,
+  getPostDislikes,
   ensureSingleFeatured,
 };

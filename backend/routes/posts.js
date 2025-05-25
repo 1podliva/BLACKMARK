@@ -17,6 +17,7 @@ const {
   dislikePost,
   getPostStats,
   getPostLikes,
+  getPostDislikes, // Додано
   ensureSingleFeatured,
 } = require('../controllers/postController');
 
@@ -66,5 +67,8 @@ router.get('/:id/stats', getPostStats);
 
 // Отримати список лайків (тільки для адмінів)
 router.get('/:id/likes', auth, restrictToAdmin, getPostLikes);
+
+// Отримати список дизлайків (тільки для адмінів)
+router.get('/:id/dislikes', auth, restrictToAdmin, getPostDislikes); // Додано
 
 module.exports = router;

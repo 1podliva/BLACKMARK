@@ -12,8 +12,6 @@ const BlogPost = () => {
   const [commentText, setCommentText] = useState('');
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editCommentText, setEditCommentText] = useState('');
-  const [likedUsers, setLikedUsers] = useState([]);
-  const [stats, setStats] = useState({ comments: 0, likes: 0, dislikes: 0 });
 
   const fetchPost = async () => {
     try {
@@ -29,21 +27,7 @@ const BlogPost = () => {
   };
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await fetch(`http://localhost:5000/api/posts/${id}/stats`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        if (!res.ok) throw new Error('Не вдалося отримати статистику');
-        const data = await res.json();
-        setStats(data);
-      } catch (err) {
-        toast.error(err.message, { toastId: 'fetch-stats-error', autoClose: 3000 });
-      }
-    };
-
     fetchPost();
-    fetchStats();
   }, [id, token]);
 
   const handleCommentSubmit = async (e) => {
@@ -68,11 +52,6 @@ const BlogPost = () => {
       const updatedPost = await res.json();
       setPost(updatedPost);
       setCommentText('');
-      const statsRes = await fetch(`http://localhost:5000/api/posts/${id}/stats`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      const statsData = await statsRes.json();
-      setStats(statsData);
       toast.success('Коментар успішно додано!', { autoClose: 3000 });
     } catch (err) {
       toast.error(err.message, { toastId: 'add-comment-error', autoClose: 3000 });
@@ -92,11 +71,6 @@ const BlogPost = () => {
       }
       const updatedPost = await res.json();
       setPost(updatedPost);
-      const statsRes = await fetch(`http://localhost:5000/api/posts/${id}/stats`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      const statsData = await statsRes.json();
-      setStats(statsData);
       toast.success('Коментар видалено!', { autoClose: 3000 });
     } catch (err) {
       toast.error(err.message, { toastId: 'delete-comment-error', autoClose: 3000 });
@@ -143,15 +117,7 @@ const BlogPost = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Не вдалося поставити лайк');
-
-      // Повторно завантажуємо пост
       await fetchPost();
-
-      const statsRes = await fetch(`http://localhost:5000/api/posts/${id}/stats`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      const statsData = await statsRes.json();
-      setStats(statsData);
     } catch (err) {
       toast.error(err.message, { toastId: 'like-error', autoClose: 3000 });
     }
@@ -168,30 +134,9 @@ const BlogPost = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Не вдалося поставити дизлайк');
-
-      // Повторно завантажуємо пост
       await fetchPost();
-
-      const statsRes = await fetch(`http://localhost:5000/api/posts/${id}/stats`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      const statsData = await statsRes.json();
-      setStats(statsData);
     } catch (err) {
       toast.error(err.message, { toastId: 'dislike-error', autoClose: 3000 });
-    }
-  };
-
-  const fetchLikedUsers = async () => {
-    try {
-      const res = await fetch(`http://localhost:5000/api/posts/${id}/likes`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error('Не вдалося отримати список користувачів, які лайкнули');
-      const data = await res.json();
-      setLikedUsers(data);
-    } catch (err) {
-      toast.error(err.message, { toastId: 'fetch-likes-error', autoClose: 3000 });
     }
   };
 
@@ -244,32 +189,6 @@ const BlogPost = () => {
           </button>
         </div>
 
-        {user?.role === 'admin' && (
-          <div className="admin-section">
-            <h3><i className="fas fa-user-shield"></i> Панель адміністратора</h3>
-            <div className="admin-stats">
-              <h4>Статистика</h4>
-              <p><i className="fas fa-comments"></i> Коментарі: {stats.comments}</p>
-              <p><i className="fas fa-thumbs-up"></i> Лайки: {stats.likes}</p>
-              <p><i className="fas fa-thumbs-down"></i> Дизлайки: {stats.dislikes}</p>
-            </div>
-            <div className="admin-likes">
-              <button onClick={fetchLikedUsers} className="admin-btn">
-                Переглянути користувачів, які лайкнули
-              </button>
-              {likedUsers.length > 0 && (
-                <ul className="liked-users-list">
-                  {likedUsers.map((likedUser) => (
-                    <li key={likedUser._id}>
-                      {likedUser.firstName} {likedUser.lastName} ({likedUser.email})
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        )}
-
         <div className="comments-section">
           <h3>
             <i className="fas fa-comments"></i> Коментарі ({post.comments.length})
@@ -309,6 +228,7 @@ const BlogPost = () => {
                   </p>
                   <div className="comment-date">
                     <span className="date-text">{new Date(comment.createdAt).toLocaleDateString('uk-UA')}</span>
+                    <span className="time-text">{new Date(comment.createdAt).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}</span>
                     {comment.isEdited && <span className="edited-status">(змінено)</span>}
                   </div>
                   {(user?._id === comment.user._id || user?.role === 'admin') && (
