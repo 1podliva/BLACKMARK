@@ -52,7 +52,7 @@ const AuthModal = ({ onClose, initialTab = 'login' }) => {
         setTimeout(onClose, 1000);
       }
     } catch (error) {
-      toast.error(error.message, { theme: 'colored' });
+      toast.error(error.message || 'Щось пішло не так', { theme: 'colored' });
     }
   };
 

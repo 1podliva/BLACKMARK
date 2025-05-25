@@ -133,6 +133,7 @@
   font-size: 2rem;
   color: var(--purple-accent);
   text-align: center;
+  align-self: center;
   margin: 40px 0 20px;
 }
 

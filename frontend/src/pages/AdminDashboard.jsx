@@ -189,7 +189,7 @@ const AdminDashboard = ({ onNotificationReceived }) => {
         }
         const responseData = await res.json();
         if (method !== 'GET') {
-          toast.success('Операція успішна!', { className: 'admin-toast', autoClose: 3000 });
+          // toast.success('Операція успішна!', { className: 'admin-toast', autoClose: 3000 });
         }
         return responseData;
       } catch (err) {

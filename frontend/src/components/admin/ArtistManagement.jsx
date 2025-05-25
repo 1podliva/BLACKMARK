@@ -1,18 +1,30 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import './ArtistManagement.css';
 
-const ArtistManagement = ({ artists, setArtists, handleSubmit, setError, setSuccess }) => {
+const ArtistManagement = ({ artists, setArtists, handleSubmit }) => {
   const [form, setForm] = useState({ name: '', description: '', age: '', experience: '', photo: null });
   const [editingId, setEditingId] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const fileInputRef = useRef(null);
 
+  useEffect(() => {
+    return () => {
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, [photoPreview]);
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     try {
       const requiredFields = ['name', 'age', 'experience'];
-      if (!requiredFields.every((field) => form[field].trim())) {
-        setError('Усі обов’язкові поля (Ім’я, Вік, Стаж) повинні бути заповнені!');
+      if (!requiredFields.every((field) => form[field] || form[field] === 0)) {
+        toast.error('Усі обов’язкові поля (Ім’я, Вік, Стаж) повинні бути заповнені!', {
+          className: 'error-toast',
+          autoClose: 3000,
+        });
         return;
       }
 
@@ -25,30 +37,61 @@ const ArtistManagement = ({ artists, setArtists, handleSubmit, setError, setSucc
         formData.append('photo', form.photo);
       }
 
+      let data;
       if (editingId) {
-        const data = await handleSubmit(
+        data = await handleSubmit(
           `http://localhost:5000/api/artists/${editingId}`,
           'PUT',
           formData,
           { 'Content-Type': 'multipart/form-data' }
         );
         setArtists(artists.map((a) => (a._id === editingId ? data : a)));
-        setSuccess('Майстер успішно оновлено!');
+        toast.success('Майстер успішно оновлено!', {
+          className: 'success-toast',
+          autoClose: 3000,
+        });
         setEditingId(null);
       } else {
-        const data = await handleSubmit(
+        data = await handleSubmit(
           'http://localhost:5000/api/artists',
           'POST',
           formData,
           { 'Content-Type': 'multipart/form-data' }
         );
         setArtists([...artists, data]);
-        setSuccess('Майстер успішно додано!');
+        toast.success('Майстер успішно додано!', {
+          className: 'success-toast',
+          autoClose: 3000,
+        });
       }
       setForm({ name: '', description: '', age: '', experience: '', photo: null });
       setPhotoPreview(null);
+      console.log('Server response:', data);
     } catch (err) {
-      setError('Сталася помилка при збереженні. Спробуйте ще раз!');
+      console.error('Error details:', err);
+      const errorMessage = err.message || 'Сталася помилка при збереженні. Спробуйте ще раз!';
+      toast.error(`😢 ${errorMessage}`, {
+        className: 'error-toast',
+        autoClose: 3000,
+      });
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await handleSubmit(`http://localhost:5000/api/artists/${id}`, 'DELETE');
+      setArtists(artists.filter((a) => a._id !== id));
+      toast.success('Майстер успішно видалено!', {
+        className: 'success-toast',
+        autoClose: 3000,
+      });
+    } catch (err) {
+      console.error('Error details:', err);
+      const errorMessage = err.message || 'Сталася помилка при видаленні. Спробуйте ще раз!';
+      toast.error(`😢 ${errorMessage}`, {
+        className: 'error-toast',
+        autoClose: 3000,
+      });
     }
   };
 
@@ -64,19 +107,31 @@ const ArtistManagement = ({ artists, setArtists, handleSubmit, setError, setSucc
     setEditingId(artist._id);
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await handleSubmit(`http://localhost:5000/api/artists/${id}`, 'DELETE');
-      setArtists(artists.filter((a) => a._id !== id));
-      setSuccess('Майстер успішно видалено!');
-    } catch (err) {
-      setError('Сталася помилка при видаленні. Спробуйте ще раз!');
-    }
-  };
-
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Дозволені лише файли формату JPEG, PNG або GIF!', {
+          className: 'error-toast',
+          autoClose: 3000,
+        });
+        return;
+      }
+
+      const maxSize = 10 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast.error('Розмір файлу не повинен перевищувати 10 МБ!', {
+          className: 'error-toast',
+          autoClose: 3000,
+        });
+        return;
+      }
+
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
+      }
+
       setForm({ ...form, photo: file });
       setPhotoPreview(URL.createObjectURL(file));
     }
@@ -86,6 +141,28 @@ const ArtistManagement = ({ artists, setArtists, handleSubmit, setError, setSucc
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Дозволені лише файли формату JPEG, PNG або GIF!', {
+          className: 'error-toast',
+          autoClose: 3000,
+        });
+        return;
+      }
+
+      const maxSize = 10 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast.error('Розмір файлу не повинен перевищувати 10 МБ!', {
+          className: 'error-toast',
+          autoClose: 3000,
+        });
+        return;
+      }
+
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
+      }
+
       setForm({ ...form, photo: file });
       setPhotoPreview(URL.createObjectURL(file));
     }

@@ -15,20 +15,20 @@ const BlogPost = () => {
   const [likedUsers, setLikedUsers] = useState([]);
   const [stats, setStats] = useState({ comments: 0, likes: 0, dislikes: 0 });
 
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const res = await fetch(`http://localhost:5000/api/posts/${id}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        if (!res.ok) throw new Error('Не вдалося завантажити пост');
-        const data = await res.json();
-        setPost(data);
-      } catch (err) {
-        toast.error(err.message, { toastId: 'fetch-post-error', autoClose: 3000 });
-      }
-    };
+  const fetchPost = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/posts/${id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Не вдалося завантажити пост');
+      const data = await res.json();
+      setPost(data);
+    } catch (err) {
+      toast.error(err.message, { toastId: 'fetch-post-error', autoClose: 3000 });
+    }
+  };
 
+  useEffect(() => {
     const fetchStats = async () => {
       try {
         const res = await fetch(`http://localhost:5000/api/posts/${id}/stats`, {
@@ -143,8 +143,10 @@ const BlogPost = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Не вдалося поставити лайк');
-      const updatedPost = await res.json();
-      setPost(updatedPost);
+
+      // Повторно завантажуємо пост
+      await fetchPost();
+
       const statsRes = await fetch(`http://localhost:5000/api/posts/${id}/stats`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -166,8 +168,10 @@ const BlogPost = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Не вдалося поставити дизлайк');
-      const updatedPost = await res.json();
-      setPost(updatedPost);
+
+      // Повторно завантажуємо пост
+      await fetchPost();
+
       const statsRes = await fetch(`http://localhost:5000/api/posts/${id}/stats`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -297,7 +301,11 @@ const BlogPost = () => {
               ) : (
                 <>
                   <p>
-                    <strong>{comment.user.firstName} {comment.user.lastName}</strong>: {comment.text}
+                    <strong>
+                      {comment.user && comment.user.firstName && comment.user.lastName
+                        ? `${comment.user.firstName} ${comment.user.lastName}`
+                        : 'Невідомий користувач'}
+                    </strong>: {comment.text}
                   </p>
                   <div className="comment-date">
                     <span className="date-text">{new Date(comment.createdAt).toLocaleDateString('uk-UA')}</span>

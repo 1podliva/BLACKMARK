@@ -23,8 +23,14 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .gallery-management.add {
@@ -51,12 +57,13 @@
 .admin-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
   background: linear-gradient(145deg, var(--dark-bg), var(--navy-gray));
-  padding: 24px;
+  padding: 16px;
   border-radius: 12px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transform-origin: center bottom; /* Додаємо точку початку трансформації */
 }
 
 .admin-form:hover {
@@ -67,7 +74,7 @@
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .form-group label {
@@ -79,20 +86,22 @@
 }
 
 .form-group input,
-.form-group select {
-  padding: 14px;
+.form-group select,
+.form-group textarea {
+  padding: 10px;
   background: var(--navy-gray);
   border: 2px solid transparent;
-  border-radius: 10px;
+  border-radius: 8px;
   color: var(--soft-white);
-  font-size: 16px;
+  font-size: 15px;
   font-family: 'Urbanist', sans-serif;
   transition: all 0.3s ease;
   background-clip: padding-box;
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus {
   border-image: linear-gradient(45deg, var(--purple-accent), var(--purple-hover)) 1;
   outline: none;
   box-shadow: 0 0 12px rgba(155, 0, 255, 0.4);
@@ -101,7 +110,7 @@
 .form-group select {
   height: auto;
   appearance: none;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="%23D1D5DB" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%23F8F9FA" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
   background-repeat: no-repeat;
   background-position: right 10px center;
 }
@@ -117,22 +126,27 @@
   border-color: var(--purple-accent);
 }
 
+.form-group textarea {
+  resize: vertical; /* Дозволяємо змінювати висоту лише по вертикалі */
+  min-height: 80px; /* Встановлюємо мінімальну висоту для textarea */
+}
+
 .image-preview-container {
   position: relative;
-  margin-top: 16px;
-  max-width: 300px;
-  border-radius: 12px;
+  margin-top: 12px;
+  max-width: 250px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   margin-left: auto;
   margin-right: auto;
 }
 
 .image-preview {
   width: 100%;
-  height: auto;
-  border-radius: 12px;
+  height: 200px; /* Обмежуємо висоту для стабільності */
   object-fit: cover;
+  border-radius: 10px;
   transition: transform 0.4s ease, filter 0.4s ease;
 }
 
@@ -166,19 +180,25 @@
 }
 
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
 }
 
 .submit-btn {
   background: linear-gradient(45deg, var(--purple-accent), var(--purple-hover));
   color: var(--soft-white);
   border: none;
-  padding: 14px 28px;
+  padding: 12px 24px; /* Зменшуємо padding для компактності */
   border-radius: 10px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px; /* Зменшуємо розмір шрифту */
   font-weight: 600;
   font-family: 'Urbanist', sans-serif;
   text-transform: uppercase;
@@ -204,11 +224,12 @@
   border-radius: 50%;
   transform: translate(-50%, -50%);
   transition: width 0.4s ease, height 0.4s ease;
+  z-index: -1; /* Щоб псевдоелемент був під текстом */
 }
 
 .submit-btn:hover::after {
-  width: 200px;
-  height: 200px;
+  width: 150px; /* Зменшуємо розмір ефекту */
+  height: 150px;
 }
 
 .gallery-tabs {
@@ -232,6 +253,7 @@
   text-transform: uppercase;
   transition: all 0.3s ease;
   position: relative;
+  transform-origin: center; /* Додаємо точку початку трансформації */
 }
 
 .gallery-tab-btn:hover {
@@ -282,6 +304,7 @@
   overflow: hidden;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
   transition: transform 0.4s ease, box-shadow 0.4s ease;
+  transform-origin: center bottom; /* Додаємо точку початку трансформації */
   position: relative;
 }
 
@@ -365,9 +388,11 @@
 
 .modal {
   background: linear-gradient(145deg, var(--dark-bg), var(--navy-gray));
-  padding: 32px;
+  padding: 24px;
   border-radius: 16px;
   max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
   margin: 50px auto;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
   color: var(--soft-white);
@@ -375,8 +400,14 @@
 }
 
 @keyframes slideIn {
-  from { transform: translateY(-30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .modal-overlay {
@@ -393,10 +424,10 @@
 }
 
 .modal h2 {
-  font-size: 24px;
+  font-size: 22px; /* Зменшено з 24px */
   font-weight: 700;
   color: var(--purple-accent);
-  margin-bottom: 24px;
+  margin-bottom: 16px; /* Зменшено з 24px */
   text-align: center;
   text-transform: uppercase;
 }
@@ -405,17 +436,22 @@
   display: flex;
   gap: 16px;
   justify-content: center;
-  margin-top: 24px;
+  margin-top: 16px; /* Зменшено з 24px */
+}
+
+.modal-actions .submit-btn {
+  padding: 10px 20px; /* Зменшено для компактності */
+  font-size: 14px; /* Зменшено розмір шрифту */
 }
 
 .cancel-btn {
   background: var(--light-gray);
   color: var(--navy-gray);
   border: none;
-  padding: 14px 28px;
+  padding: 12px 24px; /* Зменшено з 14px 28px */
   border-radius: 10px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px; /* Зменшено з 16px */
   font-weight: 600;
   font-family: 'Urbanist', sans-serif;
   text-transform: uppercase;
@@ -446,26 +482,38 @@
   }
 
   .admin-form {
-    padding: 20px;
-    gap: 20px;
+    padding: 12px; /* Зменшено з 20px */
+    gap: 12px; /* Зменшено з 20px */
   }
 
   .form-group input,
-  .form-group select {
-    font-size: 15px;
+  .form-group select,
+  .form-group textarea {
+    font-size: 14px; /* Зменшено з 15px */
+    padding: 8px; /* Зменшено з 10px */
   }
 
   .submit-btn,
   .edit-btn,
   .delete-btn,
   .cancel-btn {
-    padding: 12px 24px;
-    font-size: 15px;
+    padding: 10px 20px; /* Зменшено з 12px 24px */
+    font-size: 14px; /* Зменшено з 15px */
   }
 
   .modal {
     max-width: 90%;
+    max-height: 70vh;
+    padding: 16px;
     margin: 20px;
+  }
+
+  .modal h2 {
+    font-size: 20px; /* Зменшено з 24px */
+  }
+
+  .modal-actions {
+    gap: 12px;
   }
 }
 
@@ -486,7 +534,7 @@
   .gallery-tab-btn {
     width: 100%;
     text-align: center;
-    padding: 14px;
+    padding: 12px; /* Зменшено з 14px */
   }
 
   .image-preview-container {
@@ -495,7 +543,7 @@
 
   .modal-actions {
     flex-direction: column;
-    gap: 12px;
+    gap: 10px; /* Зменшено з 12px */
   }
 
   .gallery-management h3 {
@@ -503,6 +551,11 @@
   }
 
   .modal h2 {
-    font-size: 20px;
+    font-size: 18px; /* Зменшено з 20px */
+  }
+
+  .admin-form {
+    padding: 10px; /* Зменшено з 12px */
+    gap: 10px; /* Зменшено з 12px */
   }
 }
